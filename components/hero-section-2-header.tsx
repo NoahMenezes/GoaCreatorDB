@@ -8,7 +8,8 @@ import { AnimatedThemeToggler } from '@/registry/magicui/animated-theme-toggler'
 import React from 'react'
 
 const menuItems = [
-    { name: 'Discover', href: '#features' },
+    { name: 'Showcase', href: '#hero-showcase' },
+    { name: 'Creator Reels', href: '#reels' },
     { name: 'Locations', href: '#locations' },
     { name: 'Pricing', href: '#pricing' },
     { name: 'FAQs', href: '#faqs' },
@@ -38,7 +39,7 @@ export const HeroHeader = () => {
         <header>
             <nav
                 data-state={menuState && 'active'}
-                className="bg-background fixed top-0 z-20 w-full border-b max-lg:data-[state=active]:bottom-0"
+                className="bg-background/90 backdrop-blur-md fixed top-0 z-20 w-full border-b border-border/60 max-lg:data-[state=active]:bottom-0"
             >
                 <div className="mx-auto max-w-7xl px-6">
                     <div className="relative flex flex-wrap items-center justify-between max-lg:gap-6">
@@ -73,7 +74,7 @@ export const HeroHeader = () => {
                                         <li key={index}>
                                             <Link
                                                 href={item.href}
-                                                className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                                                className="text-muted-foreground hover:text-foreground font-medium block duration-150 transition-colors"
                                             >
                                                 <span>{item.name}</span>
                                             </Link>
@@ -106,10 +107,21 @@ export const HeroHeader = () => {
                                 <Button
                                     variant="outline"
                                     size="sm"
+                                    className="cursor-pointer rounded-full font-medium"
                                     nativeButton={false}
                                     render={
                                         <Link href="#pricing">
                                             <span>Join as Creator</span>
+                                        </Link>
+                                    }
+                                />
+                                <Button
+                                    size="sm"
+                                    className="bg-amber-500 hover:bg-amber-600 text-black font-semibold cursor-pointer rounded-full"
+                                    nativeButton={false}
+                                    render={
+                                        <Link href="#contact">
+                                            <span>Partner Brand</span>
                                         </Link>
                                     }
                                 />

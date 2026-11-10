@@ -84,23 +84,21 @@ GoaCreatorDB/
 │   ├── layout.tsx               # Root layout with Geist fonts & dark mode support
 │   └── page.tsx                 # Main Goa Creator landing page
 ├── components/
-│   ├── hero-section-2.tsx       # Hero section with CTA & dashboard preview
+│   ├── hero-section-2.tsx       # Cinematic interactive campaign player with live milestone stats
 │   ├── hero-section-2-header.tsx# Fixed navbar with AnimatedThemeToggler & mobile drawer
-│   ├── hero-section-2-logo-cloud.tsx # Infinite brand/partner ticker
-│   ├── features-3.tsx           # Vetted shoot locations & feature cards
-│   ├── features-4.tsx           # Additional feature highlights
-│   ├── content-2.tsx            # Network value proposition
+│   ├── features-3.tsx           # Vertical 9:16 creator reels & brand collabs showcase
+│   ├── features-4.tsx           # Shoot locations & creator residencies video showcase
+│   ├── content-2.tsx            # Live production & milestone escrow workflow
 │   ├── stats-2.tsx              # Platform metrics & revenue counter
 │   ├── pricing-2.tsx            # Explorer, Creator Pro & Brand pricing tiers
 │   ├── faqs-1.tsx               # Interactive FAQ accordion
 │   ├── call-to-action-2.tsx     # Final onboarding CTA
-│   ├── footer-2.tsx             # Footer links & AI summary triggers
-│   ├── logo.tsx                 # Goa Creator brand emblem
+│   ├── footer-2.tsx             # Luxury brand footer & community links
+│   ├── logo.tsx                 # Bespoke Goa Creator aperture & horizon brand identity
 │   └── ui/                      # Base UI & Shadcn primitives (buttons, cards, toggler)
 ├── hooks/
 │   └── use-media.ts             # useSyncExternalStore responsive media query hook
 ├── public/
-│   ├── mail2.png                # High-resolution dashboard graphic
 │   └── *.svg                    # Brand and vector assets
 ├── components.json              # Shadcn & Tailark OSS registry config
 ├── next.config.ts               # Next.js 16 configuration (PPR, Unsplash remote patterns)

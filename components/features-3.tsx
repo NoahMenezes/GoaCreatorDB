@@ -1,176 +1,221 @@
+'use client'
+
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { ArrowUp, ChevronDown, CloudDownload, HardDriveDownload, Mic2, MonitorDown, Plus } from 'lucide-react'
-import Image from 'next/image'
+import { Eye, MapPin, Sparkles, Volume2, VolumeX } from 'lucide-react'
+import { useState } from 'react'
 
-export default function Features() {
+const categories = ['All Reels', 'Luxury Stays', 'Beach Clubs', 'Drone Cinema', 'Music & Mixers']
+
+const reels = [
+    {
+        title: 'Sunset Beach Club Collab',
+        category: 'Beach Clubs',
+        location: 'Ashwem Beach, North Goa',
+        creator: '@ananya.creates',
+        views: '1.2M',
+        likes: '84K',
+        brand: 'Boho Beach House Goa',
+        deal: '₹85,000 Escrow',
+        video: 'https://assets.mixkit.co/videos/2168/2168-1080.mp4',
+        niche: 'Travel & Lifestyle',
+        permit: 'Verified Beach Permit',
+    },
+    {
+        title: '18th Century Portuguese Villa Tour',
+        category: 'Luxury Stays',
+        location: 'Assagao & Fontainhas',
+        creator: '@rohan.visuals',
+        views: '1.6M',
+        likes: '112K',
+        brand: 'Villa Capella Assagao',
+        deal: '₹1,20,000 Escrow',
+        video: 'https://assets.mixkit.co/videos/1191/1191-1080.mp4',
+        niche: 'Heritage & Stays',
+        permit: 'Heritage Pass #GA-21',
+    },
+    {
+        title: 'Sunset Clifftop DJ Set & Mixers',
+        category: 'Music & Mixers',
+        location: 'Vagator Cliffs & Lounge',
+        creator: '@goa.underground',
+        views: '2.4M',
+        likes: '180K',
+        brand: 'Sundowner Sessions',
+        deal: '₹1,50,000 Escrow',
+        video: 'https://assets.mixkit.co/videos/4344/4344-1080.mp4',
+        niche: 'Music & Festival',
+        permit: 'Sound Clearance Approved',
+    },
+    {
+        title: 'Morning Surf & Coastal Wellness',
+        category: 'Drone Cinema',
+        location: 'Morjim Coastline',
+        creator: '@zoya.surf',
+        views: '890K',
+        likes: '62K',
+        brand: 'Morjim Wave House',
+        deal: '₹75,000 Escrow',
+        video: 'https://assets.mixkit.co/videos/3162/3162-1080.mp4',
+        niche: 'Surf & Wellness',
+        permit: 'Coastline Drone Zone',
+    },
+    {
+        title: 'Private Pool & Palms Aerial Shoot',
+        category: 'Luxury Stays',
+        location: 'Siolim Riverbanks',
+        creator: '@kabir.drone',
+        views: '1.8M',
+        likes: '124K',
+        brand: 'Siolim Palms Estate',
+        deal: '₹1,10,000 Escrow',
+        video: 'https://assets.mixkit.co/videos/1564/1564-1080.mp4',
+        niche: 'Aerial & Architecture',
+        permit: 'Private Estate Drone Pass',
+    },
+    {
+        title: 'Golden Hour Cocktail Storytelling',
+        category: 'Beach Clubs',
+        location: 'Anjuna Sunset Point',
+        creator: '@nikita.foodie',
+        views: '940K',
+        likes: '71K',
+        brand: 'Susegado Craft Lounge',
+        deal: '₹65,000 Escrow',
+        video: 'https://assets.mixkit.co/videos/4436/4436-1080.mp4',
+        niche: 'Culinary & Mixology',
+        permit: 'Commercial Dining Pass',
+    },
+]
+
+export default function FeaturesThree() {
+    const [activeCategory, setActiveCategory] = useState('All Reels')
+    const [mutedStates, setMutedStates] = useState<Record<number, boolean>>({})
+
+    const toggleMute = (index: number) => {
+        setMutedStates((prev) => ({
+            ...prev,
+            [index]: !prev[index],
+        }))
+    }
+
+    const filteredReels = activeCategory === 'All Reels'
+        ? reels
+        : reels.filter((r) => r.category === activeCategory)
+
     return (
-        <section className="py-16 md:py-20" id="features">
+        <section className="py-20 md:py-28 scroll-mt-16" id="reels">
+            <span id="features" className="sr-only" />
             <div className="mx-auto max-w-7xl px-6">
-                <h2 className="text-muted-foreground max-w-4xl text-balance text-4xl font-medium tracking-tight">
-                    <span className="text-foreground">Curated for Goa creators.</span> <br /> Built to elevate your collaborations.
-                </h2>
-                <div className="**:data-[slot=card]:bg-background mt-8 grid gap-x-3 gap-y-6 md:mt-16 md:grid-cols-2 lg:grid-cols-3">
-                    <div className="row-span-2 grid grid-cols-subgrid gap-4">
-                        <Card className="aspect-9/12 relative overflow-hidden">
-                            <AIInputIllustration />
-                            <Image
-                                src="https://images.unsplash.com/photo-1656012710277-e103fe942e30?q=80&w=2342&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                                alt="Goa sunset vibes"
-                                width={670}
-                                height={670}
-                                className="absolute inset-0 size-full object-cover"
-                            />
-                        </Card>
-
-                        <p className="text-muted-foreground text-balance">
-                            <span className="text-foreground">Vetted Shoot Locations. </span> Discover secluded beaches, Portuguese heritage villas, and cliffside sunset spots with verified shoot permits.
+                {/* Section Header */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
+                    <div className="space-y-3 max-w-2xl">
+                        <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-500">
+                            <Sparkles className="size-3.5" />
+                            <span>Creator Reels &amp; Brand Collabs</span>
+                        </div>
+                        <h2 className="text-balance text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
+                            Real Brand Collabs in Motion Across Goa
+                        </h2>
+                        <p className="text-muted-foreground text-lg">
+                            Watch authentic reels produced by verified creators for boutique stays, beach clubs, and lifestyle brands — backed by guaranteed escrow payouts.
                         </p>
                     </div>
 
-                    <div className="row-span-2 grid grid-cols-subgrid gap-4">
-                        <Card className="aspect-9/12 bg-zinc-200! relative overflow-hidden">
-                            <DynamicIslandIllustration />
-                        </Card>
-
-                        <p className="text-muted-foreground text-balance">
-                            <span className="text-foreground">Direct Brand Deals. </span> Connect with premier luxury resorts, beach clubs, and local lifestyle brands without middleman fees.
-                        </p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground self-start md:self-end">
+                        <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>Updated Daily &bull; 6 New Collabs Live Today</span>
                     </div>
+                </div>
 
-                    <div className="row-span-2 grid grid-cols-subgrid gap-4">
-                        <Card className="aspect-9/12 relative overflow-hidden">
-                            <DownloadIllustration />
+                {/* Filter Pills */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-6 scrollbar-none">
+                    {categories.map((cat) => (
+                        <button
+                            key={cat}
+                            onClick={() => setActiveCategory(cat)}
+                            className={`cursor-pointer whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 border ${
+                                activeCategory === cat
+                                    ? 'bg-amber-500 text-black border-amber-500 shadow-sm'
+                                    : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
+                            }`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
 
-                            <video
-                                autoPlay
-                                loop
-                                preload="none"
-                                src="https://videos.pexels.com/video-files/37957431/16106725_1440_2560_24fps.mp4"
-                                className="absolute inset-0 size-full object-cover"
-                                width="2700"
-                                height="1440"
-                            />
-                        </Card>
+                {/* Reels Grid (Vertical 9:16 cards showcasing actual brand reels) */}
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {filteredReels.map((reel, index) => {
+                        const isMuted = mutedStates[index] ?? true
 
-                        <p className="text-muted-foreground text-balance">
-                            <span className="text-foreground">Real-Time Media Kit. </span> Share live engagement metrics, audience demographics, and past campaign performance with one click.
-                        </p>
-                    </div>
+                        return (
+                            <Card
+                                key={index}
+                                className="group relative overflow-hidden rounded-3xl border border-border/70 bg-black shadow-xl transition-all duration-300 hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10"
+                            >
+                                <div className="relative aspect-9/14 sm:aspect-9/15 w-full overflow-hidden">
+                                    <video
+                                        autoPlay
+                                        loop
+                                        muted={isMuted}
+                                        playsInline
+                                        preload="metadata"
+                                        src={reel.video}
+                                        className="size-full object-cover group-hover:scale-105 duration-700 transition-transform"
+                                    />
+
+                                    {/* Ambient gradient */}
+                                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/40" />
+
+                                    {/* Top Badges */}
+                                    <div className="absolute top-4 inset-x-4 flex items-center justify-between z-10">
+                                        <span className="rounded-full bg-black/60 backdrop-blur-md border border-white/20 px-3 py-1 text-xs font-medium text-white">
+                                            {reel.niche}
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 px-2.5 py-1 text-xs text-white">
+                                                <Eye className="size-3 text-amber-400" />
+                                                <span>{reel.views}</span>
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleMute(index)}
+                                                aria-label={isMuted ? 'Unmute reel' : 'Mute reel'}
+                                                className="size-7 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-black/90 cursor-pointer duration-150"
+                                            >
+                                                {isMuted ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5 text-amber-400" />}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Bottom Information */}
+                                    <div className="absolute bottom-4 inset-x-4 space-y-2.5 text-white z-10">
+                                        <div className="flex items-center justify-between text-xs">
+                                            <div className="flex items-center gap-1.5 text-amber-300 font-medium">
+                                                <MapPin className="size-3.5 shrink-0" />
+                                                <span className="truncate">{reel.location}</span>
+                                            </div>
+                                            <span className="rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[11px] font-semibold text-emerald-300 shrink-0">
+                                                {reel.deal}
+                                            </span>
+                                        </div>
+
+                                        <h3 className="text-lg font-bold leading-snug drop-shadow-sm">
+                                            {reel.title}
+                                        </h3>
+
+                                        <div className="pt-2 flex items-center justify-between text-xs text-zinc-300 border-t border-white/15">
+                                            <span className="font-semibold text-white">{reel.creator}</span>
+                                            <span className="text-zinc-400">{reel.brand}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+                        )
+                    })}
                 </div>
             </div>
         </section>
-    )
-}
-
-function DownloadIllustration() {
-    return (
-        <div className="z-1 absolute inset-0 m-auto size-fit scale-95">
-            <Button
-                variant="secondary"
-                className="bg-background/25 inset-ring inset-ring-foreground/25 ml-1 backdrop-blur"
-                size="sm"
-                nativeButton={false}
-                render={
-                    <div>
-                        <HardDriveDownload className="opacity-75" />
-                        <span className="border-r pr-2">Download</span>
-                        <ChevronDown className="opacity-50" />
-                    </div>
-                }
-            />
-
-            <div className="mt-3 min-w-52 rounded-2xl bg-white p-1 shadow-xl shadow-black/25 ring ring-black/10 *:cursor-pointer">
-                <div className="peer flex gap-2 rounded-xl px-3 py-1.5 hover:bg-black/5">
-                    <MonitorDown className="size-4 translate-y-0.5 text-black" />
-                    <div className="space-y-0.5">
-                        <div className="text-xs font-medium text-black">Computer</div>
-                        <div className="text-xs text-black/50">16.1MB left</div>
-                    </div>
-                </div>
-
-                <div className="not-peer-hover:bg-black/5 flex gap-2 rounded-xl px-3 py-1.5">
-                    <CloudDownload className="size-4 translate-y-0.5 text-black" />
-                    <div className="space-y-0.5">
-                        <div className="text-xs font-medium text-black">Cloud</div>
-                        <div className="text-xs text-black/50">Unlimited</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-function AIInputIllustration() {
-    return (
-        <div
-            aria-hidden
-            className="z-1 absolute inset-8 m-auto h-fit scale-95"
-        >
-            <div className="bg-card ring-foreground/15 mt-auto h-fit rounded-3xl p-3 shadow-xl shadow-black/25 ring">
-                <div className="text-muted-foreground p-2 pb-3 text-sm">Ask Tailark what you need...</div>
-                <div className="flex justify-between gap-3">
-                    <div className="flex items-center gap-1">
-                        <div className="hover:bg-muted flex size-7 cursor-pointer rounded-full *:m-auto *:size-4">
-                            <Plus />
-                        </div>
-                        <div className="hover:bg-muted flex size-7 cursor-pointer rounded-full *:m-auto *:size-4">
-                            <Mic2 />
-                        </div>
-                    </div>
-
-                    <div className="bg-foreground text-background flex size-7 cursor-pointer rounded-full *:m-auto *:size-4 hover:brightness-110">
-                        <ArrowUp />
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-function DynamicIslandIllustration() {
-    return (
-        <div
-            aria-hidden
-            className="z-1 bg-black/2.5 absolute inset-x-8 bottom-0 mx-auto mt-auto h-2/3 w-10/12 origin-bottom scale-95 rounded-t-[4rem] border border-black/5 px-4 pt-4"
-        >
-            <div className="h-full overflow-hidden rounded-t-[3rem] bg-white p-3 shadow-lg shadow-black/15 ring ring-black/10">
-                <div className="relative">
-                    <Image
-                        src="https://images.unsplash.com/photo-1782366951390-d6798e902db7?q=80&w=1015&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                        alt="Théo Balick"
-                        width={500}
-                        height={500}
-                        className="absolute inset-0 top-0 size-full object-cover opacity-45 blur-xl contrast-200"
-                    />
-                    <div className="shadow-black/6.5 relative rounded-[2.25rem] bg-white p-2 shadow-xl ring ring-black/10">
-                        <div className="flex gap-2">
-                            <div className="size-18 relative overflow-hidden rounded-[1.75rem] shadow-md before:absolute before:inset-0 before:rounded-[1.75rem] before:border before:border-black/20">
-                                <Image
-                                    src="https://images.unsplash.com/photo-1782366951390-d6798e902db7?q=80&w=1015&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                                    alt="Théo Balick"
-                                    width={136}
-                                    height={136}
-                                />
-                            </div>
-                            <div className="py-1 pr-4">
-                                <div className="text-sm font-medium text-black">Théo Balick</div>
-                                <div className="mt-1.5 flex items-center gap-3">
-                                    <div>
-                                        <div className="text-xs text-black/50">Expenses</div>
-                                        <div className="mt-0.5 text-sm font-semibold text-black">$32.65k</div>
-                                    </div>
-                                    <div className="bg-border h-7 w-px" />
-                                    <div>
-                                        <div className="text-xs text-black/50">Income</div>
-                                        <div className="mt-0.5 text-sm font-semibold text-black">$2.65k</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     )
 }
