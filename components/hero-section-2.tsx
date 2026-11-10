@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { HeroHeader } from '@/components/hero-section-2-header'
-import { MapPin, Shield, Sparkles, TrendingUp, Volume2, VolumeX } from 'lucide-react'
+import { MapPin, Sparkles, Volume2, VolumeX } from 'lucide-react'
 import { useRef, useState } from 'react'
 
 const campaigns = [
@@ -15,10 +15,7 @@ const campaigns = [
         creator: '@kabir.drone',
         location: 'Vagator Cliffs & Coastline',
         video: 'https://assets.mixkit.co/videos/51500/51500-1080.mp4',
-        reach: '2.8M Views',
-        payout: '₹1,40,000 Escrow Paid',
         tag: 'Drone & Landscape',
-        permit: 'Verified Coastal Flight Zone',
         description: 'Cinematic golden-hour commercial shoot showcasing cliffside villas and dramatic coastline for summer 2026.',
     },
     {
@@ -29,10 +26,7 @@ const campaigns = [
         creator: '@rohan.visuals',
         location: 'Assagao & Fontainhas Mansions',
         video: 'https://assets.mixkit.co/videos/1191/1191-1080.mp4',
-        reach: '1.9M Views',
-        payout: '₹1,80,000 Escrow Paid',
         tag: 'Architecture & Stays',
-        permit: 'Private Estate Permit #GA-404',
         description: 'Editorial architectural walkthrough and lifestyle storytelling across restored 18th-century heritage villas.',
     },
     {
@@ -43,10 +37,7 @@ const campaigns = [
         creator: '@ananya.creates',
         location: 'Ashwem Beachfront & Club',
         video: 'https://assets.mixkit.co/videos/2168/2168-1080.mp4',
-        reach: '1.4M Views',
-        payout: '₹95,000 Escrow Paid',
         tag: 'Travel & Hospitality',
-        permit: 'Beach Commercial Pass Active',
         description: 'Viral lifestyle reels driving 340+ direct boutique villa bookings during peak coastal season.',
     },
     {
@@ -56,11 +47,8 @@ const campaigns = [
         brand: 'Goa Surf Collective',
         creator: '@tarun.aerial',
         location: 'Morjim Dunes & Chapora River',
-        video: 'https://assets.mixkit.co/videos/2444/2444-1080.mp4',
-        reach: '3.2M Views',
-        payout: '₹2,20,000 Escrow Paid',
+        video: 'https://assets.mixkit.co/videos/1564/1564-1080.mp4',
         tag: 'Action & Adventure',
-        permit: 'DGCA Pre-Cleared Drone Zone',
         description: 'Multi-creator coastal expedition documenting secret sandbars, river backwaters, and surf culture.',
     },
 ]
@@ -122,7 +110,7 @@ export default function HeroSection() {
                             </div>
                         </div>
 
-                        {/* Interactive Campaign Showcase (Replaces dashboard slop with high-production brand video) */}
+                        {/* Interactive Campaign Showcase */}
                         <div className="mt-12 sm:mt-16">
                             {/* Interactive Campaign Tabs */}
                             <div className="flex items-center justify-center gap-2 overflow-x-auto pb-4 scrollbar-none">
@@ -159,17 +147,13 @@ export default function HeroSection() {
                                     />
 
                                     {/* Ambient Gradients for readability */}
-                                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/40" />
+                                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30" />
 
-                                    {/* Top Floating Badges */}
-                                    <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex flex-wrap items-center gap-2">
+                                    {/* Top Location Badge */}
+                                    <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2">
                                         <div className="inline-flex items-center gap-2 rounded-full bg-black/70 backdrop-blur-md border border-white/15 px-3.5 py-1.5 text-xs text-white">
                                             <MapPin className="size-3.5 text-amber-400" />
                                             <span>{selectedCampaign.location}</span>
-                                        </div>
-                                        <div className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-500/40 px-3 py-1.5 text-xs text-emerald-300">
-                                            <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                            <span>{selectedCampaign.permit}</span>
                                         </div>
                                     </div>
 
@@ -205,48 +189,25 @@ export default function HeroSection() {
                                                 {selectedCampaign.description}
                                             </p>
                                         </div>
-
-                                        {/* Live Campaign Metric Badges */}
-                                        <div className="flex items-center gap-2 sm:gap-3">
-                                            <div className="rounded-2xl bg-black/75 backdrop-blur-md border border-white/15 px-3.5 py-2 text-white">
-                                                <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
-                                                    <TrendingUp className="size-3 text-emerald-400" />
-                                                    <span>Verified Reach</span>
-                                                </div>
-                                                <div className="text-sm sm:text-base font-bold text-white">
-                                                    {selectedCampaign.reach}
-                                                </div>
-                                            </div>
-
-                                            <div className="rounded-2xl bg-black/75 backdrop-blur-md border border-amber-500/30 px-3.5 py-2 text-white">
-                                                <div className="flex items-center gap-1.5 text-[11px] text-amber-400">
-                                                    <Shield className="size-3" />
-                                                    <span>Escrow Status</span>
-                                                </div>
-                                                <div className="text-sm sm:text-base font-bold text-amber-400">
-                                                    {selectedCampaign.payout}
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Curated Creative Niches Ticker */}
+                        {/* Curated Creative Niches Ticker (No Emojis) */}
                         <div className="py-12 border-b border-border/50">
                             <p className="text-center text-xs uppercase tracking-widest text-muted-foreground mb-6 font-semibold">
                                 Empowering All Creative Disciplines Across Goa
                             </p>
                             <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm">
                                 {[
-                                    '🌴 Portuguese Heritage Mansions',
-                                    '🚁 4K Drone & Cinematic Films',
-                                    '🍹 Sunset Beach Clubs & Mixology',
-                                    '🎧 Festival, Club & DJ Culture',
-                                    '🍽️ Boutique Cafes & Culinary Creators',
-                                    '🏄 Ocean Surf & Wellness Retreats',
-                                    '📸 Coastal Fashion & Indie Labels',
+                                    'Portuguese Heritage Mansions',
+                                    '4K Drone & Cinematic Films',
+                                    'Sunset Beach Clubs & Mixology',
+                                    'Festival, Club & DJ Culture',
+                                    'Boutique Cafes & Culinary Creators',
+                                    'Ocean Surf & Wellness Retreats',
+                                    'Coastal Fashion & Indie Labels',
                                 ].map((item, index) => (
                                     <span
                                         key={index}

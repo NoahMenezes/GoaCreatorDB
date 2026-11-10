@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card'
-import { Calendar, Camera, CheckCircle2, Home, MapPin, Sparkles, Users } from 'lucide-react'
+import { Calendar, CheckCircle2, Home, MapPin, Sparkles, Users } from 'lucide-react'
 
 export default function FeaturesFour() {
     return (
@@ -35,11 +35,6 @@ export default function FeaturesFour() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
                         <div className="relative z-10 space-y-4 max-w-xl text-white">
-                            <div className="inline-flex items-center gap-2 rounded-full bg-black/70 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs font-medium text-amber-400">
-                                <Camera className="size-3.5" />
-                                <span>Verified Shoot Permits</span>
-                            </div>
-
                             <h3 className="text-2xl sm:text-3xl font-bold tracking-tight">
                                 Hassle-Free Filming at 180+ Private Villas &amp; Coastal Spots
                             </h3>
@@ -73,7 +68,7 @@ export default function FeaturesFour() {
                             muted
                             playsInline
                             preload="metadata"
-                            src="https://assets.mixkit.co/videos/41584/41584-1080.mp4"
+                            src="https://assets.mixkit.co/videos/2168/2168-1080.mp4"
                             className="absolute inset-0 size-full object-cover opacity-50"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />

@@ -66,7 +66,7 @@ export default function ContentSection() {
                         </div>
                     </div>
 
-                    {/* Right: Live Production & Escrow Monitor Video Card */}
+                    {/* Right: Production & Escrow Monitor Video Card */}
                     <div className="relative">
                         <Card className="relative overflow-hidden rounded-3xl border border-border/80 bg-black shadow-2xl p-6 sm:p-8">
                             {/* Video background */}
@@ -77,16 +77,10 @@ export default function ContentSection() {
                                     muted
                                     playsInline
                                     preload="metadata"
-                                    src="https://assets.mixkit.co/videos/42144/42144-1080.mp4"
+                                    src="https://assets.mixkit.co/videos/3160/3160-1080.mp4"
                                     className="size-full object-cover"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-
-                                {/* Verified permit top badge */}
-                                <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/20 px-3 py-1 text-xs text-white">
-                                    <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
-                                    <span>Live Production &bull; Candolim Boutique Stay</span>
-                                </div>
                             </div>
 
                             {/* Live Escrow Tracker Overlay Card */}

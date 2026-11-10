@@ -1,4 +1,4 @@
-# 🌴 Goa Creator
+# Goa Creator
 
 > **The Premier Platform for Creators, Luxury Stays & Brands in Goa.**
 
@@ -6,18 +6,18 @@ Goa Creator is a full-stack web platform built for storytellers, filmmakers, lif
 
 ---
 
-## ✨ Features
+## Features
 
-- **🏖️ Curated Shoot Locations**: Discover pre-vetted private Portuguese heritage villas in Fontainhas, Assagao boutique stays, and cliffside sunset viewpoints with verified filming permits.
-- **🤝 Direct Brand Partnerships**: Connect creators directly with luxury resorts, beach clubs, and lifestyle brands without intermediary agencies.
-- **🛡️ Escrow Payouts**: Guaranteed milestone-based compensation deposited securely and released within 24 hours of deliverable approval.
-- **🌓 Animated Theme Toggling**: Seamless dark and light mode switching powered by Magic UI's View Transitions API.
-- **📊 Real-Time Media Kits**: Dynamic analytics displaying verified Goa reach, impressions, and engagement metrics.
-- **⚡ Next.js 16 & React 19 Architecture**: Partial Prerendering (PPR), Turbopack compilation, and React Server Component caching for ultra-fast performance.
+- **Curated Shoot Locations**: Discover pre-vetted private Portuguese heritage villas in Fontainhas, Assagao boutique stays, and cliffside sunset viewpoints with verified filming permits.
+- **Direct Brand Partnerships**: Connect creators directly with luxury resorts, beach clubs, and lifestyle brands without intermediary agencies.
+- **Escrow Payouts**: Guaranteed milestone-based compensation deposited securely and released within 24 hours of deliverable approval.
+- **Animated Theme Toggling**: Seamless dark and light mode switching powered by Magic UI's View Transitions API.
+- **Real-Time Media Kits**: Dynamic analytics displaying verified Goa reach, impressions, and engagement metrics.
+- **Next.js 16 & React 19 Architecture**: Partial Prerendering (PPR), Turbopack compilation, and React Server Component caching for ultra-fast performance.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: [Next.js 16](https://nextjs.org) (App Router, PPR, RSC Cache)
 - **Library**: [React 19](https://react.dev)
@@ -32,7 +32,7 @@ Goa Creator is a full-stack web platform built for storytellers, filmmakers, lif
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -48,9 +48,9 @@ cd GoaCreatorDB
 bun install
 ```
 
-### Running the Development Server
+### Development Server
 
-Start the local development server with Turbopack:
+Start the Turbopack development server:
 
 ```bash
 bun run dev
@@ -60,13 +60,16 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to view the 
 
 ### Production Build
 
-Create an optimized production build:
+Create an optimized static / PPR production build:
 
 ```bash
 bun run build
+bun run start
 ```
 
-Run linting:
+### Linting
+
+Run ESLint strict checks:
 
 ```bash
 bun run lint
@@ -74,7 +77,7 @@ bun run lint
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 GoaCreatorDB/
@@ -108,6 +111,6 @@ GoaCreatorDB/
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.

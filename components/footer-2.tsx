@@ -84,7 +84,7 @@ export default function Footer() {
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span>&copy; 2026 Goa Creator. All rights reserved.</span>
                         <span className="hidden sm:inline">&bull;</span>
-                        <span className="hidden sm:inline">Built for Goa&apos;s Creative Community 🌴</span>
+                        <span className="hidden sm:inline">Built for Goa&apos;s Creative Community</span>
                     </div>
 
                     {/* Social Media Links */}
