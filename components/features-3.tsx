@@ -4,31 +4,46 @@ import { Card } from '@/components/ui/card'
 import { Sparkles, Volume2, VolumeX } from 'lucide-react'
 import { useState } from 'react'
 
-const categories = ['All Reels', 'Luxury Stays', 'Beach Clubs', 'Drone Cinema', 'Lifestyle']
+const categories = [
+    'All Reels',
+    'Nightlife & DJs',
+    'Cafes & Dining',
+    'Heritage Architecture',
+    'Luxury Stays',
+    'Cocktails & Lounges',
+]
 
 const reels = [
     {
-        category: 'Beach Clubs',
-        video: 'https://assets.mixkit.co/videos/2168/2168-1080.mp4',
+        category: 'Nightlife & DJs',
+        video: 'https://assets.mixkit.co/videos/830/830-1080.mp4',
     },
     {
-        category: 'Luxury Stays',
-        video: 'https://assets.mixkit.co/videos/1191/1191-1080.mp4',
+        category: 'Cafes & Dining',
+        video: 'https://assets.mixkit.co/videos/810/810-1080.mp4',
     },
     {
-        category: 'Drone Cinema',
-        video: 'https://assets.mixkit.co/videos/1564/1564-1080.mp4',
+        category: 'Heritage Architecture',
+        video: 'https://assets.mixkit.co/videos/4206/4206-1080.mp4',
     },
     {
-        category: 'Lifestyle',
-        video: 'https://assets.mixkit.co/videos/3158/3158-1080.mp4',
+        category: 'Cocktails & Lounges',
+        video: 'https://assets.mixkit.co/videos/4295/4295-1080.mp4',
     },
     {
         category: 'Luxury Stays',
         video: 'https://assets.mixkit.co/videos/3159/3159-1080.mp4',
     },
     {
-        category: 'Drone Cinema',
+        category: 'Nightlife & DJs',
+        video: 'https://assets.mixkit.co/videos/4188/4188-1080.mp4',
+    },
+    {
+        category: 'Heritage Architecture',
+        video: 'https://assets.mixkit.co/videos/4692/4692-1080.mp4',
+    },
+    {
+        category: 'Luxury Stays',
         video: 'https://assets.mixkit.co/videos/51501/51501-1080.mp4',
     },
 ]
@@ -63,7 +78,7 @@ export default function FeaturesThree() {
                             Real Brand Collabs in Motion Across Goa
                         </h2>
                         <p className="text-muted-foreground text-lg">
-                            Authentic reels produced by verified creators for boutique stays, beach clubs, and lifestyle brands.
+                            Authentic reels produced by verified creators for heritage villas, cafes, artisanal cocktail bars, DJ sessions, and music festivals.
                         </p>
                     </div>
 
@@ -91,7 +106,7 @@ export default function FeaturesThree() {
                 </div>
 
                 {/* Clean Reels Grid without clutter/watermark text */}
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     {filteredReels.map((reel, index) => {
                         const isMuted = mutedStates[index] ?? true
 
