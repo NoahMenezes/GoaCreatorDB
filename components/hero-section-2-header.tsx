@@ -110,7 +110,7 @@ export const HeroHeader = () => {
                                     className="cursor-pointer rounded-lg font-medium px-4 h-9 border-border hover:bg-muted"
                                     nativeButton={false}
                                     render={
-                                        <Link href="#pricing">
+                                        <Link href="/login">
                                             <span>Sign In</span>
                                         </Link>
                                     }
@@ -121,14 +121,14 @@ export const HeroHeader = () => {
                                     className="bg-emerald-700 hover:bg-emerald-800 text-white font-medium cursor-pointer rounded-lg px-4 h-9 shadow-xs"
                                     nativeButton={false}
                                     render={
-                                        <Link href="#pricing">
+                                        <Link href="/join?role=creator">
                                             <span>Join as Creator</span>
                                         </Link>
                                     }
                                 />
 
                                 <Link
-                                    href="#pricing"
+                                    href="/login"
                                     aria-label="Creator Profile"
                                     className="hidden sm:flex size-9 items-center justify-center rounded-full bg-emerald-950 text-white dark:bg-emerald-900 border border-emerald-700/50 hover:opacity-90 duration-150"
                                 >

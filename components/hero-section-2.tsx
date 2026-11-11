@@ -59,7 +59,7 @@ export default function HeroSection() {
                                     size="lg"
                                     nativeButton={false}
                                     render={
-                                        <Link href="#pricing" className="flex items-center gap-2">
+                                        <Link href="/join?role=creator" className="flex items-center gap-2">
                                             <UserPlus className="size-4 text-emerald-600 dark:text-emerald-400" />
                                             <span>Join as Creator</span>
                                         </Link>

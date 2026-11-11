@@ -29,7 +29,7 @@ export default function Pricing() {
                                 variant="outline"
                                 className="w-full rounded-lg"
                                 nativeButton={false}
-                                render={<Link href="#contact">Join Free</Link>}
+                                render={<Link href="/join?role=creator">Join Free</Link>}
                             />
                         </div>
 
@@ -67,7 +67,7 @@ export default function Pricing() {
                             <Button
                                 className="w-full bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg"
                                 nativeButton={false}
-                                render={<Link href="#contact">Upgrade to Pro</Link>}
+                                render={<Link href="/join?role=creator">Upgrade to Pro</Link>}
                             />
                         </div>
 
@@ -105,7 +105,7 @@ export default function Pricing() {
                                 className="w-full rounded-lg"
                                 variant="outline"
                                 nativeButton={false}
-                                render={<Link href="#contact">Partner as Brand</Link>}
+                                render={<Link href="/join?role=business">Partner as Brand</Link>}
                             />
                         </div>
 

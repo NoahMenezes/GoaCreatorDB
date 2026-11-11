@@ -23,8 +23,8 @@ const creatorNiches = [
 const platformLinks = [
     { name: 'How It Works', href: '#how-it-works' },
     { name: 'Brand Pricing', href: '#pricing' },
-    { name: 'Creator Application', href: '#pricing' },
-    { name: 'Client Sign In', href: '#pricing' },
+    { name: 'Creator Application', href: '/join?role=creator' },
+    { name: 'Client Sign In', href: '/login' },
     { name: 'Privacy & Terms', href: '#' },
 ]
 
