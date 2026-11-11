@@ -18,6 +18,7 @@ export interface BusinessRecord {
     description: string
     contact_phone: string
     instagram_handle: string
+    website_url?: string
     avatar_url?: string
 }
 

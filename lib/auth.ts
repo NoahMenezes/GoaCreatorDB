@@ -142,6 +142,7 @@ export async function registerUser(data: {
         description?: string
         contact_phone: string
         instagram_handle: string
+        website_url?: string
     }
     creatorData?: {
         full_name: string
@@ -187,6 +188,7 @@ export async function registerUser(data: {
             description: data.businessData.description || '',
             contact_phone: data.businessData.contact_phone,
             instagram_handle: data.businessData.instagram_handle,
+            website_url: data.businessData.website_url || '',
         }
         db.businesses.push(biz)
     } else if (data.role === 'creator' && data.creatorData) {

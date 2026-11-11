@@ -105,7 +105,7 @@ export default function Pricing() {
                                 className="w-full rounded-lg"
                                 variant="outline"
                                 nativeButton={false}
-                                render={<Link href="/join?role=business">Partner as Brand</Link>}
+                                render={<Link href="/register/business">Partner as Brand</Link>}
                             />
                         </div>
 

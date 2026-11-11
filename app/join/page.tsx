@@ -50,6 +50,10 @@ function JoinContent() {
     const [password, setPassword] = useState('')
 
     const handleContinue = (role: 'business' | 'creator') => {
+        if (role === 'business') {
+            router.push('/register/business')
+            return
+        }
         setSelectedRole(role)
         setError(null)
         setStep('form')
@@ -100,8 +104,8 @@ function JoinContent() {
 
             setSuccessMessage(`Welcome to GoaConnect, ${selectedRole === 'business' ? businessName : fullName}! Your account has been created.`)
             setTimeout(() => {
-                router.push('/')
-            }, 1800)
+                router.push(`/login?registered=${selectedRole}&email=${encodeURIComponent(email.trim())}&name=${encodeURIComponent(selectedRole === 'business' ? businessName : fullName)}`)
+            }, 1200)
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'An error occurred'
             setError(msg)
