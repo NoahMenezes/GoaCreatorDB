@@ -3,219 +3,135 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { HeroHeader } from '@/components/hero-section-2-header'
-import { MapPin, Sparkles, Volume2, VolumeX } from 'lucide-react'
-import { useRef, useState } from 'react'
-
-const campaigns = [
-    {
-        id: 'vagator',
-        name: 'Vagator Cliffs',
-        title: 'Sunkissed Horizons',
-        brand: 'Luxury Stays Goa',
-        creator: '@kabir.drone',
-        location: 'Vagator Cliffs & Coastline',
-        video: 'https://assets.mixkit.co/videos/51500/51500-1080.mp4',
-        tag: 'Drone & Landscape',
-        description: 'Cinematic golden-hour commercial shoot showcasing cliffside villas and dramatic coastline for summer 2026.',
-    },
-    {
-        id: 'assagao',
-        name: 'Assagao Estate',
-        title: 'Portuguese Heritage Revival',
-        brand: 'Villa Capella & Estate',
-        creator: '@rohan.visuals',
-        location: 'Assagao & Fontainhas Mansions',
-        video: 'https://assets.mixkit.co/videos/1191/1191-1080.mp4',
-        tag: 'Architecture & Stays',
-        description: 'Editorial architectural walkthrough and lifestyle storytelling across restored 18th-century heritage villas.',
-    },
-    {
-        id: 'ashwem',
-        name: 'Ashwem Beach Club',
-        title: 'Boho Sunset Golden Hour',
-        brand: 'Boho Beach House Goa',
-        creator: '@ananya.creates',
-        location: 'Ashwem Beachfront & Club',
-        video: 'https://assets.mixkit.co/videos/2168/2168-1080.mp4',
-        tag: 'Travel & Hospitality',
-        description: 'Viral lifestyle reels driving 340+ direct boutique villa bookings during peak coastal season.',
-    },
-    {
-        id: 'morjim',
-        name: 'Morjim Coastline',
-        title: 'Aerial Coastal Expedition',
-        brand: 'Goa Surf Collective',
-        creator: '@tarun.aerial',
-        location: 'Morjim Dunes & Chapora River',
-        video: 'https://assets.mixkit.co/videos/1564/1564-1080.mp4',
-        tag: 'Action & Adventure',
-        description: 'Multi-creator coastal expedition documenting secret sandbars, river backwaters, and surf culture.',
-    },
-]
+import {
+    Bed,
+    CheckCircle2,
+    Layers,
+    Search,
+    Shield,
+    Star,
+    UserPlus,
+    Users,
+} from 'lucide-react'
 
 export default function HeroSection() {
-    const [selectedCampaign, setSelectedCampaign] = useState(campaigns[0])
-    const videoRef = useRef<HTMLVideoElement>(null)
-    const [isMuted, setIsMuted] = useState(true)
-
-    const toggleAudio = () => {
-        if (!videoRef.current) return
-        videoRef.current.muted = !isMuted
-        setIsMuted(!isMuted)
-    }
-
-    const handleSelectCampaign = (camp: typeof campaigns[0]) => {
-        setSelectedCampaign(camp)
-        if (videoRef.current) {
-            videoRef.current.src = camp.video
-            videoRef.current.play().catch(() => {})
-        }
-    }
-
     return (
         <>
             <HeroHeader />
             <main className="overflow-hidden">
-                <section className="pt-32 sm:pt-40" id="hero-showcase">
+                <section className="pt-32 sm:pt-36 pb-8 sm:pb-12" id="hero">
                     <div className="mx-auto max-w-7xl px-6">
-                        {/* Title & Pitch */}
-                        <div className="flex flex-col items-center text-center max-w-3xl mx-auto space-y-6">
-                            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold text-amber-500 dark:text-amber-400 backdrop-blur-md">
-                                <Sparkles className="size-3.5" />
-                                <span>The Premier Goa Creator &amp; Luxury Stay Collective</span>
+                        {/* Title & Pitch Container */}
+                        <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-6">
+                            {/* Official Badge */}
+                            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 backdrop-blur-md">
+                                <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                                <span>THE OFFICIAL GOA CREATOR MARKETPLACE</span>
                             </div>
 
-                            <h1 className="text-balance text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
-                                Where Goa&apos;s Top Creators &amp; Luxury Brands Connect.
+                            {/* Main Headline */}
+                            <h1 className="text-balance text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-foreground">
+                                Find the right Goa creator{' '}
+                                <span className="text-emerald-700 dark:text-emerald-400">in minutes</span>
                             </h1>
 
-                            <p className="text-muted-foreground text-lg sm:text-xl leading-relaxed max-w-2xl">
-                                Unlock secret heritage shoot locations, partner directly with luxury beach clubs &amp; boutique stays, and turn your Goa storytelling into high-ticket brand deals.
+                            {/* Subtitle */}
+                            <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl">
+                                The dedicated marketplace connecting local Goa cafes, boutique hotels, lifestyle brands, and events with vetted local influencers and creators across North &amp; South Goa.
                             </p>
 
-                            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+                            {/* CTA / Action Buttons */}
+                            <div className="flex flex-wrap items-center justify-center gap-3.5 pt-1">
                                 <Button
-                                    className="bg-amber-500 hover:bg-amber-600 text-black font-semibold h-11 px-7 rounded-full text-base cursor-pointer shadow-lg shadow-amber-500/20"
+                                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-medium h-11 px-6 rounded-lg text-sm cursor-pointer shadow-xs"
                                     size="lg"
                                     nativeButton={false}
-                                    render={<Link href="#pricing">Join as Creator</Link>}
+                                    render={
+                                        <Link href="#creators" className="flex items-center gap-2">
+                                            <Search className="size-4" />
+                                            <span>Find Creators</span>
+                                        </Link>
+                                    }
                                 />
                                 <Button
                                     variant="outline"
-                                    className="h-11 px-7 rounded-full text-base cursor-pointer"
+                                    className="h-11 px-6 rounded-lg text-sm font-medium cursor-pointer flex items-center gap-2 border-border text-foreground hover:bg-muted"
                                     size="lg"
                                     nativeButton={false}
-                                    render={<Link href="#reels">Explore Creator Reels</Link>}
+                                    render={
+                                        <Link href="#pricing" className="flex items-center gap-2">
+                                            <UserPlus className="size-4 text-emerald-600 dark:text-emerald-400" />
+                                            <span>Join as Creator</span>
+                                        </Link>
+                                    }
                                 />
                             </div>
                         </div>
 
-                        {/* Interactive Campaign Showcase */}
-                        <div className="mt-12 sm:mt-16">
-                            {/* Interactive Campaign Tabs */}
-                            <div className="flex items-center justify-center gap-2 overflow-x-auto pb-4 scrollbar-none">
-                                {campaigns.map((camp) => {
-                                    const isActive = selectedCampaign.id === camp.id
-                                    return (
-                                        <button
-                                            key={camp.id}
-                                            onClick={() => handleSelectCampaign(camp)}
-                                            className={`cursor-pointer whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 border ${
-                                                isActive
-                                                    ? 'bg-amber-500 text-black border-amber-500 shadow-md shadow-amber-500/25 scale-102'
-                                                    : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
-                                            }`}
-                                        >
-                                            {camp.name}
-                                        </button>
-                                    )
-                                })}
-                            </div>
-
-                            {/* Cinematic Video Showcase Monitor */}
-                            <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-black shadow-2xl shadow-black/50">
-                                <div className="relative aspect-16/9 sm:aspect-21/9 w-full overflow-hidden">
-                                    <video
-                                        ref={videoRef}
-                                        autoPlay
-                                        loop
-                                        muted={isMuted}
-                                        playsInline
-                                        preload="auto"
-                                        src={selectedCampaign.video}
-                                        className="size-full object-cover transition-opacity duration-300"
-                                    />
-
-                                    {/* Ambient Gradients for readability */}
-                                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30" />
-
-                                    {/* Top Location Badge */}
-                                    <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2">
-                                        <div className="inline-flex items-center gap-2 rounded-full bg-black/70 backdrop-blur-md border border-white/15 px-3.5 py-1.5 text-xs text-white">
-                                            <MapPin className="size-3.5 text-amber-400" />
-                                            <span>{selectedCampaign.location}</span>
-                                        </div>
+                        {/* 4 Metric Cards Bar */}
+                        <div className="mt-12 rounded-2xl border border-border/80 bg-card/80 backdrop-blur-sm p-4 sm:p-6 shadow-xs">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-border">
+                                <div className="flex items-center gap-4 px-3 py-2">
+                                    <div className="size-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                                        <Users className="size-5" />
                                     </div>
-
-                                    {/* Sound Toggle Button */}
-                                    <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={toggleAudio}
-                                            aria-label={isMuted ? 'Unmute video' : 'Mute video'}
-                                            className="size-10 rounded-full bg-black/70 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-black/90 hover:scale-105 duration-150 cursor-pointer shadow-lg"
-                                        >
-                                            {isMuted ? <VolumeX className="size-4.5" /> : <Volume2 className="size-4.5 text-amber-400" />}
-                                        </button>
+                                    <div>
+                                        <div className="text-2xl font-bold tracking-tight text-foreground">450+</div>
+                                        <div className="text-xs text-muted-foreground">Vetted Goa Creators</div>
                                     </div>
+                                </div>
 
-                                    {/* Bottom Information Bar */}
-                                    <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 right-4 sm:right-6 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
-                                        <div className="space-y-1.5 text-white max-w-xl">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[11px] uppercase tracking-wider text-amber-400 font-bold bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
-                                                    {selectedCampaign.tag}
-                                                </span>
-                                                <span className="text-xs text-zinc-300 font-medium">
-                                                    Collab: {selectedCampaign.creator} &times; {selectedCampaign.brand}
-                                                </span>
-                                            </div>
+                                <div className="flex items-center gap-4 px-3 py-2 pt-4 sm:pt-2">
+                                    <div className="size-11 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-600 dark:text-teal-400 shrink-0">
+                                        <Layers className="size-5" />
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold tracking-tight text-foreground">1,200+</div>
+                                        <div className="text-xs text-muted-foreground">Collabs Done</div>
+                                    </div>
+                                </div>
 
-                                            <h3 className="text-xl sm:text-3xl font-bold tracking-tight text-white drop-shadow-sm">
-                                                {selectedCampaign.title}
-                                            </h3>
+                                <div className="flex items-center gap-4 px-3 py-2 pt-4 sm:pt-2">
+                                    <div className="size-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+                                        <Star className="size-5 fill-amber-500 text-amber-500" />
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold tracking-tight text-foreground">4.9 / 5</div>
+                                        <div className="text-xs text-muted-foreground">Average Rating</div>
+                                    </div>
+                                </div>
 
-                                            <p className="text-xs sm:text-sm text-zinc-300 line-clamp-2 leading-relaxed">
-                                                {selectedCampaign.description}
-                                            </p>
-                                        </div>
+                                <div className="flex items-center gap-4 px-3 py-2 pt-4 sm:pt-2">
+                                    <div className="size-11 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                                        <Shield className="size-5 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold tracking-tight text-foreground">100%</div>
+                                        <div className="text-xs text-muted-foreground">Escrow Protection</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Curated Creative Niches Ticker (No Emojis) */}
-                        <div className="py-12 border-b border-border/50">
-                            <p className="text-center text-xs uppercase tracking-widest text-muted-foreground mb-6 font-semibold">
-                                Empowering All Creative Disciplines Across Goa
-                            </p>
-                            <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm">
-                                {[
-                                    'Portuguese Heritage Mansions',
-                                    '4K Drone & Cinematic Films',
-                                    'Sunset Beach Clubs & Mixology',
-                                    'Festival, Club & DJ Culture',
-                                    'Boutique Cafes & Culinary Creators',
-                                    'Ocean Surf & Wellness Retreats',
-                                    'Coastal Fashion & Indie Labels',
-                                ].map((item, index) => (
-                                    <span
-                                        key={index}
-                                        className="rounded-full border border-border bg-muted/30 px-4 py-1.5 text-muted-foreground font-medium hover:text-foreground hover:border-amber-500/40 hover:bg-muted duration-150 select-none transition-colors"
-                                    >
-                                        {item}
-                                    </span>
-                                ))}
+                        {/* Trusted By Premier Stays & Spots Banner */}
+                        <div className="mt-6 rounded-xl border border-border/70 bg-card/50 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                <Bed className="size-4 text-emerald-600 dark:text-emerald-400" />
+                                <span>Trusted by Goa&apos;s Premier Stays &amp; Spots</span>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
+                                <span className="rounded-lg border border-border bg-background px-3 py-1.5 text-foreground shadow-2xs">
+                                    Café Palmeira, Calangute
+                                </span>
+                                <span className="rounded-lg border border-border bg-background px-3 py-1.5 text-foreground shadow-2xs">
+                                    Boutique Villa Assagao
+                                </span>
+                                <span className="rounded-lg border border-border bg-background px-3 py-1.5 text-foreground shadow-2xs">
+                                    Titlie Culinary Bar, Vagator
+                                </span>
+                                <span className="rounded-lg border border-border bg-background px-3 py-1.5 text-foreground shadow-2xs">
+                                    Antares Beach Club, Vagator
+                                </span>
                             </div>
                         </div>
                     </div>

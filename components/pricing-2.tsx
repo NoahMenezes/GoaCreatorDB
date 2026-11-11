@@ -4,10 +4,10 @@ import { Check } from 'lucide-react'
 
 export default function Pricing() {
     return (
-        <section className="py-16 md:py-20" id="pricing">
+        <section className="py-16 md:py-20 scroll-mt-20" id="pricing">
             <div className="mx-auto max-w-7xl px-6">
                 <div className="max-w-md space-y-4">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-amber-500">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                         Membership &amp; Access
                     </span>
                     <h2 className="text-muted-foreground text-balance text-4xl font-medium tracking-tight lg:text-5xl">
@@ -15,7 +15,7 @@ export default function Pricing() {
                     </h2>
                 </div>
 
-                <div className="mt-12 grid gap-6 border *:p-8 max-lg:mx-auto max-lg:max-w-sm lg:mt-20 lg:grid-cols-3">
+                <div className="mt-12 grid gap-6 border *:p-8 max-lg:mx-auto max-lg:max-w-sm lg:mt-20 lg:grid-cols-3 rounded-2xl overflow-hidden">
                     <div className="flex flex-col gap-8 max-lg:border-b lg:border-r">
                         <div>
                             <p className="text-lg font-medium">Explorer</p>
@@ -27,7 +27,7 @@ export default function Pricing() {
 
                             <Button
                                 variant="outline"
-                                className="w-full"
+                                className="w-full rounded-lg"
                                 nativeButton={false}
                                 render={<Link href="#contact">Join Free</Link>}
                             />
@@ -45,7 +45,7 @@ export default function Pricing() {
                                     key={index}
                                     className="flex items-center gap-3 text-sm"
                                 >
-                                    <Check className="text-emerald-500 size-3.5 shrink-0" />
+                                    <Check className="text-emerald-600 dark:text-emerald-400 size-3.5 shrink-0" />
                                     {item}
                                 </li>
                             ))}
@@ -53,7 +53,7 @@ export default function Pricing() {
                     </div>
 
                     <div className="bg-card relative flex flex-col gap-8 shadow-xl max-lg:border-y lg:border-x">
-                        <div className="inset-ring inset-ring-foreground/10 absolute right-0 top-0 w-fit -translate-y-px translate-x-px rounded-bl bg-amber-500/15 px-3 py-1 text-xs font-medium text-amber-500 dark:text-amber-400">
+                        <div className="inset-ring inset-ring-foreground/10 absolute right-0 top-0 w-fit -translate-y-px translate-x-px rounded-bl bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
                             Most Popular
                         </div>
                         <div>
@@ -65,7 +65,7 @@ export default function Pricing() {
                             </div>
 
                             <Button
-                                className="w-full"
+                                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg"
                                 nativeButton={false}
                                 render={<Link href="#contact">Upgrade to Pro</Link>}
                             />
@@ -85,7 +85,7 @@ export default function Pricing() {
                                     key={index}
                                     className="flex items-center gap-3 text-sm"
                                 >
-                                    <Check className="text-amber-500 size-3.5 shrink-0" />
+                                    <Check className="text-emerald-600 dark:text-emerald-400 size-3.5 shrink-0" />
                                     {item}
                                 </li>
                             ))}
@@ -102,7 +102,7 @@ export default function Pricing() {
                             </div>
 
                             <Button
-                                className="w-full"
+                                className="w-full rounded-lg"
                                 variant="outline"
                                 nativeButton={false}
                                 render={<Link href="#contact">Partner as Brand</Link>}
@@ -112,7 +112,7 @@ export default function Pricing() {
                         <ul className="text-muted-foreground list-outside space-y-3">
                             {[
                                 'Unlimited Campaign & Collab Postings',
-                                'Access 850+ Verified Goa Creators',
+                                'Access 450+ Verified Goa Creators',
                                 'Audience Demographics & Reach Vetting',
                                 'Escrow Payment & Milestone Protection',
                                 'Dedicated Goa Campaign Manager',
@@ -122,7 +122,7 @@ export default function Pricing() {
                                     key={index}
                                     className="flex items-center gap-3 text-sm"
                                 >
-                                    <Check className="text-emerald-500 size-3.5 shrink-0" />
+                                    <Check className="text-emerald-600 dark:text-emerald-400 size-3.5 shrink-0" />
                                     {item}
                                 </li>
                             ))}

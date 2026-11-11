@@ -7,7 +7,7 @@ export default function FAQs() {
     const faqItems = [
         {
             id: 'item-1',
-            question: 'Who can join Goa Creator?',
+            question: 'Who can join GoaConnect?',
             answer: 'Any content creator, photographer, filmmaker, lifestyle influencer, DJ, or digital nomad based in or regularly visiting Goa. We welcome creators of all audience sizes who produce authentic, high-quality storytelling.',
         },
         {
@@ -18,7 +18,7 @@ export default function FAQs() {
         {
             id: 'item-3',
             question: 'Can I book exclusive shoot locations through the platform?',
-            answer: 'Yes! Goa Creator partners with heritage Portuguese estates in Fontainhas, private luxury villas in Assagao, jungle retreats, and beach clubs with pre-arranged filming permissions so you never have to deal with shoot hassle.',
+            answer: 'Yes! GoaConnect partners with heritage Portuguese estates in Fontainhas, private luxury villas in Assagao, jungle retreats, and beach clubs with pre-arranged filming permissions so you never have to deal with shoot hassle.',
         },
         {
             id: 'item-4',
@@ -33,11 +33,11 @@ export default function FAQs() {
     ]
 
     return (
-        <section className="py-16 md:py-24" id="faqs">
+        <section className="py-16 md:py-24 scroll-mt-20" id="faqs">
             <div className="mx-auto max-w-7xl px-6">
                 <div className="grid gap-12 md:grid-cols-2 md:gap-6">
                     <div className="space-y-4">
-                        <span className="text-xs font-semibold uppercase tracking-wider text-amber-500">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                             Got Questions?
                         </span>
                         <h2 className="text-foreground max-w-sm text-balance text-4xl font-medium tracking-tight">
@@ -65,11 +65,11 @@ export default function FAQs() {
                             ))}
                         </Accordion>
 
-                        <p className="text-muted-foreground mt-6">
+                        <p className="text-muted-foreground mt-6 text-sm">
                             Can&apos;t find what you&apos;re looking for? Reach out to our{' '}
                             <Link
                                 href="#contact"
-                                className="text-primary font-medium hover:underline"
+                                className="text-emerald-700 dark:text-emerald-400 font-medium hover:underline"
                             >
                                 community team
                             </Link>

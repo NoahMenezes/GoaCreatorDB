@@ -2,17 +2,16 @@
 
 import Link from 'next/link'
 import { Logo } from '@/components/logo'
-import { X } from 'lucide-react'
+import { User, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AnimatedThemeToggler } from '@/registry/magicui/animated-theme-toggler'
 import React from 'react'
 
 const menuItems = [
-    { name: 'Showcase', href: '#hero-showcase' },
-    { name: 'Creator Reels', href: '#reels' },
-    { name: 'Locations', href: '#locations' },
+    { name: 'Explore Creators', href: '#creators' },
+    { name: 'Categories', href: '#categories' },
+    { name: 'How It Works', href: '#how-it-works' },
     { name: 'Pricing', href: '#pricing' },
-    { name: 'FAQs', href: '#faqs' },
 ]
 
 export const HeroHeader = () => {
@@ -43,10 +42,10 @@ export const HeroHeader = () => {
             >
                 <div className="mx-auto max-w-7xl px-6">
                     <div className="relative flex flex-wrap items-center justify-between max-lg:gap-6">
-                        <div className="max-lg:in-data-[state=active]:border-b flex w-full items-center justify-between gap-6 py-4 lg:w-auto lg:py-5">
+                        <div className="max-lg:in-data-[state=active]:border-b flex w-full items-center justify-between gap-6 py-4 lg:w-auto lg:py-4">
                             <Link
                                 href="/"
-                                aria-label="goto home"
+                                aria-label="GoaConnect home"
                                 className="flex items-center space-x-2"
                             >
                                 <Logo />
@@ -84,7 +83,7 @@ export const HeroHeader = () => {
                             </div>
                         </div>
 
-                        <div className="in-data-[state=active]:block lg:in-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end max-lg:space-y-8 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-4">
+                        <div className="in-data-[state=active]:block lg:in-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end max-lg:space-y-8 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-3">
                             <div className="lg:hidden">
                                 <ul>
                                     {menuItems.map((item, index) => (
@@ -100,14 +99,26 @@ export const HeroHeader = () => {
                                     ))}
                                 </ul>
                             </div>
-                            <div className="flex w-full items-center space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
+                            <div className="flex w-full items-center space-y-3 sm:flex-row sm:gap-2.5 sm:space-y-0 md:w-fit">
                                 <div className="hidden lg:block">
                                     <AnimatedThemeToggler className="flex size-9 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-muted duration-150 cursor-pointer" />
                                 </div>
+
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="cursor-pointer rounded-full font-medium"
+                                    className="cursor-pointer rounded-lg font-medium px-4 h-9 border-border hover:bg-muted"
+                                    nativeButton={false}
+                                    render={
+                                        <Link href="#pricing">
+                                            <span>Sign In</span>
+                                        </Link>
+                                    }
+                                />
+
+                                <Button
+                                    size="sm"
+                                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-medium cursor-pointer rounded-lg px-4 h-9 shadow-xs"
                                     nativeButton={false}
                                     render={
                                         <Link href="#pricing">
@@ -115,16 +126,14 @@ export const HeroHeader = () => {
                                         </Link>
                                     }
                                 />
-                                <Button
-                                    size="sm"
-                                    className="bg-amber-500 hover:bg-amber-600 text-black font-semibold cursor-pointer rounded-full"
-                                    nativeButton={false}
-                                    render={
-                                        <Link href="#contact">
-                                            <span>Partner Brand</span>
-                                        </Link>
-                                    }
-                                />
+
+                                <Link
+                                    href="#pricing"
+                                    aria-label="Creator Profile"
+                                    className="hidden sm:flex size-9 items-center justify-center rounded-full bg-emerald-950 text-white dark:bg-emerald-900 border border-emerald-700/50 hover:opacity-90 duration-150"
+                                >
+                                    <User className="size-4.5" />
+                                </Link>
                             </div>
                         </div>
                     </div>
