@@ -7,3 +7,4 @@ export async function POST() {
     response.cookies.delete('goa_session')
     return response
 }
+

@@ -64,3 +64,4 @@ export const INITIAL_CATEGORIES: CategoryRecord[] = [
     { category_id: 'cat-5', category_name: 'Fashion & Lifestyle' },
     { category_id: 'cat-6', category_name: 'Yoga & Wellness' },
 ]
+
