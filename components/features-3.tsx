@@ -2,17 +2,21 @@
 
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import type { CreatorItem } from '@/app/api/creators/route'
 import {
     CheckCircle2,
     Compass,
     ExternalLink,
     Flower2,
+    Heart,
     Hotel,
     LayoutGrid,
     MapPin,
+    MessageCircle,
+    Music,
+    Play,
+    RefreshCw,
+    Share2,
     Shirt,
-    Star,
     Utensils,
     Volume2,
     VolumeX,
@@ -21,22 +25,8 @@ import {
 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-
-interface Creator {
-    id: string
-    name: string
-    handle: string
-    niche: string
-    categorySlug: string
-    location: string
-    followers: string
-    rating: number
-    baseRate: string
-    er: string
-    video: string
-    instagramUrl: string
-    bio: string
-}
+import type { ReelItem } from '@/app/api/reels/route'
+import { goaReelsPool } from '@/app/api/reels/route'
 
 const niches = [
     { name: 'All Niches', slug: 'all', icon: LayoutGrid },
@@ -48,140 +38,52 @@ const niches = [
     { name: 'Yoga & Wellness', slug: 'yoga-wellness', icon: Flower2 },
 ]
 
-const initialCreators: Creator[] = [
-    {
-        id: 'creator-1',
-        name: 'Rahul Naik',
-        handle: '@rahul.goanbites',
-        niche: 'Food & Nightlife',
-        categorySlug: 'food-dining',
-        location: 'Panjim & Calangute',
-        followers: '85K',
-        rating: 4.9,
-        baseRate: '₹8,500/reel',
-        er: '6.4% ER',
-        video: 'https://assets.mixkit.co/videos/810/810-1080.mp4',
-        instagramUrl: 'https://instagram.com/rahul.goanbites',
-        bio: 'Documenting Goan tavernas, Portuguese bakeries, and modern coastal culinary bars.',
-    },
-    {
-        id: 'creator-2',
-        name: 'Sneha Fernandes',
-        handle: '@sneha_curates',
-        niche: 'Boutique Stays & Lifestyle',
-        categorySlug: 'boutique-resorts',
-        location: 'Assagao',
-        followers: '120K',
-        rating: 5.0,
-        baseRate: '₹14,000/reel',
-        er: '7.8% ER',
-        video: 'https://assets.mixkit.co/videos/3159/3159-1080.mp4',
-        instagramUrl: 'https://instagram.com/sneha_curates',
-        bio: 'Highlighting private Portuguese estates, heritage villas, and luxury tropical interiors.',
-    },
-    {
-        id: 'creator-3',
-        name: 'Rohan D\'Souza',
-        handle: '@wavesofgoa',
-        niche: 'Travel & Surf',
-        categorySlug: 'travel-adventure',
-        location: 'Morjim & Vagator',
-        followers: '62K',
-        rating: 4.8,
-        baseRate: '₹6,000/reel',
-        er: '8.1% ER',
-        video: 'https://assets.mixkit.co/videos/4692/4692-1080.mp4',
-        instagramUrl: 'https://instagram.com/wavesofgoa',
-        bio: 'Surf instructor, coastal filmmaker, and backwater trail guide across North Goa.',
-    },
-    {
-        id: 'creator-4',
-        name: 'Ananya Kamat',
-        handle: '@panjimfashionista',
-        niche: 'Fashion & Events',
-        categorySlug: 'fashion-lifestyle',
-        location: 'Panjim & Miramar',
-        followers: '94K',
-        rating: 4.9,
-        baseRate: '₹10,000/reel',
-        er: '5.9% ER',
-        video: 'https://assets.mixkit.co/videos/4206/4206-1080.mp4',
-        instagramUrl: 'https://instagram.com/panjimfashionista',
-        bio: 'Curating resort fashion, bohemian aesthetics, and luxury brand pop-ups in Panaji.',
-    },
-    {
-        id: 'creator-5',
-        name: 'Kabir Mehta',
-        handle: '@kabir.drone',
-        niche: 'Drone Cinema & Stays',
-        categorySlug: 'boutique-resorts',
-        location: 'Siolim & Chapora',
-        followers: '110K',
-        rating: 5.0,
-        baseRate: '₹12,500/reel',
-        er: '8.5% ER',
-        video: 'https://assets.mixkit.co/videos/51501/51501-1080.mp4',
-        instagramUrl: 'https://instagram.com/kabir.drone',
-        bio: 'DGCA-certified drone cinema capturing luxury villas, clifftops, and river backwaters.',
-    },
-    {
-        id: 'creator-6',
-        name: 'Zoya Alvares',
-        handle: '@zoya.sundowner',
-        niche: 'Nightlife & Music',
-        categorySlug: 'nightlife-music',
-        location: 'Vagator & Anjuna',
-        followers: '78K',
-        rating: 4.9,
-        baseRate: '₹9,000/reel',
-        er: '7.2% ER',
-        video: 'https://assets.mixkit.co/videos/830/830-1080.mp4',
-        instagramUrl: 'https://instagram.com/zoya.sundowner',
-        bio: 'Electronic music DJ, sunset festival curator, and music culture storyteller in Goa.',
-    },
-]
-
 export default function FeaturesThree() {
     const [activeSlug, setActiveSlug] = useState('all')
     const [mutedStates, setMutedStates] = useState<Record<string, boolean>>({})
-    const [creators, setCreators] = useState<Creator[]>(initialCreators)
-    const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null)
+    const [playingStates, setPlayingStates] = useState<Record<string, boolean>>({})
+    const [likedStates, setLikedStates] = useState<Record<string, boolean>>({})
+    const [likeCounts, setLikeCounts] = useState<Record<string, number>>({})
+    const [selectedReel, setSelectedReel] = useState<ReelItem | null>(null)
     const [bookingSuccess, setBookingSuccess] = useState(false)
+    const [isShuffling, setIsShuffling] = useState(false)
+    const [displayReels, setDisplayReels] = useState<ReelItem[]>(goaReelsPool.slice(0, 4))
+
     const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
+    // Randomize reels on mount and when category changes (client-side only)
     useEffect(() => {
-        // Fetch from the project API
-        const fetchCreators = async () => {
-            try {
-                const res = await fetch(`/api/creators${activeSlug !== 'all' ? `?niche=${activeSlug}` : ''}`)
-                const data = await res.json()
-                if (data.success && data.data && data.data.length > 0) {
-                    const mapped: Creator[] = data.data.map((c: CreatorItem) => {
-                        const existing = initialCreators.find((ic) => ic.id === c.id)
-                        return {
-                            id: c.id,
-                            name: c.name,
-                            handle: c.handle,
-                            niche: c.niche,
-                            categorySlug: c.nicheSlug,
-                            location: c.location,
-                            followers: c.followers,
-                            rating: c.rating,
-                            baseRate: c.baseRate,
-                            er: c.er,
-                            video: existing ? existing.video : 'https://assets.mixkit.co/videos/810/810-1080.mp4',
-                            instagramUrl: c.instagramUrl,
-                            bio: c.bio,
-                        }
-                    })
-                    setCreators(mapped)
-                }
-            } catch {
-                // Keep local initialCreators if offline
+        const timer = setTimeout(() => {
+            let pool = [...goaReelsPool]
+            if (activeSlug !== 'all') {
+                pool = pool.filter(
+                    (r) =>
+                        r.categorySlug.toLowerCase() === activeSlug.toLowerCase() ||
+                        r.category.toLowerCase().includes(activeSlug.replace('-', ' '))
+                )
             }
-        }
-        fetchCreators()
+            // Client-side shuffle on page mount / reload
+            const shuffled = [...pool].sort(() => Math.random() - 0.5)
+            setDisplayReels(shuffled.slice(0, Math.min(4, shuffled.length)))
+        }, 0)
+
+        return () => clearTimeout(timer)
     }, [activeSlug])
+
+    const handleShuffle = () => {
+        setIsShuffling(true)
+        let pool = [...goaReelsPool]
+        if (activeSlug !== 'all') {
+            pool = pool.filter(
+                (r) =>
+                    r.categorySlug.toLowerCase() === activeSlug.toLowerCase() ||
+                    r.category.toLowerCase().includes(activeSlug.replace('-', ' '))
+            )
+        }
+        const shuffled = [...pool].sort(() => Math.random() - 0.5)
+        setDisplayReels(shuffled.slice(0, Math.min(4, shuffled.length)))
+        setTimeout(() => setIsShuffling(false), 400)
+    }
 
     const toggleMute = (id: string) => {
         const video = videoRefs.current[id]
@@ -194,9 +96,32 @@ export default function FeaturesThree() {
         }))
     }
 
-    const filteredCreators = activeSlug === 'all'
-        ? creators
-        : creators.filter((c) => c.categorySlug === activeSlug || c.niche.toLowerCase().includes(activeSlug.replace('-', ' ')))
+    const togglePlay = (id: string) => {
+        const video = videoRefs.current[id]
+        if (!video) return
+        if (video.paused) {
+            video.play().catch(() => {})
+            setPlayingStates((prev) => ({ ...prev, [id]: true }))
+        } else {
+            video.pause()
+            setPlayingStates((prev) => ({ ...prev, [id]: false }))
+        }
+    }
+
+    const toggleLike = (id: string) => {
+        const isLiked = likedStates[id] ?? false
+        setLikedStates((prev) => ({ ...prev, [id]: !isLiked }))
+        setLikeCounts((prev) => ({
+            ...prev,
+            [id]: (prev[id] || 0) + (isLiked ? -1 : 1),
+        }))
+    }
+
+    const formatNumber = (num: number) => {
+        if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+        if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+        return num.toString()
+    }
 
     return (
         <section className="py-12 sm:py-16 scroll-mt-20" id="creators">
@@ -205,21 +130,38 @@ export default function FeaturesThree() {
                 {/* Section Header */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
                     <div>
-                        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1.5">
+                            <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>Live Instagram Collab Engine &bull; North &amp; South Goa</span>
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                             Explore by Goa Niches
                         </h2>
-                        <p className="text-muted-foreground text-sm sm:text-base mt-1">
-                            Filter by coastal specialization and community resonance
+                        <p className="text-muted-foreground text-xs sm:text-sm mt-1">
+                            Filter by coastal specialization and community resonance. Reels update dynamically on every visit.
                         </p>
                     </div>
 
-                    <Link
-                        href="#categories"
-                        className="text-emerald-700 dark:text-emerald-400 hover:underline text-sm font-semibold flex items-center gap-1 self-start sm:self-auto"
-                    >
-                        <span>View All Niches</span>
-                        <span>&rarr;</span>
-                    </Link>
+                    <div className="flex items-center gap-3 self-start sm:self-auto">
+                        {/* Dynamic Shuffle Reels Button */}
+                        <button
+                            type="button"
+                            onClick={handleShuffle}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted duration-150 cursor-pointer shadow-xs"
+                            title="Shuffle and pop up random reels"
+                        >
+                            <RefreshCw className={`size-3.5 text-emerald-600 dark:text-emerald-400 ${isShuffling ? 'animate-spin' : ''}`} />
+                            <span>Shuffle Reels</span>
+                        </button>
+
+                        <Link
+                            href="#categories"
+                            className="text-emerald-700 dark:text-emerald-400 hover:underline text-xs sm:text-sm font-semibold flex items-center gap-1"
+                        >
+                            <span>View All Niches</span>
+                            <span>&rarr;</span>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Filter Pills */}
@@ -244,117 +186,182 @@ export default function FeaturesThree() {
                     })}
                 </div>
 
-                {/* 4 Creator Cards Grid */}
+                {/* Instagram Reels Grid (Vertical Aspect Ratio, Clean Zero-Swimwear Content) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-                    {filteredCreators.map((creator) => {
-                        const isMuted = mutedStates[creator.id] ?? true
+                    {displayReels.map((reel) => {
+                        const isMuted = mutedStates[reel.id] ?? true
+                        const isPlaying = playingStates[reel.id] ?? true
+                        const isLiked = likedStates[reel.id] ?? false
+                        const currentLikes = likeCounts[reel.id] ?? reel.likes
 
                         return (
                             <Card
-                                key={creator.id}
-                                className="group relative overflow-hidden rounded-2xl border border-border/80 bg-card p-0 shadow-xs transition-all duration-300 hover:shadow-md hover:border-emerald-600/30 flex flex-col"
+                                key={reel.id}
+                                className="group relative overflow-hidden rounded-2xl border border-border/80 bg-zinc-950 p-0 shadow-lg transition-all duration-300 hover:shadow-2xl hover:border-emerald-500/40 flex flex-col justify-between"
                             >
-                                {/* Media Top (Video Reel) */}
-                                <div className="relative aspect-4/3 sm:aspect-square w-full overflow-hidden bg-black/90">
+                                {/* Media Viewport (Tall Instagram Reel Format) */}
+                                <div
+                                    className="relative aspect-[9/13] w-full overflow-hidden cursor-pointer select-none bg-black"
+                                    onClick={() => togglePlay(reel.id)}
+                                >
                                     <video
                                         ref={(el) => {
-                                            videoRefs.current[creator.id] = el
+                                            videoRefs.current[reel.id] = el
                                         }}
                                         autoPlay
                                         loop
                                         muted={isMuted}
                                         playsInline
                                         preload="metadata"
-                                        src={creator.video}
-                                        className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        src={reel.videoUrl}
+                                        className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
 
-                                    {/* Top Left: Verified Badge */}
-                                    <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 dark:bg-black/80 backdrop-blur-md px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-xs">
-                                        <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                                        <span>Verified</span>
-                                    </div>
+                                    {/* Gradients for Instagram text readability */}
+                                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/60" />
 
-                                    {/* Top Right: ER Badge */}
-                                    <div className="absolute top-3 right-3 rounded-full bg-emerald-700 text-white px-2.5 py-1 text-[11px] font-bold shadow-xs">
-                                        {creator.er}
-                                    </div>
+                                    {/* Play / Pause Animated Overlay when paused */}
+                                    {!isPlaying && (
+                                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40">
+                                            <div className="size-12 rounded-full bg-black/70 backdrop-blur-md text-white flex items-center justify-center border border-white/20">
+                                                <Play className="size-5 fill-white ml-0.5" />
+                                            </div>
+                                        </div>
+                                    )}
 
-                                    {/* Bottom Left: Location Tag */}
-                                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-lg bg-black/70 backdrop-blur-md px-2.5 py-1 text-[11px] font-medium text-white shadow-xs">
-                                        <MapPin className="size-3 text-amber-400" />
-                                        <span>{creator.location}</span>
-                                    </div>
-
-                                    {/* Bottom Right: Audio Mute/Unmute */}
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            toggleMute(creator.id)
-                                        }}
-                                        aria-label={isMuted ? 'Unmute video' : 'Mute video'}
-                                        className="absolute bottom-3 right-3 size-7 rounded-full bg-black/70 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/90 duration-150 cursor-pointer shadow-xs"
-                                    >
-                                        {isMuted ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5 text-emerald-400" />}
-                                    </button>
-                                </div>
-
-                                {/* Creator Details Body */}
-                                <div className="p-4 flex flex-col flex-1 justify-between gap-3">
-                                    <div className="space-y-1.5">
-                                        <div className="flex items-center justify-between">
-                                            <h3 className="text-base font-bold text-foreground">
-                                                {creator.name}
-                                            </h3>
-                                            <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
-                                                <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                                                <span>{creator.rating.toFixed(1)}</span>
+                                    {/* Top Bar: Creator Info & Sound Control */}
+                                    <div className="absolute top-3 inset-x-3 flex items-center justify-between z-10">
+                                        {/* Creator Avatar & Handle */}
+                                        <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-full py-1 pl-1 pr-3 border border-white/15">
+                                            <div className="p-[1.5px] rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600">
+                                                <div className="size-6 rounded-full bg-zinc-900 text-white flex items-center justify-center text-[10px] font-bold">
+                                                    {reel.creator.avatar}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-[11px] font-semibold text-white drop-shadow-xs">
+                                                    {reel.creator.handle}
+                                                </span>
+                                                <CheckCircle2 className="size-3 fill-emerald-500 text-black" />
                                             </div>
                                         </div>
 
-                                        <p className="text-xs text-muted-foreground">
-                                            {creator.handle}
+                                        {/* Audio Mute/Unmute */}
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                toggleMute(reel.id)
+                                            }}
+                                            aria-label={isMuted ? 'Unmute reel audio' : 'Mute reel audio'}
+                                            className="size-7 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/90 duration-150 cursor-pointer border border-white/20 shadow-xs"
+                                        >
+                                            {isMuted ? <VolumeX className="size-3.5 text-zinc-300" /> : <Volume2 className="size-3.5 text-emerald-400" />}
+                                        </button>
+                                    </div>
+
+                                    {/* Right Floating Action Rail (Instagram Reels Style) */}
+                                    <div
+                                        className="absolute right-3 bottom-20 flex flex-col items-center gap-3 z-10"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {/* Like Button */}
+                                        <button
+                                            type="button"
+                                            onClick={() => toggleLike(reel.id)}
+                                            className="flex flex-col items-center gap-1 group/btn cursor-pointer"
+                                            title="Like Reel"
+                                        >
+                                            <div className={`size-9 rounded-full bg-black/60 backdrop-blur-md border border-white/15 flex items-center justify-center transition-transform active:scale-125 ${isLiked ? 'text-rose-500' : 'text-white hover:text-rose-400'}`}>
+                                                <Heart className={`size-4.5 ${isLiked ? 'fill-rose-500' : ''}`} />
+                                            </div>
+                                            <span className="text-[10px] font-bold text-white drop-shadow-sm">
+                                                {formatNumber(currentLikes)}
+                                            </span>
+                                        </button>
+
+                                        {/* Collab / Comment Button */}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedReel(reel)
+                                                setBookingSuccess(false)
+                                            }}
+                                            className="flex flex-col items-center gap-1 group/btn cursor-pointer"
+                                            title="Book Creator / Collab"
+                                        >
+                                            <div className="size-9 rounded-full bg-black/60 backdrop-blur-md border border-white/15 flex items-center justify-center text-white hover:text-emerald-400 transition-colors">
+                                                <MessageCircle className="size-4.5" />
+                                            </div>
+                                            <span className="text-[10px] font-bold text-white drop-shadow-sm">
+                                                {reel.comments}
+                                            </span>
+                                        </button>
+
+                                        {/* Direct Instagram Link */}
+                                        <a
+                                            href={reel.instagramUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex flex-col items-center gap-1 group/btn cursor-pointer"
+                                            title="Open on Instagram"
+                                        >
+                                            <div className="size-9 rounded-full bg-black/60 backdrop-blur-md border border-white/15 flex items-center justify-center text-white hover:text-amber-400 transition-colors">
+                                                <Share2 className="size-4.5" />
+                                            </div>
+                                            <span className="text-[10px] font-semibold text-zinc-300">
+                                                IG
+                                            </span>
+                                        </a>
+                                    </div>
+
+                                    {/* Bottom Overlay: Title, Caption, Audio & Hashtags */}
+                                    <div className="absolute bottom-3 inset-x-3 pr-14 z-10 space-y-1.5 text-white">
+                                        {/* Location Tag */}
+                                        <div className="inline-flex items-center gap-1 rounded-md bg-black/60 backdrop-blur-md px-2 py-0.5 text-[10px] text-zinc-200 border border-white/10">
+                                            <MapPin className="size-2.5 text-amber-400" />
+                                            <span>{reel.location}</span>
+                                        </div>
+
+                                        {/* Reel Title */}
+                                        <h3 className="text-sm font-bold text-white line-clamp-1 drop-shadow-sm">
+                                            {reel.title}
+                                        </h3>
+
+                                        {/* Caption */}
+                                        <p className="text-[11px] text-zinc-300 line-clamp-2 leading-relaxed">
+                                            {reel.caption}
                                         </p>
 
-                                        <div className="pt-1">
-                                            <span className="inline-block rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground border border-border/50">
-                                                {creator.niche}
-                                            </span>
+                                        {/* Audio Track Ticker */}
+                                        <div className="flex items-center gap-1.5 text-[10px] text-zinc-300 pt-0.5">
+                                            <Music className="size-2.5 text-emerald-400 animate-bounce" />
+                                            <span className="truncate">{reel.audioTrack}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Bottom Card Footer: Rates & Booking */}
+                                <div className="p-3.5 bg-card border-t border-border/80 flex items-center justify-between gap-2">
+                                    <div>
+                                        <span className="text-[10px] font-medium text-muted-foreground uppercase">
+                                            Collab Rate
+                                        </span>
+                                        <div className="text-xs font-bold text-foreground">
+                                            {reel.creator.baseRate}
                                         </div>
                                     </div>
 
-                                    {/* Stats Grid */}
-                                    <div className="grid grid-cols-2 gap-2 rounded-lg bg-muted/40 p-2 text-center border border-border/50">
-                                        <div>
-                                            <div className="text-[10px] uppercase font-semibold text-muted-foreground">
-                                                Followers
-                                            </div>
-                                            <div className="text-xs font-bold text-foreground mt-0.5">
-                                                {creator.followers}
-                                            </div>
-                                        </div>
-                                        <div className="border-l border-border/50">
-                                            <div className="text-[10px] uppercase font-semibold text-muted-foreground">
-                                                Base Rate
-                                            </div>
-                                            <div className="text-xs font-bold text-foreground mt-0.5">
-                                                {creator.baseRate}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Action Button */}
                                     <Button
                                         onClick={() => {
-                                            setSelectedCreator(creator)
+                                            setSelectedReel(reel)
                                             setBookingSuccess(false)
                                         }}
-                                        variant="outline"
                                         size="sm"
-                                        className="w-full text-xs font-semibold rounded-lg bg-blue-50/50 hover:bg-blue-100/70 text-blue-900 dark:bg-blue-950/40 dark:text-blue-200 dark:hover:bg-blue-900/60 border-blue-200 dark:border-blue-800/60 cursor-pointer h-9"
+                                        className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-lg h-8 px-3 cursor-pointer shadow-xs"
                                     >
-                                        View Profile / Book
+                                        <span>Book Deal</span>
+                                        <span>&rarr;</span>
                                     </Button>
                                 </div>
                             </Card>
@@ -363,13 +370,13 @@ export default function FeaturesThree() {
                 </div>
             </div>
 
-            {/* Profile & Booking Modal */}
-            {selectedCreator && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+            {/* Instagram Reel Booking & Profile Modal */}
+            {selectedReel && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4">
                     <div className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
                         {/* Close button */}
                         <button
-                            onClick={() => setSelectedCreator(null)}
+                            onClick={() => setSelectedReel(null)}
                             className="absolute top-4 right-4 size-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer"
                             aria-label="Close modal"
                         >
@@ -378,50 +385,61 @@ export default function FeaturesThree() {
 
                         {/* Modal Header */}
                         <div className="flex items-start gap-3">
-                            <div className="size-12 rounded-xl bg-emerald-600/15 border border-emerald-600/30 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold text-lg shrink-0">
-                                {selectedCreator.name[0]}
+                            <div className="p-[2px] rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shrink-0">
+                                <div className="size-12 rounded-2xl bg-emerald-700 text-white flex items-center justify-center font-bold text-base">
+                                    {selectedReel.creator.avatar}
+                                </div>
                             </div>
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2">
-                                    <h3 className="text-lg font-bold text-foreground">{selectedCreator.name}</h3>
+                                    <h3 className="text-lg font-bold text-foreground">{selectedReel.creator.name}</h3>
                                     <span className="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[10px] font-semibold border border-emerald-500/20">
                                         Verified
                                     </span>
                                 </div>
-                                <p className="text-xs text-muted-foreground">{selectedCreator.handle} &bull; {selectedCreator.location}</p>
+                                <p className="text-xs text-muted-foreground">{selectedReel.creator.handle} &bull; {selectedReel.location}</p>
                             </div>
                         </div>
 
-                        {/* Bio & Details */}
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                            {selectedCreator.bio}
-                        </p>
+                        {/* Reel Preview Info */}
+                        <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-1.5">
+                            <div className="text-xs font-bold text-foreground">{selectedReel.title}</div>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{selectedReel.caption}</p>
+                            <div className="flex flex-wrap gap-1 pt-1">
+                                {selectedReel.hashtags.map((tag, i) => (
+                                    <span key={i} className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
 
+                        {/* Stats Bar */}
                         <div className="grid grid-cols-3 gap-2 rounded-xl bg-muted/40 p-3 text-center border border-border">
                             <div>
                                 <span className="text-[10px] text-muted-foreground uppercase font-semibold">Followers</span>
-                                <div className="text-sm font-bold text-foreground mt-0.5">{selectedCreator.followers}</div>
+                                <div className="text-sm font-bold text-foreground mt-0.5">{selectedReel.creator.followers}</div>
                             </div>
                             <div>
                                 <span className="text-[10px] text-muted-foreground uppercase font-semibold">Engagement</span>
-                                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{selectedCreator.er}</div>
+                                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{selectedReel.creator.er}</div>
                             </div>
                             <div>
                                 <span className="text-[10px] text-muted-foreground uppercase font-semibold">Base Rate</span>
-                                <div className="text-sm font-bold text-foreground mt-0.5">{selectedCreator.baseRate}</div>
+                                <div className="text-sm font-bold text-foreground mt-0.5">{selectedReel.creator.baseRate}</div>
                             </div>
                         </div>
 
                         {/* Instagram Link */}
                         <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-background">
-                            <div className="text-xs font-medium text-foreground">Verified Creator Instagram</div>
+                            <div className="text-xs font-medium text-foreground">Verified Instagram Reel</div>
                             <a
-                                href={selectedCreator.instagramUrl}
+                                href={selectedReel.instagramUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1"
                             >
-                                <span>Open Instagram</span>
+                                <span>Watch on Instagram</span>
                                 <ExternalLink className="size-3" />
                             </a>
                         </div>
@@ -430,9 +448,9 @@ export default function FeaturesThree() {
                         {bookingSuccess ? (
                             <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-4 text-center space-y-2">
                                 <CheckCircle2 className="size-6 text-emerald-600 dark:text-emerald-400 mx-auto" />
-                                <div className="text-sm font-bold text-foreground">Booking Request Sent</div>
+                                <div className="text-sm font-bold text-foreground">Collab Request Sent!</div>
                                 <p className="text-xs text-muted-foreground">
-                                    The brief has been submitted to {selectedCreator.name}. Payment is protected via escrow.
+                                    Brief delivered to {selectedReel.creator.handle}. Escrow milestones will activate upon creator acceptance.
                                 </p>
                             </div>
                         ) : (
@@ -444,17 +462,17 @@ export default function FeaturesThree() {
                                 className="space-y-3 pt-1"
                             >
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-foreground">Campaign Brief / Requirements</label>
+                                    <label className="text-xs font-medium text-foreground">Collab Brief / Deliverables</label>
                                     <textarea
                                         required
                                         rows={2}
-                                        placeholder="e.g. 1 Instagram Reel + 3 Stories showcasing our sunset tapas menu in Assagao"
-                                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                        defaultValue={`1 Dedicated Instagram Reel & 3 Stories for ${selectedReel.title}`}
+                                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="text-xs font-medium text-foreground">Target Date</label>
+                                        <label className="text-xs font-medium text-foreground">Shoot Date</label>
                                         <input
                                             type="date"
                                             required
@@ -463,11 +481,11 @@ export default function FeaturesThree() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-medium text-foreground">Offer Budget</label>
+                                        <label className="text-xs font-medium text-foreground">Escrow Amount</label>
                                         <input
                                             type="text"
                                             required
-                                            defaultValue={selectedCreator.baseRate.replace('/reel', '')}
+                                            defaultValue={selectedReel.creator.baseRate.replace('/reel', '')}
                                             className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
                                         />
                                     </div>
@@ -477,7 +495,7 @@ export default function FeaturesThree() {
                                     type="submit"
                                     className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium text-xs rounded-lg h-9 cursor-pointer mt-2"
                                 >
-                                    Send Booking Request via Escrow
+                                    Book {selectedReel.creator.name} via Escrow
                                 </Button>
                             </form>
                         )}

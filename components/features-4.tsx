@@ -29,7 +29,7 @@ export default function FeaturesFour() {
                             muted
                             playsInline
                             preload="metadata"
-                            src="https://assets.mixkit.co/videos/1564/1564-1080.mp4"
+                            src="https://assets.mixkit.co/videos/51500/51500-1080.mp4"
                             className="absolute inset-0 size-full object-cover opacity-55"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
@@ -68,7 +68,7 @@ export default function FeaturesFour() {
                             muted
                             playsInline
                             preload="metadata"
-                            src="https://assets.mixkit.co/videos/2168/2168-1080.mp4"
+                            src="https://assets.mixkit.co/videos/1191/1191-1080.mp4"
                             className="absolute inset-0 size-full object-cover opacity-50"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />

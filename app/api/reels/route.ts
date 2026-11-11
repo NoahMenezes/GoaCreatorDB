@@ -3,185 +3,329 @@ import { NextResponse } from 'next/server'
 export interface ReelItem {
     id: string
     title: string
+    caption: string
+    hashtags: string[]
+    audioTrack: string
     creator: {
         name: string
         handle: string
-        avatar?: string
+        avatar: string
         followers: string
         rating: number
         baseRate: string
         er: string
+        verified: boolean
     }
     category: string
     categorySlug: string
     location: string
     videoUrl: string
     instagramUrl: string
-    instagramEmbedUrl: string
     views: string
-    likes: string
+    likes: number
+    comments: number
 }
 
-export const goaReels: ReelItem[] = [
+export const goaReelsPool: ReelItem[] = [
     {
         id: 'reel-1',
-        title: 'Assagao Cafe Hopping & Artisanal Coffee',
+        title: 'Artisanal Latte Art & Sourdough Poee',
+        caption: 'Secret morning coffee hideouts in Assagao serving authentic wood-fired poee with cashew butter.',
+        hashtags: ['#GoaCafes', '#AssagaoEats', '#SpecialtyCoffee', '#NorthGoa'],
+        audioTrack: 'Original Audio · Goa Morning Acoustic',
         creator: {
             name: 'Rahul Naik',
             handle: '@rahul.goanbites',
+            avatar: 'RN',
             followers: '85K',
             rating: 4.9,
             baseRate: '₹8,500/reel',
-            er: '6.4%',
+            er: '6.4% ER',
+            verified: true,
         },
         category: 'Food & Dining',
         categorySlug: 'food-dining',
-        location: 'Panjim & Calangute',
+        location: 'Assagao & Calangute',
         videoUrl: 'https://assets.mixkit.co/videos/810/810-1080.mp4',
         instagramUrl: 'https://www.instagram.com/reel/C3zY5zAoP1K/',
-        instagramEmbedUrl: 'https://www.instagram.com/reel/C3zY5zAoP1K/embed',
         views: '1.2M',
-        likes: '84K',
+        likes: 84200,
+        comments: 640,
     },
     {
         id: 'reel-2',
-        title: 'Sunset Sundowner DJ Sessions at Vagator',
+        title: 'Sunset Electronic DJ Session at Vagator',
+        caption: 'Hypnotic sunset sundowner set behind the decks overlooking the dramatic Vagator cliffs.',
+        hashtags: ['#GoaNightlife', '#VagatorSunsets', '#DJSet', '#ElectronicGoa'],
+        audioTrack: 'Zoya Alvares · Deep Sunset Remix',
         creator: {
             name: 'Zoya Alvares',
             handle: '@zoya.sundowner',
+            avatar: 'ZA',
             followers: '78K',
             rating: 4.9,
             baseRate: '₹9,000/reel',
-            er: '7.2%',
+            er: '7.2% ER',
+            verified: true,
         },
         category: 'Nightlife & Music',
         categorySlug: 'nightlife-music',
-        location: 'Vagator & Anjuna',
+        location: 'Vagator Cliffs',
         videoUrl: 'https://assets.mixkit.co/videos/830/830-1080.mp4',
         instagramUrl: 'https://www.instagram.com/reel/C21Wq7MoP8L/',
-        instagramEmbedUrl: 'https://www.instagram.com/reel/C21Wq7MoP8L/embed',
         views: '2.4M',
-        likes: '160K',
+        likes: 164000,
+        comments: 1420,
     },
     {
         id: 'reel-3',
-        title: 'Fontainhas Heritage Walk & Latin Quarter',
+        title: 'Fontainhas Latin Quarter Architectural Tour',
+        caption: 'Walking through 18th-century Portuguese streets, indigo blue doors, and tiled balconies in Panaji.',
+        hashtags: ['#Fontainhas', '#HeritageGoa', '#PanjimDiaries', '#ColonialArchitecture'],
+        audioTrack: 'Latin Quarter Walks · Goa Heritage Strings',
         creator: {
             name: 'Ananya Kamat',
             handle: '@panjimfashionista',
+            avatar: 'AK',
             followers: '94K',
             rating: 4.9,
             baseRate: '₹10,000/reel',
-            er: '5.9%',
+            er: '5.9% ER',
+            verified: true,
         },
         category: 'Fashion & Lifestyle',
         categorySlug: 'fashion-lifestyle',
-        location: 'Panjim & Miramar',
+        location: 'Panjim & Latin Quarter',
         videoUrl: 'https://assets.mixkit.co/videos/4206/4206-1080.mp4',
         instagramUrl: 'https://www.instagram.com/reel/C14TxNBoP9M/',
-        instagramEmbedUrl: 'https://www.instagram.com/reel/C14TxNBoP9M/embed',
         views: '980K',
-        likes: '72K',
+        likes: 72500,
+        comments: 512,
     },
     {
         id: 'reel-4',
-        title: 'Speakeasy Craft Cocktail Tour Assagao',
+        title: 'Smoked Kokum Craft Cocktails & Mixology',
+        caption: 'Behind the speakeasy bar in Assagao creating botanical drinks infused with local feni & spices.',
+        hashtags: ['#GoaCocktails', '#AssagaoBar', '#CraftMixology', '#GoaNightlife'],
+        audioTrack: 'Original Audio · Speakeasy Jazz Nights',
         creator: {
             name: 'Rahul Naik',
             handle: '@rahul.goanbites',
+            avatar: 'RN',
             followers: '85K',
             rating: 4.9,
             baseRate: '₹8,500/reel',
-            er: '6.4%',
+            er: '6.4% ER',
+            verified: true,
         },
         category: 'Food & Dining',
         categorySlug: 'food-dining',
         location: 'Assagao',
         videoUrl: 'https://assets.mixkit.co/videos/4295/4295-1080.mp4',
         instagramUrl: 'https://www.instagram.com/reel/C45Pq1LoP3Q/',
-        instagramEmbedUrl: 'https://www.instagram.com/reel/C45Pq1LoP3Q/embed',
         views: '840K',
-        likes: '58K',
+        likes: 58900,
+        comments: 390,
     },
     {
         id: 'reel-5',
-        title: 'Luxury Villa Residency & Private Pool',
+        title: 'Restored Portuguese Villa Estate Walkthrough',
+        caption: 'A 200-year-old restored heritage mansion hidden amidst lush tropical palms in North Goa.',
+        hashtags: ['#GoaVillas', '#LuxuryResort', '#BoutiqueStay', '#HeritageArchitecture'],
+        audioTrack: 'Monsoon Echoes · Goa Acoustic',
         creator: {
             name: 'Sneha Fernandes',
             handle: '@sneha_curates',
+            avatar: 'SF',
             followers: '120K',
             rating: 5.0,
             baseRate: '₹14,000/reel',
-            er: '7.8%',
+            er: '7.8% ER',
+            verified: true,
         },
         category: 'Boutique Resorts',
         categorySlug: 'boutique-resorts',
-        location: 'Assagao',
-        videoUrl: 'https://assets.mixkit.co/videos/3159/3159-1080.mp4',
+        location: 'Assagao & Siolim',
+        videoUrl: 'https://assets.mixkit.co/videos/1191/1191-1080.mp4',
         instagramUrl: 'https://www.instagram.com/reel/C57Lk4PoP5R/',
-        instagramEmbedUrl: 'https://www.instagram.com/reel/C57Lk4PoP5R/embed',
         views: '1.6M',
-        likes: '112K',
+        likes: 112000,
+        comments: 890,
     },
     {
         id: 'reel-6',
-        title: 'Festival Lights & Sound at HillTop',
+        title: 'Underground Techno Stage & Laser Production',
+        caption: 'High-energy visuals and sound engineering at a premier Goa electronic music gathering.',
+        hashtags: ['#HillTopGoa', '#TechnoGoa', '#FestivalLife', '#NightlifeGoa'],
+        audioTrack: 'Goa Bass Collective · High Altitude',
         creator: {
             name: 'Zoya Alvares',
             handle: '@zoya.sundowner',
+            avatar: 'ZA',
             followers: '78K',
             rating: 4.9,
             baseRate: '₹9,000/reel',
-            er: '7.2%',
+            er: '7.2% ER',
+            verified: true,
         },
         category: 'Nightlife & Music',
         categorySlug: 'nightlife-music',
-        location: 'Vagator Cliffs',
+        location: 'Vagator & Anjuna',
         videoUrl: 'https://assets.mixkit.co/videos/4188/4188-1080.mp4',
         instagramUrl: 'https://www.instagram.com/reel/C39Mn2IoP7S/',
-        instagramEmbedUrl: 'https://www.instagram.com/reel/C39Mn2IoP7S/embed',
         views: '1.9M',
-        likes: '135K',
+        likes: 135000,
+        comments: 1100,
     },
     {
         id: 'reel-7',
-        title: 'Morjim Coastline & Surf Lifestyle',
+        title: 'Drone Cinema: Chapora River & Mangrove Kayak',
+        caption: 'Gliding through emerald backwaters at dawn where the river meets the Arabian Sea.',
+        hashtags: ['#ChaporaRiver', '#GoaBackwaters', '#DroneCinema', '#ExploreGoa'],
+        audioTrack: 'Kabir Mehta · Coastal Reverie',
         creator: {
-            name: 'Rohan D\'Souza',
-            handle: '@wavesofgoa',
-            followers: '62K',
-            rating: 4.8,
-            baseRate: '₹6,000/reel',
-            er: '8.1%',
-        },
-        category: 'Travel & Adventure',
-        categorySlug: 'travel-adventure',
-        location: 'Morjim & Vagator',
-        videoUrl: 'https://assets.mixkit.co/videos/4692/4692-1080.mp4',
-        instagramUrl: 'https://www.instagram.com/reel/C41Nk5IoP2T/',
-        instagramEmbedUrl: 'https://www.instagram.com/reel/C41Nk5IoP2T/embed',
-        views: '1.1M',
-        likes: '79K',
-    },
-    {
-        id: 'reel-8',
-        title: 'River Mangroves & Backwater Retreat',
-        creator: {
-            name: 'Rohan D\'Souza',
-            handle: '@wavesofgoa',
-            followers: '62K',
-            rating: 4.8,
-            baseRate: '₹6,000/reel',
-            er: '8.1%',
+            name: 'Kabir Mehta',
+            handle: '@kabir.drone',
+            avatar: 'KM',
+            followers: '110K',
+            rating: 5.0,
+            baseRate: '₹12,500/reel',
+            er: '8.5% ER',
+            verified: true,
         },
         category: 'Travel & Adventure',
         categorySlug: 'travel-adventure',
         location: 'Chapora & Siolim',
         videoUrl: 'https://assets.mixkit.co/videos/51501/51501-1080.mp4',
         instagramUrl: 'https://www.instagram.com/reel/C53Qz8IoP4U/',
-        instagramEmbedUrl: 'https://www.instagram.com/reel/C53Qz8IoP4U/embed',
         views: '870K',
-        likes: '64K',
+        likes: 64500,
+        comments: 480,
+    },
+    {
+        id: 'reel-8',
+        title: 'Turquoise Swells & Dramatic Sea Cliffs',
+        caption: 'Capturing monsoon ocean swells crashing against the ancient red laterite cliffs of North Goa.',
+        hashtags: ['#GoaCoast', '#MorjimSurf', '#OceanCinema', '#NatureGoa'],
+        audioTrack: 'Waves of Goa · Natural Ambient',
+        creator: {
+            name: 'Rohan D\'Souza',
+            handle: '@wavesofgoa',
+            avatar: 'RD',
+            followers: '62K',
+            rating: 4.8,
+            baseRate: '₹6,000/reel',
+            er: '8.1% ER',
+            verified: true,
+        },
+        category: 'Travel & Adventure',
+        categorySlug: 'travel-adventure',
+        location: 'Morjim & Vagator',
+        videoUrl: 'https://assets.mixkit.co/videos/4690/4690-1080.mp4',
+        instagramUrl: 'https://www.instagram.com/reel/C41Nk5IoP2T/',
+        views: '1.1M',
+        likes: 79200,
+        comments: 540,
+    },
+    {
+        id: 'reel-9',
+        title: 'Gourmet Kingfish Recheado & Microgreens Plating',
+        caption: 'Chef plating signature coastal delicacies with fiery recheado masala reduction in Calangute.',
+        hashtags: ['#GoaFoodie', '#CoastalCuisine', '#SeafoodGoa', '#ChefTable'],
+        audioTrack: 'Goa Culinary Beats · Acoustic Groove',
+        creator: {
+            name: 'Rahul Naik',
+            handle: '@rahul.goanbites',
+            avatar: 'RN',
+            followers: '85K',
+            rating: 4.9,
+            baseRate: '₹8,500/reel',
+            er: '6.4% ER',
+            verified: true,
+        },
+        category: 'Food & Dining',
+        categorySlug: 'food-dining',
+        location: 'Calangute & Candolim',
+        videoUrl: 'https://assets.mixkit.co/videos/1195/1195-1080.mp4',
+        instagramUrl: 'https://www.instagram.com/reel/C68Lk2QoP9A/',
+        views: '760K',
+        likes: 54100,
+        comments: 420,
+    },
+    {
+        id: 'reel-10',
+        title: 'Boutique Resort Verandah & Sunlit Courtyard',
+        caption: 'Early morning light filtering through terracotta roofs and private verandahs in Saligao.',
+        hashtags: ['#BoutiqueStay', '#ResortLife', '#GoaGetaway', '#VillaInteriors'],
+        audioTrack: 'Tropical Morning · Birds of Goa',
+        creator: {
+            name: 'Sneha Fernandes',
+            handle: '@sneha_curates',
+            avatar: 'SF',
+            followers: '120K',
+            rating: 5.0,
+            baseRate: '₹14,000/reel',
+            er: '7.8% ER',
+            verified: true,
+        },
+        category: 'Boutique Resorts',
+        categorySlug: 'boutique-resorts',
+        location: 'Saligao & Assagao',
+        videoUrl: 'https://assets.mixkit.co/videos/1193/1193-1080.mp4',
+        instagramUrl: 'https://www.instagram.com/reel/C71Xm3QoP8B/',
+        views: '1.3M',
+        likes: 92400,
+        comments: 730,
+    },
+    {
+        id: 'reel-11',
+        title: 'Artisan Espresso Roasting & Cupping Session',
+        caption: 'Behind the counter with certified baristas roasting South Indian arabica blends in Panaji.',
+        hashtags: ['#PanjimCafes', '#CoffeeLovers', '#ArtisanRoast', '#GoaBites'],
+        audioTrack: 'Coffee Shop Vibes · LoFi Chill',
+        creator: {
+            name: 'Rahul Naik',
+            handle: '@rahul.goanbites',
+            avatar: 'RN',
+            followers: '85K',
+            rating: 4.9,
+            baseRate: '₹8,500/reel',
+            er: '6.4% ER',
+            verified: true,
+        },
+        category: 'Food & Dining',
+        categorySlug: 'food-dining',
+        location: 'Panjim',
+        videoUrl: 'https://assets.mixkit.co/videos/811/811-1080.mp4',
+        instagramUrl: 'https://www.instagram.com/reel/C83Lm4QoP7C/',
+        views: '690K',
+        likes: 47800,
+        comments: 310,
+    },
+    {
+        id: 'reel-12',
+        title: 'DJ Mixer Deck Faders & Sunset Drop',
+        caption: 'Live audio transition as the sun slips below the horizon at an Anjuna cliffside lounge.',
+        hashtags: ['#AnjunaSunsets', '#DJBooth', '#LiveMix', '#GoaSoundtrack'],
+        audioTrack: 'Sunset Sessions Vol 4 · Anjuna Live',
+        creator: {
+            name: 'Zoya Alvares',
+            handle: '@zoya.sundowner',
+            avatar: 'ZA',
+            followers: '78K',
+            rating: 4.9,
+            baseRate: '₹9,000/reel',
+            er: '7.2% ER',
+            verified: true,
+        },
+        category: 'Nightlife & Music',
+        categorySlug: 'nightlife-music',
+        location: 'Anjuna & Vagator',
+        videoUrl: 'https://assets.mixkit.co/videos/829/829-1080.mp4',
+        instagramUrl: 'https://www.instagram.com/reel/C95Lm5QoP6D/',
+        views: '1.5M',
+        likes: 104000,
+        comments: 810,
     },
 ]
 
@@ -190,8 +334,9 @@ export async function GET(request: Request) {
     const category = searchParams.get('category')
     const location = searchParams.get('location')
     const search = searchParams.get('search')
+    const shuffle = searchParams.get('shuffle')
 
-    let filtered = [...goaReels]
+    let filtered = [...goaReelsPool]
 
     if (category && category !== 'all' && category !== 'All Niches') {
         filtered = filtered.filter(
@@ -212,6 +357,7 @@ export async function GET(request: Request) {
         filtered = filtered.filter(
             (r) =>
                 r.title.toLowerCase().includes(query) ||
+                r.caption.toLowerCase().includes(query) ||
                 r.creator.name.toLowerCase().includes(query) ||
                 r.creator.handle.toLowerCase().includes(query) ||
                 r.location.toLowerCase().includes(query) ||
@@ -219,11 +365,15 @@ export async function GET(request: Request) {
         )
     }
 
+    // Shuffle if requested or default randomized stream
+    if (shuffle === 'true' || shuffle === '1') {
+        filtered = filtered.sort(() => Math.random() - 0.5)
+    }
+
     return NextResponse.json({
         success: true,
         total: filtered.length,
-        source: 'Goa Creator Instagram Network API',
+        source: 'GoaConnect Verified Instagram Reels Engine',
         data: filtered,
     })
 }
-

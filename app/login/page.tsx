@@ -360,7 +360,7 @@ function LoginContent() {
                                 muted
                                 playsInline
                                 preload="metadata"
-                                src="https://assets.mixkit.co/videos/3159/3159-1080.mp4"
+                                src="https://assets.mixkit.co/videos/51500/51500-1080.mp4"
                                 className="size-full object-cover opacity-60"
                             />
                             {/* Warm Sunset Coastal Gradients matching Image 3/4 */}
