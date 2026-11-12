@@ -16,6 +16,22 @@ const menuItems = [
 
 export const HeroHeader = () => {
     const [menuState, setMenuState] = React.useState(false)
+    const [userRole, setUserRole] = React.useState<string | null>(null)
+    const [bizName, setBizName] = React.useState<string | null>(null)
+
+    React.useEffect(() => {
+        fetch('/api/auth/me')
+            .then((r) => r.json())
+            .then((data) => {
+                if (data.authenticated && data.user) {
+                    setUserRole(data.user.role)
+                    if (data.profile?.business_name) {
+                        setBizName(data.profile.business_name)
+                    }
+                }
+            })
+            .catch(() => {})
+    }, [])
 
     React.useEffect(() => {
         if (!menuState) return
@@ -104,17 +120,30 @@ export const HeroHeader = () => {
                                     <AnimatedThemeToggler className="flex size-9 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-muted duration-150 cursor-pointer" />
                                 </div>
 
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="cursor-pointer rounded-lg font-medium px-4 h-9 border-border hover:bg-muted"
-                                    nativeButton={false}
-                                    render={
-                                        <Link href="/login">
-                                            <span>Sign In</span>
-                                        </Link>
-                                    }
-                                />
+                                {userRole === 'business' ? (
+                                    <Button
+                                        size="sm"
+                                        className="bg-teal-700 hover:bg-teal-800 text-white font-semibold cursor-pointer rounded-lg px-4 h-9 shadow-xs"
+                                        nativeButton={false}
+                                        render={
+                                            <Link href="/portal">
+                                                <span>Business Portal</span>
+                                            </Link>
+                                        }
+                                    />
+                                ) : (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="cursor-pointer rounded-lg font-medium px-4 h-9 border-border hover:bg-muted"
+                                        nativeButton={false}
+                                        render={
+                                            <Link href="/login">
+                                                <span>Sign In</span>
+                                            </Link>
+                                        }
+                                    />
+                                )}
 
                                 <Button
                                     size="sm"
@@ -128,9 +157,10 @@ export const HeroHeader = () => {
                                 />
 
                                 <Link
-                                    href="/login"
-                                    aria-label="Creator Profile"
+                                    href={userRole === 'business' ? '/portal' : '/login'}
+                                    aria-label="Profile"
                                     className="hidden sm:flex size-9 items-center justify-center rounded-full bg-emerald-950 text-white dark:bg-emerald-900 border border-emerald-700/50 hover:opacity-90 duration-150"
+                                    title={bizName || 'Profile'}
                                 >
                                     <User className="size-4.5" />
                                 </Link>

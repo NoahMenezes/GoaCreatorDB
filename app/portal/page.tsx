@@ -85,7 +85,7 @@ export default function BusinessPortalPage() {
             <aside className="w-64 border-r border-border/70 bg-card/50 hidden md:flex flex-col justify-between p-4 shrink-0 sticky top-0 h-screen overflow-y-auto">
                 <div className="space-y-6">
                     {/* Brand Header */}
-                    <Link href="/" className="flex items-center gap-2.5 px-2 py-1">
+                    <Link href="/portal" className="flex items-center gap-2.5 px-2 py-1">
                         <div className="size-9 rounded-xl bg-teal-800 text-white flex items-center justify-center shadow-xs">
                             <Anchor className="size-5" />
                         </div>
@@ -162,9 +162,17 @@ export default function BusinessPortalPage() {
                         <Link href="/join" className="hover:text-foreground hover:underline">
                             Switch Role
                         </Link>
-                        <Link href="/" className="hover:text-foreground hover:underline">
+                        <button
+                            type="button"
+                            onClick={async () => {
+                                await fetch('/api/auth/logout', { method: 'POST' })
+                                // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+                                window.location.href = '/login'
+                            }}
+                            className="hover:text-foreground hover:underline cursor-pointer"
+                        >
                             Sign Out
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </aside>

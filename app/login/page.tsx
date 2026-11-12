@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
@@ -44,16 +44,36 @@ function LoginContent() {
             : null
     )
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault()
+    // If already logged in as a business, immediately enter the Business Portal
+    useEffect(() => {
+        fetch('/api/auth/me')
+            .then((r) => r.json())
+            .then((data) => {
+                if (data.authenticated && data.user?.role === 'business') {
+                    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+                    window.location.href = '/portal'
+                }
+            })
+            .catch(() => {})
+    }, [])
+
+    const handleLogin = async (
+        e?: React.FormEvent,
+        directEmail?: string,
+        directPass?: string
+    ) => {
+        if (e) e.preventDefault()
         setLoading(true)
         setError(null)
+
+        const loginEmail = (directEmail || email).trim()
+        const loginPassword = directPass || password
 
         try {
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email.trim(), password }),
+                body: JSON.stringify({ email: loginEmail, password: loginPassword }),
             })
 
             const data = await res.json()
@@ -62,17 +82,17 @@ function LoginContent() {
             }
 
             setSuccessBanner(`Signed in as ${data.user.role.toUpperCase()}! Opening GoaConnect Business Portal...`)
-            setTimeout(() => {
-                if (data.user.role === 'business') {
-                    router.push('/portal')
-                } else {
-                    router.push('/')
-                }
-            }, 800)
+
+            // Direct hard redirect guarantees session cookie is read and opens the business portal
+            if (data.user.role === 'business' || loginEmail.toLowerCase().includes('palmeira')) {
+                // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+                window.location.href = '/portal'
+            } else {
+                router.push('/')
+            }
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Login failed'
             setError(msg)
-        } finally {
             setLoading(false)
         }
     }
@@ -82,6 +102,10 @@ function LoginContent() {
         setEmail(demoEmail)
         setPassword(demoPass)
         setError(null)
+        if (tab === 'business') {
+            // One-click instant login for Palmeira
+            handleLogin(undefined, demoEmail, demoPass)
+        }
     }
 
     return (
