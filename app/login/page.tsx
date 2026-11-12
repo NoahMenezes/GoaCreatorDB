@@ -61,10 +61,14 @@ function LoginContent() {
                 throw new Error(data.error || 'Invalid email or password.')
             }
 
-            setSuccessBanner(`Signed in as ${data.user.role.toUpperCase()}! Redirecting to GoaConnect dashboard...`)
+            setSuccessBanner(`Signed in as ${data.user.role.toUpperCase()}! Opening GoaConnect Business Portal...`)
             setTimeout(() => {
-                router.push('/')
-            }, 1000)
+                if (data.user.role === 'business') {
+                    router.push('/portal')
+                } else {
+                    router.push('/')
+                }
+            }, 800)
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Login failed'
             setError(msg)
