@@ -101,7 +101,7 @@ export default function BusinessLayout({
                             const Icon = item.icon
                             const isActive =
                                 pathname === item.href ||
-                                (item.href === '/business/discover' && pathname === '/business/portal')
+                                (item.href === '/business/dashboard' && (pathname === '/business/portal' || pathname === '/business'))
 
                             return (
                                 <Link
@@ -363,3 +363,4 @@ export default function BusinessLayout({
         </div>
     )
 }
+

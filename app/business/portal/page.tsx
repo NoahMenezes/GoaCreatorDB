@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
 
 export default function BusinessPortalRedirect() {
-    redirect('/business/discover')
+    redirect('/business/dashboard')
 }
