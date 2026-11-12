@@ -71,7 +71,7 @@ export default function BusinessShortlistPage() {
 
     return (
         <main className="space-y-6">
-            <div className="border border-border/80 bg-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-none shadow-none">
+            <div className="border border-border bg-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
                         Shortlisted Goan Creators
@@ -82,12 +82,12 @@ export default function BusinessShortlistPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <span className="border border-border bg-muted/40 px-3 py-1.5 text-xs font-bold text-foreground rounded-none">
+                    <span className="border border-border bg-muted px-3 py-1.5 text-xs font-bold text-foreground">
                         {shortlist.length} Creators Saved
                     </span>
                     <Link
                         href="/business/discover"
-                        className="bg-[#0c4e40] hover:bg-[#08382e] text-white font-bold text-xs px-4 py-2 transition-colors rounded-none shadow-none"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs px-4 py-2 transition-colors"
                     >
                         + Discover More
                     </Link>
@@ -98,28 +98,28 @@ export default function BusinessShortlistPage() {
                 {shortlist.map((cr) => (
                     <div
                         key={cr.id}
-                        className="border border-border/80 bg-card p-5 space-y-4 rounded-none shadow-none hover:border-teal-700 transition-colors"
+                        className="border border-border bg-card p-5 space-y-4 hover:border-primary transition-colors"
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="size-14 overflow-hidden border border-border shrink-0 rounded-none relative">
+                                <div className="size-14 overflow-hidden border border-border shrink-0 relative">
                                     <Image
                                         unoptimized
                                         src={cr.avatar}
                                         alt={cr.name}
                                         width={100}
                                         height={100}
-                                        className="size-full object-cover rounded-none"
+                                        className="size-full object-cover"
                                     />
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-1.5">
                                         <h3 className="text-sm font-bold text-foreground">{cr.name}</h3>
-                                        <CheckCircle2 className="size-3.5 fill-sky-600 text-white" />
+                                        <CheckCircle2 className="size-3.5 fill-primary text-white" />
                                     </div>
                                     <span className="text-xs text-muted-foreground font-mono">{cr.handle}</span>
                                     <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                                        <MapPin className="size-3 text-teal-700 dark:text-teal-400" />
+                                        <MapPin className="size-3 text-primary" />
                                         <span>{cr.location} • {cr.niche}</span>
                                     </div>
                                 </div>
@@ -129,19 +129,19 @@ export default function BusinessShortlistPage() {
                                 type="button"
                                 onClick={() => handleRemove(cr.id)}
                                 aria-label="Remove from shortlist"
-                                className="size-8 border border-border flex items-center justify-center text-muted-foreground hover:text-rose-600 transition-colors rounded-none cursor-pointer"
+                                className="size-8 border border-border flex items-center justify-center text-muted-foreground hover:text-rose-600 transition-colors cursor-pointer"
                             >
                                 <Trash2 className="size-4" />
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-2 py-2 border-y border-border/60 text-center text-xs">
+                        <div className="grid grid-cols-3 gap-2 py-2 border-y border-border text-center text-xs">
                             <div>
                                 <span className="font-extrabold text-foreground block">{cr.followers}</span>
                                 <span className="text-[10px] text-muted-foreground uppercase font-bold">Followers</span>
                             </div>
                             <div>
-                                <span className="font-extrabold text-teal-700 dark:text-teal-400 block">{cr.engagement}</span>
+                                <span className="font-extrabold text-primary block">{cr.engagement}</span>
                                 <span className="text-[10px] text-muted-foreground uppercase font-bold">Eng. Rate</span>
                             </div>
                             <div>
@@ -153,14 +153,14 @@ export default function BusinessShortlistPage() {
                         <div className="flex items-center gap-2 pt-1">
                             <Link
                                 href="/business/profile"
-                                className="flex-1 border border-border bg-background hover:bg-muted text-foreground text-center font-bold text-xs py-2 transition-colors rounded-none"
+                                className="flex-1 border border-border bg-background hover:bg-muted text-foreground text-center font-bold text-xs py-2 transition-colors"
                             >
                                 View Profile &rarr;
                             </Link>
 
                             <Link
                                 href="/business/requests"
-                                className="flex-1 bg-[#0c4e40] hover:bg-[#08382e] text-white text-center font-bold text-xs py-2 transition-colors rounded-none shadow-none"
+                                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground text-center font-bold text-xs py-2 transition-colors"
                             >
                                 Send Collab Request
                             </Link>

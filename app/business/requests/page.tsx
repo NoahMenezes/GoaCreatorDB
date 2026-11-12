@@ -23,7 +23,7 @@ export default function BusinessRequestsPage() {
             offeredAmount: '₹14,000 + Weekend Brunch Table',
             status: 'accepted',
             statusLabel: 'Accepted • Shoot Scheduled',
-            statusBadge: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30',
+            statusBadge: 'border-primary text-primary bg-primary/10',
             date: 'Shoot: Oct 28, 2026',
             escrowStatus: '₹14,000 Locked in Escrow',
             deadline: 'Final Draft Due: Nov 02, 2026',
@@ -39,7 +39,7 @@ export default function BusinessRequestsPage() {
             offeredAmount: '₹6,500',
             status: 'pending',
             statusLabel: 'Pending Creator Response',
-            statusBadge: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30',
+            statusBadge: 'border-border text-muted-foreground bg-background',
             date: 'Requested: Yesterday',
             escrowStatus: '₹6,500 Reserved',
             deadline: 'Response Window: 24h Remaining',
@@ -55,7 +55,7 @@ export default function BusinessRequestsPage() {
             offeredAmount: '₹5,500 + Pastry Box',
             status: 'completed',
             statusLabel: 'Completed & Escrow Paid',
-            statusBadge: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/30',
+            statusBadge: 'border-primary text-primary bg-primary/10',
             date: 'Published: Oct 15, 2026',
             escrowStatus: '₹5,500 Released via Escrow',
             deadline: 'Result: 54,200 Organic Views • 8.4% ER',
@@ -71,7 +71,7 @@ export default function BusinessRequestsPage() {
             offeredAmount: '₹11,000 + Chef Tasting Table',
             status: 'completed',
             statusLabel: 'Completed & Escrow Paid',
-            statusBadge: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/30',
+            statusBadge: 'border-primary text-primary bg-primary/10',
             date: 'Published: Sep 29, 2026',
             escrowStatus: '₹11,000 Released via Escrow',
             deadline: 'Result: 72,100 Organic Views • 5.0 Rating Left',
@@ -85,8 +85,7 @@ export default function BusinessRequestsPage() {
 
     return (
         <main className="space-y-6">
-            {/* Header - Sharp */}
-            <div className="border border-border/80 bg-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-none shadow-none">
+            <div className="border border-border bg-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
                         Collaboration Requests &amp; Deals
@@ -98,15 +97,14 @@ export default function BusinessRequestsPage() {
 
                 <Link
                     href="/business/discover"
-                    className="bg-[#0c4e40] hover:bg-[#08382e] text-white font-bold text-xs px-4 py-2.5 flex items-center gap-1.5 transition-colors self-start md:self-auto rounded-none shadow-none"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs px-4 py-2.5 flex items-center gap-1.5 transition-colors self-start md:self-auto"
                 >
                     <Plus className="size-4" />
                     <span>New Booking Request</span>
                 </Link>
             </div>
 
-            {/* Filter Tabs - Sharp */}
-            <div className="flex flex-wrap gap-2 border-b border-border/80 pb-2">
+            <div className="flex flex-wrap gap-2 border-b border-border pb-2">
                 {[
                     { id: 'all', label: `All Requests (${requests.length})` },
                     { id: 'pending', label: 'Pending Response (1)' },
@@ -117,10 +115,10 @@ export default function BusinessRequestsPage() {
                         key={tab.id}
                         type="button"
                         onClick={() => setStatusFilter(tab.id as typeof statusFilter)}
-                        className={`px-4 py-2 text-xs font-bold transition-colors cursor-pointer rounded-none border ${
+                        className={`px-4 py-2 text-xs font-bold transition-colors cursor-pointer border ${
                             statusFilter === tab.id
-                                ? 'bg-[#0c4e40] text-white border-[#0c4e40]'
-                                : 'bg-card text-muted-foreground border-border/80 hover:text-foreground'
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-card text-muted-foreground border-border hover:text-foreground'
                         }`}
                     >
                         {tab.label}
@@ -128,24 +126,22 @@ export default function BusinessRequestsPage() {
                 ))}
             </div>
 
-            {/* Requests List - Sharp */}
             <div className="space-y-4">
                 {filteredRequests.map((req) => (
                     <div
                         key={req.id}
-                        className="border border-border/80 bg-card p-6 space-y-4 rounded-none shadow-none hover:border-teal-700 transition-colors"
+                        className="border border-border bg-card p-6 space-y-4 hover:border-primary transition-colors"
                     >
-                        {/* Top Meta Row */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
                             <div className="flex items-center gap-3">
-                                <div className="size-12 overflow-hidden border border-border shrink-0 rounded-none relative">
+                                <div className="size-12 overflow-hidden border border-border shrink-0 relative">
                                     <Image
                                         unoptimized
                                         src={req.avatar}
                                         alt={req.creator}
                                         width={80}
                                         height={80}
-                                        className="size-full object-cover rounded-none"
+                                        className="size-full object-cover"
                                     />
                                 </div>
                                 <div>
@@ -156,7 +152,7 @@ export default function BusinessRequestsPage() {
                                         <span className="text-xs text-muted-foreground font-mono">
                                             {req.handle}
                                         </span>
-                                        <span className="text-[10px] text-muted-foreground border border-border px-1.5 py-0.5 font-mono rounded-none">
+                                        <span className="text-[10px] text-muted-foreground border border-border px-1.5 py-0.5 font-mono">
                                             {req.id}
                                         </span>
                                     </div>
@@ -167,13 +163,12 @@ export default function BusinessRequestsPage() {
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <span className={`text-[10px] font-bold px-2.5 py-1 uppercase tracking-wider rounded-none ${req.statusBadge}`}>
+                                <span className={`text-[10px] font-bold px-2.5 py-1 uppercase tracking-wider ${req.statusBadge}`}>
                                     {req.statusLabel}
                                 </span>
                             </div>
                         </div>
 
-                        {/* Title & Deliverables */}
                         <div className="space-y-2">
                             <h4 className="text-sm font-bold text-foreground">
                                 {req.title}
@@ -182,7 +177,7 @@ export default function BusinessRequestsPage() {
                                 {req.deliverables.map((deliv) => (
                                     <span
                                         key={deliv}
-                                        className="border border-border bg-muted/40 px-2.5 py-1 text-muted-foreground font-medium rounded-none"
+                                        className="border border-border bg-muted px-2.5 py-1 text-muted-foreground font-medium"
                                     >
                                         ✓ {deliv}
                                     </span>
@@ -190,10 +185,9 @@ export default function BusinessRequestsPage() {
                             </div>
                         </div>
 
-                        {/* Escrow & Dates Footer */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-border/60 text-xs">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-border text-xs">
                             <div className="flex items-center gap-4 text-muted-foreground">
-                                <div className="flex items-center gap-1.5 font-semibold text-emerald-700 dark:text-emerald-400">
+                                <div className="flex items-center gap-1.5 font-semibold text-primary">
                                     <ShieldCheck className="size-4" />
                                     <span>{req.escrowStatus}</span>
                                 </div>
@@ -204,14 +198,14 @@ export default function BusinessRequestsPage() {
                             <div className="flex items-center gap-2">
                                 <Link
                                     href="/business/profile"
-                                    className="border border-border bg-background hover:bg-muted font-bold text-xs px-3 py-1.5 text-foreground transition-colors rounded-none"
+                                    className="border border-border bg-background hover:bg-muted font-bold text-xs px-3 py-1.5 text-foreground transition-colors"
                                 >
                                     Creator Profile &rarr;
                                 </Link>
                                 <button
                                     type="button"
                                     onClick={() => alert(`Direct escrow messaging opened for ${req.id}`)}
-                                    className="bg-[#0c4e40] hover:bg-[#08382e] text-white font-bold text-xs px-3 py-1.5 transition-colors cursor-pointer rounded-none"
+                                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs px-3 py-1.5 transition-colors cursor-pointer"
                                 >
                                     Campaign Chat
                                 </button>

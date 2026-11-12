@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Zilla_Slab, Rethink_Sans } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const zillaSlab = Zilla_Slab({
+  variable: "--font-display",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const rethinkSans = Rethink_Sans({
+  variable: "--font-body",
   subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "Goa Creator — Connect, Collab & Create in Goa",
+  title: "Goa Creator — Creator discovery and collaboration for Goan hospitality",
   description:
-    "The premier ecosystem connecting creators, luxury villas, and brands across Goa. Unlock verified shoot locations, brand deals, and creator residencies.",
+    "Goa Creator connects hotels, resorts, cafés and brands with verified Goan creators for reels, photo carousels and story campaigns. Escrow-held budgets, verified reviews, direct booking.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -23,7 +25,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      className={`${zillaSlab.variable} ${rethinkSans.variable} h-full antialiased`}
+      data-type="service"
+      data-radius="sharp"
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
