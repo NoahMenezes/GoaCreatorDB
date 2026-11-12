@@ -126,7 +126,7 @@ export const HeroHeader = () => {
                                         className="bg-teal-700 hover:bg-teal-800 text-white font-semibold cursor-pointer rounded-lg px-4 h-9 shadow-xs"
                                         nativeButton={false}
                                         render={
-                                            <Link href="/business/portal">
+                                            <Link href="/business/dashboard">
                                                 <span>Business Portal</span>
                                             </Link>
                                         }
@@ -157,7 +157,7 @@ export const HeroHeader = () => {
                                 />
 
                                 <Link
-                                    href={userRole === 'business' ? '/business/portal' : '/login'}
+                                    href={userRole === 'business' ? '/business/dashboard' : '/login'}
                                     aria-label="Profile"
                                     className="hidden sm:flex size-9 items-center justify-center rounded-full bg-emerald-950 text-white dark:bg-emerald-900 border border-emerald-700/50 hover:opacity-90 duration-150"
                                     title={bizName || 'Profile'}
