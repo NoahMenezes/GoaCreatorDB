@@ -107,11 +107,10 @@ export default function BusinessLayout({
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer rounded-none ${
-                                        isActive
-                                            ? 'bg-[#0c4e40] text-white shadow-none border-l-4 border-emerald-400'
-                                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                                    }`}
+                                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer rounded-none ${isActive
+                                        ? 'bg-[#0c4e40] text-white shadow-none border-l-4 border-emerald-400'
+                                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                        }`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <Icon className="size-4" />
@@ -119,11 +118,10 @@ export default function BusinessLayout({
                                     </div>
                                     {item.badge && (
                                         <span
-                                            className={`text-[10px] px-2 py-0.5 font-bold rounded-none ${
-                                                isActive
-                                                    ? 'bg-white/20 text-white'
-                                                    : 'bg-muted text-muted-foreground border border-border/60'
-                                            }`}
+                                            className={`text-[10px] px-2 py-0.5 font-bold rounded-none ${isActive
+                                                ? 'bg-white/20 text-white'
+                                                : 'bg-muted text-muted-foreground border border-border/60'
+                                                }`}
                                         >
                                             {item.badge}
                                         </span>
@@ -212,7 +210,9 @@ export default function BusinessLayout({
                             <span>New Request</span>
                         </button>
 
-                        <AnimatedThemeToggler className="flex size-9 items-center justify-center border border-border bg-background text-foreground hover:bg-muted duration-150 cursor-pointer rounded-none" />
+                        <AnimatedThemeToggler
+                            className="flex size-9 items-center justify-center border border-border bg-background text-foreground hover:bg-muted duration-150 cursor-pointer rounded-none"
+                        />
 
                         <div className="relative">
                             <button
@@ -225,20 +225,15 @@ export default function BusinessLayout({
                             <span className="absolute top-1.5 right-1.5 size-2 bg-emerald-500 rounded-none" />
                         </div>
 
-                        {/* User Avatar - Sharp Pointed Square */}
                         <div className="size-9 bg-teal-900 border border-teal-700 text-white flex items-center justify-center font-bold text-xs rounded-none">
                             CP
                         </div>
                     </div>
                 </header>
-
-                {/* PAGE INJECTION */}
                 <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto w-full">
                     {children}
                 </div>
             </div>
-
-            {/* SEND COLLAB REQUEST MODAL - SHARP CORNERS */}
             {isCollabModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4">
                     <div className="relative w-full max-w-xl border border-border bg-card p-6 sm:p-8 shadow-2xl space-y-6 rounded-none max-h-[90vh] overflow-y-auto">
@@ -266,7 +261,9 @@ export default function BusinessLayout({
 
                         {requestSuccess ? (
                             <div className="p-8 text-center space-y-3 bg-emerald-500/10 border border-emerald-500/30 rounded-none">
-                                <CheckCircle2 className="size-10 text-emerald-600 dark:text-emerald-400 mx-auto" />
+                                <CheckCircle2
+                                    className="size-10 text-emerald-600 dark:text-emerald-400 mx-auto"
+                                />
                                 <h3 className="text-base font-bold text-foreground">
                                     Collab Request Sent Successfully!
                                 </h3>
@@ -305,19 +302,17 @@ export default function BusinessLayout({
                                                 <div
                                                     key={deliv.id}
                                                     onClick={() => toggleAddon(deliv.id)}
-                                                    className={`border p-3 flex items-center justify-between text-xs cursor-pointer transition-colors rounded-none ${
-                                                        isChecked
-                                                            ? 'border-teal-700 bg-teal-50/20 dark:bg-teal-950/20'
-                                                            : 'border-border bg-background hover:bg-muted/40'
-                                                    }`}
+                                                    className={`border p-3 flex items-center justify-between text-xs cursor-pointer transition-colors rounded-none ${isChecked
+                                                        ? 'border-teal-700 bg-teal-50/20 dark:bg-teal-950/20'
+                                                        : 'border-border bg-background hover:bg-muted/40'
+                                                        }`}
                                                 >
                                                     <div className="flex items-center gap-2.5">
                                                         <div
-                                                            className={`size-4 border flex items-center justify-center rounded-none ${
-                                                                isChecked
-                                                                    ? 'bg-teal-700 border-teal-700 text-white'
-                                                                    : 'border-border'
-                                                            }`}
+                                                            className={`size-4 border flex items-center justify-center rounded-none ${isChecked
+                                                                ? 'bg-teal-700 border-teal-700 text-white'
+                                                                : 'border-border'
+                                                                }`}
                                                         >
                                                             {isChecked && <Check className="size-3 stroke-[3]" />}
                                                         </div>
