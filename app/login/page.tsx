@@ -51,7 +51,7 @@ function LoginContent() {
             .then((data) => {
                 if (data.authenticated && data.user?.role === 'business') {
                     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-                    window.location.href = '/portal'
+                    window.location.href = '/business/portal'
                 }
             })
             .catch(() => {})
@@ -86,7 +86,7 @@ function LoginContent() {
             // Direct hard redirect guarantees session cookie is read and opens the business portal
             if (data.user.role === 'business' || loginEmail.toLowerCase().includes('palmeira')) {
                 // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-                window.location.href = '/portal'
+                window.location.href = '/business/portal'
             } else {
                 router.push('/')
             }

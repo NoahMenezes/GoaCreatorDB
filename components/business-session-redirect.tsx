@@ -12,7 +12,7 @@ export function BusinessSessionRedirect() {
             .then((data) => {
                 if (data.authenticated && data.user?.role === 'business') {
                     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-                    window.location.href = '/portal'
+                    window.location.href = '/business/portal'
                 }
             })
             .catch(() => {})
