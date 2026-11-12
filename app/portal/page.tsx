@@ -38,9 +38,21 @@ import {
     Zap,
 } from 'lucide-react'
 import { AnimatedThemeToggler } from '@/registry/magicui/animated-theme-toggler'
+import {
+    DiscoverView,
+    DISCOVER_CREATORS,
+    type CreatorItem,
+} from '@/components/portal/discover-view'
 
 export default function BusinessPortalPage() {
-    const [activeNav, setActiveNav] = useState('profile')
+    const [activeNav, setActiveNav] = useState('discover')
+    const [selectedCreator, setSelectedCreator] = useState<CreatorItem>(DISCOVER_CREATORS[0])
+    const [shortlistedIds, setShortlistedIds] = useState<string[]>([
+        'cr-sneha',
+        'cr-rohan',
+        'cr-alisha',
+        'cr-keith',
+    ])
     const [isShortlisted, setIsShortlisted] = useState(true)
     const [isCollabModalOpen, setIsCollabModalOpen] = useState(false)
     const [selectedAddons, setSelectedAddons] = useState<string[]>(['reel'])
@@ -104,7 +116,7 @@ export default function BusinessPortalPage() {
                         {[
                             { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
                             { id: 'discover', label: 'Discover Creators', icon: Compass },
-                            { id: 'shortlist', label: 'Shortlist', icon: Bookmark, badge: '4' },
+                            { id: 'shortlist', label: 'Shortlist', icon: Bookmark, badge: shortlistedIds.length.toString() },
                             { id: 'requests', label: 'My Requests', icon: Send, badge: '2 active' },
                             { id: 'reviews', label: 'Reviews', icon: Star },
                             { id: 'profile', label: 'Profile', icon: Store },
@@ -241,8 +253,39 @@ export default function BusinessPortalPage() {
                     </div>
                 </header>
 
-                {/* CONTENT AREA: CREATOR PROFILE (BUSINESS VIEW) */}
-                <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto w-full">
+                {/* CONTENT AREA */}
+                <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto w-full">
+                    {activeNav === 'discover' ? (
+                        <DiscoverView
+                            onSelectCreator={(cr) => {
+                                setSelectedCreator(cr)
+                                setActiveNav('profile')
+                                if (typeof window !== 'undefined') {
+                                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                                }
+                            }}
+                            shortlistedIds={shortlistedIds}
+                            onToggleShortlist={(id) => {
+                                setShortlistedIds((prev) =>
+                                    prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+                                )
+                            }}
+                        />
+                    ) : (
+                        <main className="space-y-8">
+                            {/* Breadcrumb Back to Discover */}
+                            <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-border/60">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveNav('discover')}
+                                    className="inline-flex items-center gap-2 text-xs font-bold text-teal-700 dark:text-teal-400 hover:underline cursor-pointer"
+                                >
+                                    <span>&larr; Back to Discover Goan Creators</span>
+                                </button>
+                                <div className="text-xs text-muted-foreground">
+                                    Viewing creator profile for <span className="font-bold text-foreground">{selectedCreator.name}</span> ({selectedCreator.location})
+                                </div>
+                            </div>
                     {/* 1. CREATOR HERO / COVER CARD (Image 1) */}
                     <div className="rounded-3xl border border-border/80 bg-card overflow-hidden shadow-xs">
                         {/* Cover Photo / Courtyard View */}
@@ -973,7 +1016,9 @@ export default function BusinessPortalPage() {
                             </div>
                         </div>
                     </div>
-                </main>
+                        </main>
+                    )}
+                </div>
             </div>
 
             {/* SEND COLLAB REQUEST / BOOKING MODAL */}
