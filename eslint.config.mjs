@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Third-party skill tooling (not application source)
+    ".agents/skills/**",
+    // Ambient type declarations (any types are expected)
+    "types/**",
   ]),
 ]);
 

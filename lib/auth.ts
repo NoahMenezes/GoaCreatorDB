@@ -1,295 +1,287 @@
 import crypto from 'crypto'
-import fs from 'fs'
-import path from 'path'
+import bcrypt from 'bcrypt'
 import { cookies } from 'next/headers'
+import path from 'path'
+import fs from 'fs'
 import {
-    INITIAL_LOCATIONS,
-    INITIAL_CATEGORIES,
-    type UserRecord,
-    type BusinessRecord,
-    type CreatorRecord,
-    type LocationRecord,
-    type CategoryRecord,
-} from '@/lib/types'
+  initDb,
+  closeDb,
+  type SqlDatabase,
+  type UserRow,
+  type BusinessRow,
+  type CreatorRow,
+  type LocationRow,
+  type CategoryRow,
+} from '@/lib/db'
 
 export type {
-    UserRecord,
-    BusinessRecord,
-    CreatorRecord,
-    LocationRecord,
-    CategoryRecord,
-}
-export { INITIAL_LOCATIONS, INITIAL_CATEGORIES }
-
-interface DatabaseSchema {
-    users: UserRecord[]
-    locations: LocationRecord[]
-    categories: CategoryRecord[]
-    businesses: BusinessRecord[]
-    creators: CreatorRecord[]
-    sessions: Record<string, string> // token -> user_id
+  UserRow,
+  BusinessRow,
+  CreatorRow,
+  LocationRow,
+  CategoryRow,
 }
 
-const DB_PATH = path.join(process.cwd(), '.data', 'db.json')
+const DB_PATH = process.env.DATABASE_URL
+  ? process.env.DATABASE_URL.replace(/^sqlite:/, '')
+  : path.join(process.cwd(), '.data', 'goa-creator.db')
 
-function hashPassword(password: string): string {
-    return crypto.createHash('sha256').update(password + '_goaconnect_salt').digest('hex')
+const SALT_ROUNDS = 12
+
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, SALT_ROUNDS)
 }
 
-function loadDB(): DatabaseSchema {
-    try {
-        if (!fs.existsSync(path.dirname(DB_PATH))) {
-            fs.mkdirSync(path.dirname(DB_PATH), { recursive: true })
-        }
-        if (fs.existsSync(DB_PATH)) {
-            const raw = fs.readFileSync(DB_PATH, 'utf-8')
-            return JSON.parse(raw)
-        }
-    } catch {
-        // Fallback to initial
-    }
-
-    const initial: DatabaseSchema = {
-        users: [
-            {
-                user_id: 'usr-admin',
-                email: 'admin@goaconnect.in',
-                password_hash: hashPassword('admin123'),
-                role: 'admin',
-                is_verified: true,
-                is_active: true,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-            },
-            {
-                user_id: 'usr-rahul',
-                email: 'rahul@goaconnect.in',
-                password_hash: hashPassword('creator123'),
-                role: 'creator',
-                is_verified: true,
-                is_active: true,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-            },
-            {
-                user_id: 'usr-palmeira',
-                email: 'palmeira@goaconnect.in',
-                password_hash: hashPassword('business123'),
-                role: 'business',
-                is_verified: true,
-                is_active: true,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-            },
-        ],
-        locations: INITIAL_LOCATIONS,
-        categories: INITIAL_CATEGORIES,
-        businesses: [
-            {
-                business_id: 'biz-1',
-                user_id: 'usr-palmeira',
-                location_id: 'loc-2',
-                business_name: 'Café Palmeira',
-                industry: 'Food & Dining',
-                description: 'Authentic Portuguese-Goan bistro in Calangute with artisan sourdough & coffee.',
-                contact_phone: '+91 98221 44556',
-                instagram_handle: '@cafepalmeiragoa',
-            },
-        ],
-        creators: [
-            {
-                creator_id: 'cr-1',
-                user_id: 'usr-rahul',
-                location_id: 'loc-1',
-                full_name: 'Rahul Naik',
-                bio: 'Documenting Goan tavernas, Portuguese bakeries, and coastal culinary bars.',
-                accepts_barter: true,
-                min_paid_rate: 8500,
-                created_at: new Date().toISOString(),
-            },
-        ],
-        sessions: {},
-    }
-
-    try {
-        fs.writeFileSync(DB_PATH, JSON.stringify(initial, null, 2))
-    } catch {
-        // Ignore write failures in read-only sandbox
-    }
-
-    return initial
-}
-
-function saveDB(db: DatabaseSchema) {
-    try {
-        if (!fs.existsSync(path.dirname(DB_PATH))) {
-            fs.mkdirSync(path.dirname(DB_PATH), { recursive: true })
-        }
-        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2))
-    } catch {
-        // Ignore write failure
-    }
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash)
 }
 
 export async function registerUser(data: {
-    email: string
-    password: string
-    role: 'business' | 'creator'
-    businessData?: {
-        business_name: string
-        industry: string
-        location_id: string
-        description?: string
-        contact_phone: string
-        instagram_handle: string
-        website_url?: string
-    }
-    creatorData?: {
-        full_name: string
-        location_id: string
-        bio?: string
-        category_id?: string
-        accepts_barter: boolean
-        min_paid_rate: number
-        instagram_handle?: string
-    }
+  email: string
+  password: string
+  role: 'business' | 'creator'
+  businessData?: {
+    business_name: string
+    industry: string
+    location_id: string
+    description?: string
+    contact_phone: string
+    instagram_handle: string
+    website_url?: string
+  }
+  creatorData?: {
+    full_name: string
+    location_id: string
+    bio?: string
+    category_id?: string
+    accepts_barter: boolean
+    min_paid_rate: number
+    instagram_handle?: string
+  }
 }) {
-    const db = loadDB()
-    const emailLower = data.email.trim().toLowerCase()
+  if (data.password.length < 6) {
+    throw new Error('Password must be at least 6 characters.')
+  }
 
-    const existing = db.users.find((u) => u.email.toLowerCase() === emailLower)
-    if (existing) {
-        throw new Error('An account with this email already exists.')
-    }
+  const db = await initDb()
+  const emailLower = data.email.trim().toLowerCase()
 
-    const userId = `usr-${crypto.randomUUID().slice(0, 8)}`
-    const now = new Date().toISOString()
+  const existing = db
+    .query('SELECT COUNT(*) as cnt FROM users WHERE email = ?')
+    .get(emailLower) as { cnt: number } | null
 
-    const newUser: UserRecord = {
-        user_id: userId,
-        email: emailLower,
-        password_hash: hashPassword(data.password),
-        role: data.role,
-        is_verified: false,
-        is_active: true,
-        created_at: now,
-        updated_at: now,
-    }
+  if (existing && existing.cnt > 0) {
+    closeDb()
+    throw new Error('An account with this email already exists.')
+  }
 
-    db.users.push(newUser)
+  const userId = `usr-${crypto.randomUUID().slice(0, 8)}`
+  const now = new Date().toISOString()
+  const passwordHash = await hashPassword(data.password)
 
-    if (data.role === 'business' && data.businessData) {
-        const biz: BusinessRecord = {
-            business_id: `biz-${crypto.randomUUID().slice(0, 8)}`,
-            user_id: userId,
-            location_id: data.businessData.location_id,
-            business_name: data.businessData.business_name,
-            industry: data.businessData.industry,
-            description: data.businessData.description || '',
-            contact_phone: data.businessData.contact_phone,
-            instagram_handle: data.businessData.instagram_handle,
-            website_url: data.businessData.website_url || '',
-        }
-        db.businesses.push(biz)
-    } else if (data.role === 'creator' && data.creatorData) {
-        const cr: CreatorRecord = {
-            creator_id: `cr-${crypto.randomUUID().slice(0, 8)}`,
-            user_id: userId,
-            location_id: data.creatorData.location_id,
-            full_name: data.creatorData.full_name,
-            bio: data.creatorData.bio || '',
-            accepts_barter: Boolean(data.creatorData.accepts_barter),
-            min_paid_rate: Number(data.creatorData.min_paid_rate) || 0,
-            created_at: now,
-        }
-        db.creators.push(cr)
-    }
+  const insertUser = db.query(
+    `INSERT INTO users (user_id, email, password_hash, role, is_verified, is_active, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  )
+  insertUser.run(
+    userId,
+    emailLower,
+    passwordHash,
+    data.role,
+    0,
+    1,
+    now,
+    now
+  )
 
-    // Generate session token
-    const token = crypto.randomUUID()
-    db.sessions[token] = userId
-    saveDB(db)
+  if (data.role === 'business' && data.businessData) {
+    const insertBiz = db.query(
+      `INSERT INTO businesses (business_id, user_id, location_id, business_name, industry, description, contact_phone, instagram_handle, website_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    insertBiz.run(
+      `biz-${crypto.randomUUID().slice(0, 8)}`,
+      userId,
+      data.businessData.location_id,
+      data.businessData.business_name,
+      data.businessData.industry,
+      data.businessData.description || '',
+      data.businessData.contact_phone,
+      data.businessData.instagram_handle,
+      data.businessData.website_url || ''
+    )
+  } else if (data.role === 'creator' && data.creatorData) {
+    const insertCr = db.query(
+      `INSERT INTO creators (creator_id, user_id, location_id, full_name, bio, accepts_barter, min_paid_rate)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    )
+    insertCr.run(
+      `cr-${crypto.randomUUID().slice(0, 8)}`,
+      userId,
+      data.creatorData.location_id,
+      data.creatorData.full_name,
+      data.creatorData.bio || '',
+      data.creatorData.accepts_barter ? 1 : 0,
+      Number(data.creatorData.min_paid_rate) || 0
+    )
+  }
 
-    return { user: sanitizeUser(newUser), token }
+  // Generate session token
+  const token = crypto.randomUUID()
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  const insertSession = db.query(
+    'INSERT INTO sessions (token, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)'
+  )
+  insertSession.run(token, userId, now, expiresAt)
+
+  saveAndCloseDb(db)
+
+  return {
+    user: sanitizeUser({
+      user_id: userId,
+      email: emailLower,
+      password_hash: passwordHash,
+      role: data.role,
+      is_verified: 0,
+      is_active: 1,
+      created_at: now,
+      updated_at: now,
+    }),
+    token,
+  }
 }
 
 export async function loginUser(email: string, password: string) {
-    const db = loadDB()
-    const emailLower = email.trim().toLowerCase()
-    const hash = hashPassword(password)
+  const db = await initDb()
+  const emailLower = email.trim().toLowerCase()
 
-    let user = db.users.find(
-        (u) => u.email.toLowerCase() === emailLower && u.password_hash === hash
-    )
+  const user = db
+    .query('SELECT * FROM users WHERE email = ?')
+    .get(emailLower) as UserRow | null
 
-    // Flexible login for Café Palmeira demo (palmeira@goaconnect.in, contact@cafepalmeira.com, gm@cafepalmeira.com, or palmeira)
-    if (!user && (emailLower.includes('palmeira') || emailLower.includes('cafepalmeira'))) {
-        user = db.users.find((u) => u.user_id === 'usr-palmeira')
-    }
+  if (!user) {
+    saveAndCloseDb(db)
+    throw new Error('Invalid email or password.')
+  }
 
-    if (!user) {
-        throw new Error('Invalid email or password.')
-    }
+  const passwordValid = await verifyPassword(password, user.password_hash)
+  if (!passwordValid) {
+    saveAndCloseDb(db)
+    throw new Error('Invalid email or password.')
+  }
 
-    if (!user.is_active) {
-        throw new Error('Your account has been deactivated. Please contact support.')
-    }
+  if (!user.is_active) {
+    saveAndCloseDb(db)
+    throw new Error('Your account has been deactivated. Please contact support.')
+  }
 
-    const token = crypto.randomUUID()
-    db.sessions[token] = user.user_id
-    saveDB(db)
+  const token = crypto.randomUUID()
+  const now = new Date().toISOString()
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  const insertSession = db.query(
+    'INSERT INTO sessions (token, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)'
+  )
+  insertSession.run(token, user.user_id, now, expiresAt)
 
-    let profile: BusinessRecord | CreatorRecord | null = null
-    if (user.role === 'business') {
-        profile = db.businesses.find((b) => b.user_id === user.user_id) || null
-    } else if (user.role === 'creator') {
-        profile = db.creators.find((c) => c.user_id === user.user_id) || null
-    }
+  let profile: BusinessRow | CreatorRow | null = null
+  if (user.role === 'business') {
+    profile = (db
+      .query('SELECT * FROM businesses WHERE user_id = ?')
+      .get(user.user_id) as BusinessRow | null) ?? null
+  } else if (user.role === 'creator') {
+    profile = (db
+      .query('SELECT * FROM creators WHERE user_id = ?')
+      .get(user.user_id) as CreatorRow | null) ?? null
+  }
 
-    return {
-        user: sanitizeUser(user),
-        profile,
-        token,
-    }
+  saveAndCloseDb(db)
+
+  return {
+    user: sanitizeUser(user),
+    profile,
+    token,
+  }
 }
 
 export async function getSessionUser() {
-    const cookieStore = await cookies()
-    const token = cookieStore.get('goa_session')?.value
-    if (!token) return null
+  const cookieStore = await cookies()
+  const token = cookieStore.get('goa_session')?.value
+  if (!token) return null
 
-    const db = loadDB()
-    const userId = db.sessions[token]
-    if (!userId) return null
+  const db = await initDb()
+  const session = db
+    .query(
+      'SELECT * FROM sessions WHERE token = ? AND expires_at > ?'
+    )
+    .get(token, new Date().toISOString()) as { user_id: string } | null
 
-    const user = db.users.find((u) => u.user_id === userId)
-    if (!user || !user.is_active) return null
+  if (!session) {
+    saveAndCloseDb(db)
+    return null
+  }
 
-    let profile: BusinessRecord | CreatorRecord | null = null
-    if (user.role === 'business') {
-        profile = db.businesses.find((b) => b.user_id === user.user_id) || null
-    } else if (user.role === 'creator') {
-        profile = db.creators.find((c) => c.user_id === user.user_id) || null
-    }
+  const user = db
+    .query('SELECT * FROM users WHERE user_id = ? AND is_active = 1')
+    .get(session.user_id) as UserRow | null
 
-    return {
-        user: sanitizeUser(user),
-        profile,
-    }
+  if (!user) {
+    saveAndCloseDb(db)
+    return null
+  }
+
+  let profile: BusinessRow | CreatorRow | null = null
+  if (user.role === 'business') {
+    profile = (db
+      .query('SELECT * FROM businesses WHERE user_id = ?')
+      .get(user.user_id) as BusinessRow | null) ?? null
+  } else if (user.role === 'creator') {
+    profile = (db
+      .query('SELECT * FROM creators WHERE user_id = ?')
+      .get(user.user_id) as CreatorRow | null) ?? null
+  }
+
+  saveAndCloseDb(db)
+
+  return {
+    user: sanitizeUser(user),
+    profile,
+  }
 }
 
 export async function logoutUser() {
-    const cookieStore = await cookies()
-    const token = cookieStore.get('goa_session')?.value
-    if (token) {
-        const db = loadDB()
-        delete db.sessions[token]
-        saveDB(db)
-    }
+  const cookieStore = await cookies()
+  const token = cookieStore.get('goa_session')?.value
+  if (token) {
+    const db = await initDb()
+    db.query('DELETE FROM sessions WHERE token = ?').run(token)
+    saveAndCloseDb(db)
+  }
 }
 
-function sanitizeUser(user: UserRecord) {
-    const { password_hash, ...rest } = user
-    void password_hash
-    return rest
+function saveAndCloseDb(db: SqlDatabase) {
+  try {
+    saveDbFile(db)
+  } catch {
+    // Ignore save errors
+  }
+  closeDb()
+}
+
+function sanitizeUser(user: UserRow) {
+  const { password_hash, ...rest } = user
+  void password_hash
+  return rest
+}
+
+function saveDbFile(db: SqlDatabase) {
+  try {
+    const data = db.export()
+    const dbDir = path.dirname(DB_PATH)
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true })
+    }
+    fs.writeFileSync(DB_PATH, Buffer.from(data))
+  } catch {
+    // Ignore save errors
+  }
 }

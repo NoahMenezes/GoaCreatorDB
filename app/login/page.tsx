@@ -45,19 +45,19 @@ function LoginContent() {
             : null
     )
 
-    // If already logged in as a business, immediately enter the Business Portal
+    // If already logged in, redirect to the appropriate dashboard
     useEffect(() => {
         fetch('/api/auth/me')
             .then((r) => r.json())
             .then((data) => {
                 if (data.authenticated && data.user?.role === 'business') {
-                    window.location.href = '/business/dashboard'
+                    router.push('/business/dashboard')
                 } else if (data.authenticated && data.user?.role === 'creator') {
-                    window.location.href = '/creator/dashboard'
+                    router.push('/creator/dashboard')
                 }
             })
             .catch(() => {})
-    }, [])
+    }, [router])
 
     const handleLogin = async (
         e?: React.FormEvent,
@@ -85,11 +85,11 @@ function LoginContent() {
 
             setSuccessBanner(`Signed in as ${data.user.role.toUpperCase()}! Opening GoaConnect...`)
 
-            // Direct hard redirect guarantees session cookie is read and opens the correct portal
+            // Navigate to the correct dashboard based on role
             if (data.user.role === 'business' || loginEmail.toLowerCase().includes('palmeira')) {
-                window.location.href = '/business/dashboard'
+                router.push('/business/dashboard')
             } else if (data.user.role === 'creator' || loginEmail.toLowerCase().includes('rahul')) {
-                window.location.href = '/creator/dashboard'
+                router.push('/creator/dashboard')
             } else {
                 router.push('/creator/dashboard')
             }

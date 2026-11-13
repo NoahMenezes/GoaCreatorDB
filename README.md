@@ -10,9 +10,9 @@ Goa Creator is a full-stack web platform built for storytellers, filmmakers, lif
 
 - **Curated Shoot Locations**: Discover pre-vetted private Portuguese heritage villas in Fontainhas, Assagao boutique stays, and cliffside sunset viewpoints with verified filming permits.
 - **Direct Brand Partnerships**: Connect creators directly with luxury resorts, beach clubs, and lifestyle brands without intermediary agencies.
-- **Escrow Payouts**: Guaranteed milestone-based compensation deposited securely and released within 24 hours of deliverable approval.
+- **Collaboration Requests**: Businesses can send collaboration requests to creators with deliverables and pricing.
+- **Creator Portfolios**: Creators maintain public profiles with rates, deliverables, and verified reviews.
 - **Animated Theme Toggling**: Seamless dark and light mode switching powered by Magic UI's View Transitions API.
-- **Real-Time Media Kits**: Dynamic analytics displaying verified Goa reach, impressions, and engagement metrics.
 - **Next.js 16 & React 19 Architecture**: Partial Prerendering (PPR), Turbopack compilation, and React Server Component caching for ultra-fast performance.
 
 ---
@@ -29,6 +29,8 @@ Goa Creator is a full-stack web platform built for storytellers, filmmakers, lif
   - [Lucide React](https://lucide.dev) icons
 - **Runtime & Package Manager**: [Bun](https://bun.sh)
 - **Language**: TypeScript 5 (Strict mode)
+- **Database**: SQLite (via [sql.js](https://sql.js.org/)) with migration from JSON
+- **Authentication**: Session-based with bcrypt password hashing
 
 ---
 
@@ -47,6 +49,36 @@ git clone https://github.com/NoahMenezes/GoaCreatorDB.git
 cd GoaCreatorDB
 bun install
 ```
+
+### Environment Setup
+
+Copy `.env.example` to `.env` and configure:
+
+```bash
+cp .env.example .env
+```
+
+Required environment variables:
+
+| Variable | Purpose | Required |
+|----------|---------|----------|
+| `DATABASE_URL` | SQLite database path (optional, defaults to `.data/goa-creator.db`) | No |
+| `AUTH_SECRET` | Secret for session signing | Yes (production) |
+| `NEXT_PUBLIC_APP_URL` | Application base URL | Yes (production) |
+| `NODE_ENV` | Environment (`development` or `production`) | No |
+
+### Database Setup
+
+The application uses SQLite for persistent storage. On first run, existing data from `.data/db.json` is automatically migrated to SQLite.
+
+To initialize the database:
+
+```bash
+bun run scripts/migrate.ts
+bun run scripts/seed.ts
+```
+
+The migration script preserves existing JSON data as `.data/db.json.bak`.
 
 ### Development Server
 
@@ -75,6 +107,21 @@ Run ESLint strict checks:
 bun run lint
 ```
 
+### Testing
+
+Run the test suite:
+
+```bash
+# Unit tests
+bun run test:unit
+
+# API integration tests
+bun run test:api
+
+# All tests
+bun run test
+```
+
 ---
 
 ## Project Structure
@@ -82,32 +129,66 @@ bun run lint
 ```
 GoaCreatorDB/
 ├── app/
-│   ├── favicon.ico
-│   ├── globals.css              # Tailwind v4 theme tokens & View Transitions
-│   ├── layout.tsx               # Root layout with Geist fonts & dark mode support
-│   └── page.tsx                 # Main Goa Creator landing page
-├── components/
-│   ├── hero-section-2.tsx       # Cinematic interactive campaign player with live milestone stats
-│   ├── hero-section-2-header.tsx# Fixed navbar with AnimatedThemeToggler & mobile drawer
-│   ├── features-3.tsx           # Vertical 9:16 creator reels & brand collabs showcase
-│   ├── features-4.tsx           # Shoot locations & creator residencies video showcase
-│   ├── content-2.tsx            # Live production & milestone escrow workflow
-│   ├── stats-2.tsx              # Platform metrics & revenue counter
-│   ├── pricing-2.tsx            # Explorer, Creator Pro & Brand pricing tiers
-│   ├── faqs-1.tsx               # Interactive FAQ accordion
-│   ├── call-to-action-2.tsx     # Final onboarding CTA
-│   ├── footer-2.tsx             # Luxury brand footer & community links
-│   ├── logo.tsx                 # Bespoke Goa Creator aperture & horizon brand identity
-│   └── ui/                      # Base UI & Shadcn primitives (buttons, cards, toggler)
-├── hooks/
-│   └── use-media.ts             # useSyncExternalStore responsive media query hook
-├── public/
-│   └── *.svg                    # Brand and vector assets
-├── components.json              # Shadcn & Tailark OSS registry config
-├── next.config.ts               # Next.js 16 configuration (PPR, Unsplash remote patterns)
-├── package.json                 # Project dependencies & scripts
-└── tsconfig.json                # Strict TypeScript configuration
+│   ├── api/
+│   │   ├── auth/     # Login, logout, me, register
+│   │   ├── creators/ # Creator discovery API
+│   │   └── reels/    # Reels showcase API
+│   ├── business/     # Business portal routes
+│   ├── creator/      # Creator portal routes
+│   ├── login/        # Sign-in page
+│   ├── register/     # Registration pages
+│   ├── join/         # Role selection
+│   ├── dashboard/    # Dashboard redirect
+│   ├── portal/       # Portal redirect
+│   ├── layout.tsx    # Root layout
+│   └── page.tsx      # Landing page
+├── components/       # React components
+├── lib/
+│   ├── db.ts         # SQLite database layer
+│   ├── auth.ts       # Authentication (bcrypt + sessions)
+│   ├── showcase-data.ts # Showcase creator/reel data
+│   ├── types.ts      # TypeScript interfaces
+│   └── utils.ts      # Utility functions
+├── scripts/
+│   ├── migrate.ts    # JSON to SQLite migration
+│   └── seed.ts       # Showcase data seeding
+├── tests/
+│   ├── unit/         # Unit tests
+│   └── api/          # API integration tests
+├── types/            # Bun module type declarations
+├── .data/            # SQLite database file
+├── .env.example      # Environment variable template
+├── next.config.ts    # Next.js configuration
+├── package.json      # Dependencies & scripts
+├── tsconfig.json     # TypeScript configuration
+└── eslint.config.mjs # ESLint configuration
 ```
+
+---
+
+## Authentication
+
+The application uses session-based authentication with secure HTTP-only cookies:
+
+- Passwords are hashed with bcrypt (12 salt rounds)
+- Session tokens are stored in `goa_session` cookie (httpOnly, secure in production)
+- Sessions expire after 7 days
+- Protected routes enforce server-side authorization
+
+Demo credentials (for development):
+- Business: `palmeira@goaconnect.in` / `business123`
+- Creator: `rahul@goaconnect.in` / `creator123`
+
+---
+
+## Production Readiness
+
+- Persistent SQLite database (no dependency on local JSON storage)
+- Secure authentication with bcrypt and secure cookies
+- API authorization enforcement
+- Environment variable configuration
+- Unit and API integration tests
+- Migration path from JSON to SQLite
 
 ---
 
