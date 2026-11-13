@@ -19,7 +19,6 @@ import {
     Play,
     ShieldCheck,
     SlidersHorizontal,
-    Sparkles,
     Sun,
     Utensils,
     Waves,
@@ -207,7 +206,6 @@ export const DISCOVER_CREATORS: CreatorItem[] = [
 
 export function DiscoverView() {
     const [verifiedOnly, setVerifiedOnly] = useState(true)
-    const [availableThisMonth, setAvailableThisMonth] = useState(true)
     const [selectedCategories, setSelectedCategories] = useState<string[]>(['Food & Dining'])
     const [northGoaOpen, setNorthGoaOpen] = useState(true)
     const [southGoaOpen, setSouthGoaOpen] = useState(false)
@@ -276,7 +274,6 @@ export function DiscoverView() {
 
     const handleResetAll = () => {
         setVerifiedOnly(true)
-        setAvailableThisMonth(true)
         setSelectedCategories(['Food & Dining'])
         setSelectedLocations(['Assagao', 'Panjim & Miramar'])
         setMinEngagement(5)
@@ -317,8 +314,9 @@ export function DiscoverView() {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <aside className="lg:col-span-4 xl:col-span-3 border border-border bg-card p-5 space-y-6 sticky top-24">
-                <div className="flex items-center justify-between pb-2 border-b border-border">
+            {/* Filters sidebar */}
+            <aside className="lg:col-span-4 xl:col-span-3 border border-border bg-card p-5 rounded-sm shadow-sm sticky top-24">
+                <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
                     <div className="flex items-center gap-2">
                         <SlidersHorizontal className="size-4 text-foreground" />
                         <h2 className="text-sm font-bold text-foreground">Filters</h2>
@@ -326,15 +324,15 @@ export function DiscoverView() {
                     <button
                         type="button"
                         onClick={handleResetAll}
-                        className="text-xs font-semibold text-primary hover:underline cursor-pointer"
+                        className="text-xs font-bold text-primary hover:underline cursor-pointer rounded-sm px-2 py-1 hover:bg-primary/5"
                     >
                         Reset All
                     </button>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3 mb-6">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                        <div className="flex items-center gap-2 text-xs font-bold text-foreground">
                             <ShieldCheck className="size-4 text-primary" />
                             <span>Verified Only</span>
                         </div>
@@ -342,42 +340,21 @@ export function DiscoverView() {
                             type="button"
                             onClick={() => setVerifiedOnly(!verifiedOnly)}
                             aria-label="Toggle Verified Only"
-                            className={`w-11 h-6 flex items-center p-1 cursor-pointer transition-colors duration-150 ${
-                                verifiedOnly ? 'bg-primary' : 'bg-muted border border-border'
+                            className={`w-11 h-6 flex items-center p-1 cursor-pointer transition-colors duration-150 rounded-full border ${
+                                verifiedOnly ? 'bg-primary border-primary' : 'bg-background border-border'
                             }`}
                         >
                             <div
-                                className={`bg-white size-4 transform transition-transform duration-150 ${
+                                className={`bg-white size-4 transform transition-transform duration-150 rounded-full ${
                                     verifiedOnly ? 'translate-x-5' : 'translate-x-0'
-                                }`}
-                            />
-                        </button>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                            <Sparkles className="size-4 text-primary" />
-                            <span>Available this month</span>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => setAvailableThisMonth(!availableThisMonth)}
-                            aria-label="Toggle Available this month"
-                            className={`w-11 h-6 flex items-center p-1 cursor-pointer transition-colors duration-150 ${
-                                availableThisMonth ? 'bg-primary' : 'bg-muted border border-border'
-                            }`}
-                        >
-                            <div
-                                className={`bg-white size-4 transform transition-transform duration-150 ${
-                                    availableThisMonth ? 'translate-x-5' : 'translate-x-0'
                                 }`}
                             />
                         </button>
                     </div>
                 </div>
 
-                <div className="space-y-2.5 pt-3 border-t border-border">
-                    <div className="flex items-center justify-between text-xs">
+                <div className="space-y-2.5 mb-6 border-t border-border pt-4">
+                    <div className="flex items-center justify-between text-xs mb-2">
                         <span className="font-bold text-foreground">Category</span>
                         <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
                             {selectedCategories.length} SELECTED
@@ -392,10 +369,10 @@ export function DiscoverView() {
                                     key={cat}
                                     type="button"
                                     onClick={() => toggleCategory(cat)}
-                                    className={`px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
+                                    className={`px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer rounded-sm border ${
                                         isSelected
-                                            ? 'bg-primary text-primary-foreground'
-                                            : 'bg-muted text-muted-foreground hover:bg-muted hover:text-foreground border border-border'
+                                            ? 'bg-primary text-primary-foreground border-primary'
+                                            : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-primary/50'
                                     }`}
                                 >
                                     <span>{cat}</span>
@@ -406,7 +383,7 @@ export function DiscoverView() {
                     </div>
                 </div>
 
-                <div className="space-y-3 pt-3 border-t border-border">
+                <div className="space-y-3 mb-6 border-t border-border pt-4">
                     <span className="text-xs font-bold text-foreground block">Location / Taluka</span>
 
                     <div className="space-y-2">
@@ -435,7 +412,7 @@ export function DiscoverView() {
                                                 type="checkbox"
                                                 checked={checked}
                                                 onChange={() => toggleLocation(loc)}
-                                                className="size-4 border-border text-primary focus:ring-primary cursor-pointer"
+                                                className="size-4 border-border text-primary focus:ring-primary cursor-pointer rounded-sm"
                                             />
                                             <span className={checked ? 'font-semibold text-foreground' : ''}>
                                                 {loc}
@@ -473,7 +450,7 @@ export function DiscoverView() {
                                                 type="checkbox"
                                                 checked={checked}
                                                 onChange={() => toggleLocation(loc)}
-                                                className="size-4 border-border text-primary focus:ring-primary cursor-pointer"
+                                                className="size-4 border-border text-primary focus:ring-primary cursor-pointer rounded-sm"
                                             />
                                             <span className={checked ? 'font-semibold text-foreground' : ''}>
                                                 {loc}
@@ -486,17 +463,17 @@ export function DiscoverView() {
                     </div>
                 </div>
 
-                <div className="space-y-2.5 pt-3 border-t border-border">
-                    <div className="flex items-center justify-between text-xs">
+                <div className="space-y-2.5 mb-6 border-t border-border pt-4">
+                    <div className="flex items-center justify-between text-xs mb-2">
                         <span className="font-bold text-foreground">Followers</span>
                         <span className="font-bold text-primary">10K — 250K+</span>
                     </div>
 
-                    <div className="relative pt-2 pb-1">
-                        <div className="h-1.5 w-full bg-muted relative">
+                    <div className="relative pt-3 pb-1">
+                        <div className="h-1.5 w-full bg-muted relative rounded-full overflow-hidden">
                             <div className="absolute left-[8%] right-[5%] h-full bg-primary" />
-                            <div className="absolute left-[8%] -top-1.5 size-4 bg-white border-2 border-primary shadow-none cursor-pointer" />
-                            <div className="absolute right-[5%] -top-1.5 size-4 bg-white border-2 border-primary shadow-none cursor-pointer" />
+                            <div className="absolute left-[8%] -top-1.5 size-4 bg-white border-2 border-primary shadow-none cursor-pointer rounded-full" />
+                            <div className="absolute right-[5%] -top-1.5 size-4 bg-white border-2 border-primary shadow-none cursor-pointer rounded-full" />
                         </div>
                     </div>
 
@@ -506,7 +483,7 @@ export function DiscoverView() {
                     </div>
                 </div>
 
-                <div className="space-y-2.5 pt-3 border-t border-border">
+                <div className="space-y-2.5 mb-6 border-t border-border pt-4">
                     <span className="text-xs font-bold text-foreground block">Min. Engagement Rate</span>
                     <div className="grid grid-cols-3 gap-2">
                         {[3, 5, 7].map((rate) => {
@@ -516,10 +493,10 @@ export function DiscoverView() {
                                     key={rate}
                                     type="button"
                                     onClick={() => setMinEngagement(rate)}
-                                    className={`py-2 text-xs font-bold transition-colors cursor-pointer border rounded ${
+                                    className={`py-2 text-xs font-bold transition-colors cursor-pointer rounded-sm border ${
                                         isSelected
                                             ? 'bg-primary text-primary-foreground border-primary'
-                                            : 'bg-muted/60 text-muted-foreground border-border hover:text-foreground'
+                                            : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-primary/50'
                                     }`}
                                 >
                                     {rate}%
@@ -529,7 +506,7 @@ export function DiscoverView() {
                     </div>
                 </div>
 
-                <div className="space-y-2.5 pt-3 border-t border-border">
+                <div className="space-y-2.5 border-t border-border pt-4">
                     <span className="text-xs font-bold text-foreground block">Collaboration Model</span>
                     <div className="grid grid-cols-2 gap-2.5 text-xs text-muted-foreground">
                         {['All Types', 'Paid Only', 'Barter / Stay', 'Hybrid'].map((model) => {
@@ -541,10 +518,10 @@ export function DiscoverView() {
                                 >
                                     <input
                                         type="radio"
-                                        name="collabModelSharp"
+                                        name="collabModel"
                                         checked={checked}
                                         onChange={() => setCollabModel(model)}
-                                        className="size-3.5 text-primary focus:ring-primary cursor-pointer"
+                                        className="size-3.5 text-primary focus:ring-primary cursor-pointer rounded-sm"
                                     />
                                     <span className={checked ? 'font-semibold text-foreground' : ''}>
                                         {model}
@@ -553,33 +530,33 @@ export function DiscoverView() {
                             )
                         })}
                     </div>
-                </div>
 
-                <div className="pt-2">
-                    <button
-                        type="button"
-                        onClick={() => {}}
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-11 text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
-                    >
-                        <SlidersHorizontal className="size-3.5" />
-                        <span>Apply Filters ({filteredCreators.length * 4})</span>
-                    </button>
+                    <div className="mt-4">
+                        <button
+                            type="button"
+                            onClick={() => {}}
+                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-11 text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors rounded-sm shadow-sm"
+                        >
+                            <SlidersHorizontal className="size-3.5" />
+                            <span>Apply Filters ({filteredCreators.length * 4})</span>
+                        </button>
+                    </div>
                 </div>
             </aside>
 
-            <main className="lg:col-span-8 xl:col-span-9 space-y-6">
-                <div className="border border-border bg-card p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="space-y-1">
+            <main className="lg:col-span-8 xl:col-span-9 space-y-8">
+                <div className="border border-border bg-card p-5 sm:p-6 rounded-sm shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="space-y-1.5">
                         <div className="flex items-center gap-2.5">
-                            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
+                            <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                                 Discover Goan Creators
                             </h1>
-                            <span className="inline-flex items-center gap-1 bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[10px] font-bold text-primary dark:text-primary/80 uppercase">
+                            <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wider">
                                 450+ VERIFIED
                             </span>
                         </div>
                         <p className="text-xs sm:text-sm text-muted-foreground">
-                            Showing <span className="font-semibold text-foreground">24 creators</span> specializing in coastal gastronomy, cafe crawls, and dining culture.
+                            Showing <span className="font-semibold text-foreground">{filteredCreators.length} creators</span> specializing in coastal gastronomy, cafe crawls, and dining culture.
                         </p>
                     </div>
 
@@ -590,7 +567,7 @@ export function DiscoverView() {
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                                    className="border border-border bg-background rounded-sm px-3 py-1.5 text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                 >
                                     <option value="Highest Engagement">Highest Engagement</option>
                                     <option value="Most Followers">Most Followers</option>
@@ -600,15 +577,15 @@ export function DiscoverView() {
                             </div>
                         </div>
 
-                        <div className="flex items-center border border-border bg-muted p-1">
+                        <div className="flex items-center border border-border bg-background p-1 rounded-sm">
                             <button
                                 type="button"
                                 onClick={() => setViewMode('grid')}
                                 aria-label="Grid view"
-                                className={`size-7 flex items-center justify-center cursor-pointer transition-colors ${
+                                className={`size-7 flex items-center justify-center cursor-pointer transition-colors rounded-sm ${
                                     viewMode === 'grid'
-                                        ? 'bg-card text-foreground'
-                                        : 'text-muted-foreground hover:text-foreground'
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                                 }`}
                             >
                                 <LayoutGrid className="size-3.5" />
@@ -617,10 +594,10 @@ export function DiscoverView() {
                                 type="button"
                                 onClick={() => setViewMode('list')}
                                 aria-label="List view"
-                                className={`size-7 flex items-center justify-center cursor-pointer transition-colors ${
+                                className={`size-7 flex items-center justify-center cursor-pointer transition-colors rounded-sm ${
                                     viewMode === 'list'
-                                        ? 'bg-card text-foreground'
-                                        : 'text-muted-foreground hover:text-foreground'
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                                 }`}
                             >
                                 <List className="size-3.5" />
@@ -643,7 +620,7 @@ export function DiscoverView() {
                         return (
                             <div
                                 key={creator.id}
-                                className="border border-border bg-card overflow-hidden hover:border-primary transition-colors duration-200 flex flex-col justify-between"
+                                className="border border-border bg-card overflow-hidden rounded-sm shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
                             >
                                 <div>
                                     <div className="relative h-44 sm:h-48 w-full overflow-hidden">
@@ -653,12 +630,11 @@ export function DiscoverView() {
                                             alt={creator.name}
                                             width={600}
                                             height={400}
-                                            className="size-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90"
+                                            className="size-full object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/30" />
 
                                         <div className="absolute top-3 inset-x-3 flex items-center justify-between z-10">
-                                            <span className="inline-flex items-center gap-1.5 bg-white/95 dark:bg-zinc-900/90 px-3 py-1 text-[10px] font-bold text-foreground uppercase tracking-wider">
+                                            <span className="inline-flex items-center gap-1.5 bg-background border border-border px-3 py-1 text-[10px] font-bold text-foreground uppercase tracking-wider rounded-sm shadow-sm">
                                                 {getTagIcon(creator.tagType)}
                                                 <span>{creator.tag}</span>
                                             </span>
@@ -667,10 +643,10 @@ export function DiscoverView() {
                                                 type="button"
                                                 onClick={() => toggleLiked(creator.id)}
                                                 aria-label="Favorite creator"
-                                                className={`size-8 flex items-center justify-center transition-colors cursor-pointer ${
+                                                className={`size-8 flex items-center justify-center transition-colors cursor-pointer rounded-sm ${
                                                     isLiked
-                                                        ? 'bg-rose-500 text-white'
-                                                        : 'bg-white/90 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-300 hover:text-rose-500'
+                                                        ? 'bg-primary text-primary-foreground'
+                                                        : 'bg-background border border-border text-muted-foreground hover:text-primary hover:bg-primary/5'
                                                 }`}
                                             >
                                                 <Heart className={`size-4 ${isLiked ? 'fill-white' : ''}`} />
@@ -678,12 +654,12 @@ export function DiscoverView() {
                                         </div>
 
                                         <div className="absolute bottom-3 inset-x-3 flex items-center justify-between text-white text-[11px] font-semibold z-10">
-                                            <div className="flex items-center gap-1.5 bg-black/70 px-2.5 py-1">
+                                            <div className="flex items-center gap-1.5 bg-black/60 px-2.5 py-1 rounded-sm">
                                                 <Play className="size-3 fill-white text-white" />
                                                 <span>{creator.views}</span>
                                             </div>
 
-                                            <span className="bg-black/70 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase">
+                                            <span className="bg-black/60 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-sm">
                                                 {creator.highlightBadge}
                                             </span>
                                         </div>
@@ -691,7 +667,7 @@ export function DiscoverView() {
 
                                     <div className="p-5 space-y-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="relative size-12 overflow-hidden border-2 border-background shadow-none shrink-0">
+                                            <div className="relative size-12 overflow-hidden border-2 border-background shadow-sm shrink-0 rounded-md">
                                                 <Image
                                                     unoptimized
                                                     src={creator.avatar}
@@ -719,7 +695,7 @@ export function DiscoverView() {
                                                 <MapPin className="size-3.5 text-primary shrink-0" />
                                                 <span className="truncate">{creator.location}</span>
                                             </div>
-                                            <span className="bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold">
+                                            <span className="bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold rounded-sm">
                                                 {creator.nicheBadge}
                                             </span>
                                         </div>
@@ -762,7 +738,7 @@ export function DiscoverView() {
                                             </div>
 
                                             <span
-                                                className={`text-[10px] font-bold px-2 py-0.5 border uppercase tracking-wider ${
+                                                className={`text-[10px] font-bold px-2 py-0.5 border uppercase tracking-wider rounded-sm ${
                                                     creator.collabBadge === 'BARTER FRIENDLY'
                                                         ? 'bg-primary/10 text-primary border-primary'
                                                         : 'bg-muted border-border text-muted-foreground'
@@ -777,7 +753,7 @@ export function DiscoverView() {
                                 <div className="p-5 pt-0 flex items-center gap-2">
                                     <Link
                                         href="/business/profile"
-                                        className="flex-1 border border-border bg-background hover:bg-muted font-bold text-xs py-2.5 text-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                                        className="flex-1 border border-border bg-background hover:bg-muted font-medium text-xs py-2.5 text-foreground flex items-center justify-center gap-1.5 transition-colors rounded-sm cursor-pointer"
                                     >
                                         <span>View Profile</span>
                                         <span className="text-[11px]">&nearr;</span>
@@ -787,10 +763,10 @@ export function DiscoverView() {
                                         type="button"
                                         onClick={() => toggleShortlist(creator.id)}
                                         aria-label={isShortlisted ? 'Remove from shortlist' : 'Shortlist creator'}
-                                        className={`size-10 border flex items-center justify-center cursor-pointer transition-colors shrink-0 ${
+                                        className={`size-10 border flex items-center justify-center cursor-pointer transition-colors shrink-0 rounded-sm ${
                                             isShortlisted
                                                 ? 'bg-primary text-primary-foreground border-primary'
-                                                : 'border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground'
+                                                : 'border-border bg-background hover:bg-muted text-muted-foreground hover:text-primary hover:border-primary/50'
                                         }`}
                                     >
                                         <Bookmark className={`size-4 ${isShortlisted ? 'fill-white' : ''}`} />
@@ -801,10 +777,10 @@ export function DiscoverView() {
                     })}
                 </div>
 
-                <div className="border border-border bg-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-muted-foreground">
+                <div className="border border-border bg-card p-4 sm:p-5 rounded-sm shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-muted-foreground">
                     <div>
-                        Showing <span className="font-semibold text-foreground">1 – 6</span> of{' '}
-                        <span className="font-semibold text-foreground">24 creators</span>
+                        Showing <span className="font-semibold text-foreground">1 – {Math.min(6, filteredCreators.length)}</span> of{' '}
+                        <span className="font-semibold text-foreground">{filteredCreators.length} creators</span>
                     </div>
 
                     <div className="flex items-center gap-1.5 self-center sm:self-auto">
@@ -812,7 +788,7 @@ export function DiscoverView() {
                             type="button"
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                            className="px-3 py-1.5 border border-border bg-background hover:bg-muted disabled:opacity-50 text-foreground font-semibold cursor-pointer"
+                            className="px-3 py-1.5 border border-border bg-background hover:bg-muted disabled:opacity-50 text-foreground font-semibold cursor-pointer rounded-sm"
                         >
                             &lt; Prev
                         </button>
@@ -822,7 +798,7 @@ export function DiscoverView() {
                                 key={page}
                                 type="button"
                                 onClick={() => setCurrentPage(page)}
-                                className={`size-8 font-bold text-xs flex items-center justify-center cursor-pointer transition-colors ${
+                                className={`size-8 font-bold text-xs flex items-center justify-center cursor-pointer transition-colors rounded-sm ${
                                     currentPage === page
                                         ? 'bg-primary text-primary-foreground'
                                         : 'border border-border bg-background hover:bg-muted text-foreground'
@@ -836,7 +812,7 @@ export function DiscoverView() {
                             type="button"
                             disabled={currentPage === 4}
                             onClick={() => setCurrentPage((p) => Math.min(4, p + 1))}
-                            className="px-3 py-1.5 border border-border bg-background hover:bg-muted disabled:opacity-50 text-foreground font-semibold cursor-pointer"
+                            className="px-3 py-1.5 border border-border bg-background hover:bg-muted disabled:opacity-50 text-foreground font-semibold cursor-pointer rounded-sm"
                         >
                             Next &gt;
                         </button>

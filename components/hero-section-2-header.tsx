@@ -2,14 +2,12 @@
 
 import Link from 'next/link'
 import { Logo } from '@/components/logo'
-import { User, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { X } from 'lucide-react'
 import { AnimatedThemeToggler } from '@/registry/magicui/animated-theme-toggler'
 import React from 'react'
 
 const menuItems = [
     { name: 'Explore Creators', href: '#creators' },
-    { name: 'Categories', href: '#categories' },
     { name: 'How It Works', href: '#how-it-works' },
     { name: 'Pricing', href: '#pricing' },
 ]
@@ -17,7 +15,6 @@ const menuItems = [
 export const HeroHeader = () => {
     const [menuState, setMenuState] = React.useState(false)
     const [userRole, setUserRole] = React.useState<string | null>(null)
-    const [bizName, setBizName] = React.useState<string | null>(null)
 
     React.useEffect(() => {
         fetch('/api/auth/me')
@@ -25,9 +22,6 @@ export const HeroHeader = () => {
             .then((data) => {
                 if (data.authenticated && data.user) {
                     setUserRole(data.user.role)
-                    if (data.profile?.business_name) {
-                        setBizName(data.profile.business_name)
-                    }
                 }
             })
             .catch(() => {})
@@ -35,15 +29,12 @@ export const HeroHeader = () => {
 
     React.useEffect(() => {
         if (!menuState) return
-
         const mediaQuery = window.matchMedia('(max-width: 1023px)')
         const updateOverflow = () => {
             document.documentElement.classList.toggle('overflow-hidden', mediaQuery.matches)
         }
-
         updateOverflow()
         mediaQuery.addEventListener('change', updateOverflow)
-
         return () => {
             mediaQuery.removeEventListener('change', updateOverflow)
             document.documentElement.classList.remove('overflow-hidden')
@@ -68,7 +59,7 @@ export const HeroHeader = () => {
                             </Link>
 
                             <div className="flex items-center gap-3 lg:hidden">
-                                <AnimatedThemeToggler className="flex size-9 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-muted duration-150 cursor-pointer" />
+                                <AnimatedThemeToggler className="flex size-9 items-center justify-center rounded-sm border border-border bg-background text-foreground hover:bg-muted duration-150 cursor-pointer" />
                                 <button
                                     onClick={() => setMenuState(!menuState)}
                                     aria-label={menuState ? 'Close Menu' : 'Open Menu'}
@@ -107,7 +98,7 @@ export const HeroHeader = () => {
                                             <Link
                                                 href={item.href}
                                                 onClick={() => setMenuState(false)}
-                                                className="text-foreground block py-3 text-2xl font-medium"
+                                                className="text-foreground block py-3 text-lg font-medium"
                                             >
                                                 <span>{item.name}</span>
                                             </Link>
@@ -117,52 +108,39 @@ export const HeroHeader = () => {
                             </div>
                             <div className="flex w-full items-center space-y-3 sm:flex-row sm:gap-2.5 sm:space-y-0 md:w-fit">
                                 <div className="hidden lg:block">
-                                    <AnimatedThemeToggler className="flex size-9 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-muted duration-150 cursor-pointer" />
+                                    <AnimatedThemeToggler className="flex size-9 items-center justify-center rounded-sm border border-border bg-background text-foreground hover:bg-muted duration-150 cursor-pointer" />
                                 </div>
 
                                 {userRole === 'business' ? (
-                                    <Button
-                                        size="sm"
-                                        className="bg-teal-700 hover:bg-teal-800 text-white font-semibold cursor-pointer rounded-lg px-4 h-9 shadow-xs"
-                                        nativeButton={false}
-                                        render={
-                                            <Link href="/business/dashboard">
-                                                <span>Business Portal</span>
-                                            </Link>
-                                        }
-                                    />
+                                    <a
+                                        href="/business/dashboard"
+                                        className="text-xs font-bold text-primary-foreground bg-primary hover:bg-primary/90 px-4 py-2.5 rounded-sm shadow-sm transition-colors cursor-pointer"
+                                    >
+                                        Business Portal
+                                    </a>
                                 ) : (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="cursor-pointer rounded-lg font-medium px-4 h-9 border-border hover:bg-muted"
-                                        nativeButton={false}
-                                        render={
-                                            <Link href="/login">
-                                                <span>Sign In</span>
-                                            </Link>
-                                        }
-                                    />
+                                    <a
+                                        href="/login"
+                                        className="text-xs font-bold text-foreground border border-border bg-background hover:bg-muted px-4 py-2.5 rounded-sm transition-colors cursor-pointer"
+                                    >
+                                        Sign In
+                                    </a>
                                 )}
 
-                                <Button
-                                    size="sm"
-                                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-medium cursor-pointer rounded-lg px-4 h-9 shadow-xs"
-                                    nativeButton={false}
-                                    render={
-                                        <Link href="/join?role=creator">
-                                            <span>Join as Creator</span>
-                                        </Link>
-                                    }
-                                />
+                                <a
+                                    href="/join?role=creator"
+                                    className="text-xs font-bold text-primary-foreground bg-primary hover:bg-primary/90 px-4 py-2.5 rounded-sm shadow-sm transition-colors cursor-pointer"
+                                >
+                                    Join as Creator
+                                </a>
 
                                 <Link
                                     href={userRole === 'business' ? '/business/dashboard' : '/login'}
                                     aria-label="Profile"
-                                    className="hidden sm:flex size-9 items-center justify-center rounded-full bg-emerald-950 text-white dark:bg-emerald-900 border border-emerald-700/50 hover:opacity-90 duration-150"
-                                    title={bizName || 'Profile'}
+                                    className="hidden sm:flex size-9 items-center justify-center rounded-sm bg-primary text-primary-foreground border border-primary/30 hover:opacity-90 duration-150"
+                                    title="Profile"
                                 >
-                                    <User className="size-4.5" />
+                                    <span className="font-bold text-[10px]">P</span>
                                 </Link>
                             </div>
                         </div>

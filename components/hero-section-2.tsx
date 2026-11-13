@@ -1,142 +1,105 @@
 'use client'
 
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { HeroHeader } from '@/components/hero-section-2-header'
-import {
-    Bed,
-    CheckCircle2,
-    Layers,
-    Search,
-    Shield,
-    Star,
-    UserPlus,
-    Users,
-} from 'lucide-react'
+import { Search, UserPlus } from 'lucide-react'
+import Image from 'next/image'
 
 export default function HeroSection() {
     return (
         <>
-            <HeroHeader />
-            <main className="overflow-hidden">
-                <section className="pt-32 sm:pt-36 pb-8 sm:pb-12" id="hero">
-                    <div className="mx-auto max-w-7xl px-6">
-                        {/* Title & Pitch Container */}
-                        <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-6">
-                            {/* Official Badge */}
-                            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 backdrop-blur-md">
-                                <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                                <span>THE OFFICIAL GOA CREATOR MARKETPLACE</span>
-                            </div>
+            <section id="hero" className="relative overflow-hidden">
+                <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 sm:py-28 lg:py-36 text-center">
+                    <div className="inline-flex items-center gap-2 rounded-sm bg-primary/10 border border-primary/20 px-3 py-1 text-[10px] font-bold text-primary uppercase tracking-wider mb-6 inline-block">
+                        <span className="size-2 rounded-full bg-primary" />
+                        <span>THE OFFICIAL GOA CREATOR MARKETPLACE</span>
+                    </div>
 
-                            {/* Main Headline */}
-                            <h1 className="text-balance text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-foreground">
-                                Find the right Goa creator{' '}
-                                <span className="text-emerald-700 dark:text-emerald-400">in minutes</span>
-                            </h1>
+                    <h1 className="text-balance text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-4">
+                        Find the right Goa creator <br />
+                        <span className="text-primary">in minutes</span>
+                    </h1>
 
-                            {/* Subtitle */}
-                            <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl">
-                                The dedicated marketplace connecting local Goa cafes, boutique hotels, lifestyle brands, and events with vetted local influencers and creators across North &amp; South Goa.
-                            </p>
+                    <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-2xl mx-auto mb-8">
+                        The dedicated marketplace connecting local Goa cafes, boutique hotels, lifestyle brands, and events with vetted local influencers and creators across North &amp; South Goa.
+                    </p>
 
-                            {/* CTA / Action Buttons */}
-                            <div className="flex flex-wrap items-center justify-center gap-3.5 pt-1">
-                                <Button
-                                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-medium h-11 px-6 rounded-lg text-sm cursor-pointer shadow-xs"
-                                    size="lg"
-                                    nativeButton={false}
-                                    render={
-                                        <Link href="#creators" className="flex items-center gap-2">
-                                            <Search className="size-4" />
-                                            <span>Find Creators</span>
-                                        </Link>
-                                    }
-                                />
-                                <Button
-                                    variant="outline"
-                                    className="h-11 px-6 rounded-lg text-sm font-medium cursor-pointer flex items-center gap-2 border-border text-foreground hover:bg-muted"
-                                    size="lg"
-                                    nativeButton={false}
-                                    render={
-                                        <Link href="/join?role=creator" className="flex items-center gap-2">
-                                            <UserPlus className="size-4 text-emerald-600 dark:text-emerald-400" />
-                                            <span>Join as Creator</span>
-                                        </Link>
-                                    }
-                                />
-                            </div>
-                        </div>
+                    <div className="flex flex-wrap items-center justify-center gap-3">
+                        <Link
+                            href="#creators"
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-sm px-5 py-2.5 text-sm shadow-sm transition-colors cursor-pointer"
+                        >
+                            <Search className="size-4 mr-1.5" />
+                            <span>Find Creators</span>
+                        </Link>
+                        <Link
+                            href="/join?role=creator"
+                            className="border border-border bg-background hover:bg-muted font-medium rounded-sm px-5 py-2.5 text-sm transition-colors cursor-pointer text-foreground"
+                        >
+                            <UserPlus className="size-4 mr-1.5" />
+                            <span>Join as Creator</span>
+                        </Link>
+                    </div>
+                </div>
 
-                        {/* 4 Metric Cards Bar */}
-                        <div className="mt-12 rounded-2xl border border-border/80 bg-card/80 backdrop-blur-sm p-4 sm:p-6 shadow-xs">
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-border">
-                                <div className="flex items-center gap-4 px-3 py-2">
-                                    <div className="size-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                                        <Users className="size-5" />
-                                    </div>
-                                    <div>
-                                        <div className="text-2xl font-bold tracking-tight text-foreground">450+</div>
-                                        <div className="text-xs text-muted-foreground">Vetted Goa Creators</div>
-                                    </div>
-                                </div>
+                {/* Hero photograph (right side on desktop) */}
+                <div className="hidden lg:block absolute right-0 top-0 h-full w-1/2 z-0 overflow-hidden">
+                    <Image
+                        src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=1600&auto=format&fit=crop"
+                        alt="Goan coastal heritage cafe courtyard"
+                        width={1600}
+                        height={1200}
+                        className="size-full object-cover opacity-90"
+                    />
+                    <div className="absolute inset-0 bg-white/40" />
+                </div>
+            </section>
 
-                                <div className="flex items-center gap-4 px-3 py-2 pt-4 sm:pt-2">
-                                    <div className="size-11 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-600 dark:text-teal-400 shrink-0">
-                                        <Layers className="size-5" />
-                                    </div>
-                                    <div>
-                                        <div className="text-2xl font-bold tracking-tight text-foreground">1,200+</div>
-                                        <div className="text-xs text-muted-foreground">Collabs Done</div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-4 px-3 py-2 pt-4 sm:pt-2">
-                                    <div className="size-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
-                                        <Star className="size-5 fill-amber-500 text-amber-500" />
-                                    </div>
-                                    <div>
-                                        <div className="text-2xl font-bold tracking-tight text-foreground">4.9 / 5</div>
-                                        <div className="text-xs text-muted-foreground">Average Rating</div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-4 px-3 py-2 pt-4 sm:pt-2">
-                                    <div className="size-11 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
-                                        <Shield className="size-5 text-blue-600 dark:text-blue-400" />
-                                    </div>
-                                    <div>
-                                        <div className="text-2xl font-bold tracking-tight text-foreground">100%</div>
-                                        <div className="text-xs text-muted-foreground">Escrow Protection</div>
-                                    </div>
-                                </div>
+            {/* Trust metrics bar */}
+            <section className="border-t border-border bg-card px-6 py-8 sm:py-12">
+                <div className="mx-auto max-w-7xl">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 divide-y sm:divide-y-0 sm:divide-x divide-border">
+                        <div className="flex items-center gap-3 py-2 sm:py-4">
+                            <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0 font-bold text-[11px]">
+                                450+
+                            </span>
+                            <div className="text-left">
+                                <div className="text-sm font-bold text-foreground">Vetted Goa Creators</div>
+                                <div className="text-[10px] text-muted-foreground">North & South Goa</div>
                             </div>
                         </div>
 
-                        {/* Trusted By Premier Stays & Spots Banner */}
-                        <div className="mt-6 rounded-xl border border-border/70 bg-card/50 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                                <Bed className="size-4 text-emerald-600 dark:text-emerald-400" />
-                                <span>Trusted by Goa&apos;s Premier Stays &amp; Spots</span>
+                        <div className="flex items-center gap-3 py-2 sm:py-4">
+                            <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0 font-bold text-[11px]">
+                                1,200+
+                            </span>
+                            <div className="text-left">
+                                <div className="text-sm font-bold text-foreground">Collabs Done</div>
+                                <div className="text-[10px] text-muted-foreground">Verified campaigns</div>
                             </div>
-                            <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
-                                <span className="rounded-lg border border-border bg-background px-3 py-1.5 text-foreground shadow-2xs">
-                                    Café Palmeira, Calangute
-                                </span>
-                                <span className="rounded-lg border border-border bg-background px-3 py-1.5 text-foreground shadow-2xs">
-                                    Boutique Villa Assagao
-                                </span>
-                                <span className="rounded-lg border border-border bg-background px-3 py-1.5 text-foreground shadow-2xs">
-                                    Titlie Culinary Bar, Vagator
-                                </span>
-                                <span className="rounded-lg border border-border bg-background px-3 py-1.5 text-foreground shadow-2xs">
-                                    Antares Beach Club, Vagator
-                                </span>
+                        </div>
+
+                        <div className="flex items-center gap-3 py-2 sm:py-4">
+                            <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0 font-bold text-[11px]">
+                                4.9 / 5
+                            </span>
+                            <div className="text-left">
+                                <div className="text-sm font-bold text-foreground">Average Rating</div>
+                                <div className="text-[10px] text-muted-foreground">Brand reviews</div>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 py-2 sm:py-4">
+                            <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0 font-bold text-[11px]">
+                                100%
+                            </span>
+                            <div className="text-left">
+                                <div className="text-sm font-bold text-foreground">Escrow Protection</div>
+                                <div className="text-[10px] text-muted-foreground">Secure milestone payouts</div>
                             </div>
                         </div>
                     </div>
-                </section>
-            </main>
+                </div>
+            </section>
         </>
     )
 }

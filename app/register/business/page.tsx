@@ -27,7 +27,7 @@ export default function RegisterBusinessPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    // Form fields matching Image 1 & 2
+    // Form fields
     const [businessName, setBusinessName] = useState('')
     const [industry, setIndustry] = useState('')
     const [locationId, setLocationId] = useState('')
@@ -44,14 +44,13 @@ export default function RegisterBusinessPage() {
 
     // Password strength calculation
     const getPasswordStrength = (pass: string) => {
-        if (!pass) return { label: 'EMPTY', pct: 0, color: 'bg-muted' }
-        if (pass.length < 6) return { label: 'WEAK', pct: 25, color: 'bg-red-500' }
-        if (pass.length < 10) return { label: 'MEDIUM', pct: 60, color: 'bg-amber-500' }
-        return { label: 'STRONG', pct: 100, color: 'bg-emerald-500' }
+        if (!pass) return { label: 'EMPTY', pct: 0, color: '#D8D6D0' }
+        if (pass.length < 6) return { label: 'WEAK', pct: 25, color: '#B91C1C' }
+        if (pass.length < 10) return { label: 'MEDIUM', pct: 60, color: '#B98A2C' }
+        return { label: 'STRONG', pct: 100, color: '#0C4E40' }
     }
 
     const strength = getPasswordStrength(password)
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
@@ -122,7 +121,7 @@ export default function RegisterBusinessPage() {
                 throw new Error(data.error || 'Registration failed')
             }
 
-            // Successfully created business profile -> open Image 3 & 4 (Login page with pre-filled email and success banner)
+            // Successfully created business profile -> open login page with pre-filled email
             router.push(`/login?registered=business&email=${encodeURIComponent(workEmail.trim())}&name=${encodeURIComponent(businessName.trim())}`)
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Registration failed'
@@ -135,17 +134,17 @@ export default function RegisterBusinessPage() {
     return (
         <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-200">
             {/* Top Navigation */}
-            <header className="border-b border-border/60 bg-background/90 backdrop-blur-md sticky top-0 z-30">
+            <header className="border-b border-border bg-background/90 backdrop-blur-md sticky top-0 z-30">
                 <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
                         <Logo />
                     </Link>
 
                     <div className="flex items-center gap-3">
-                        <AnimatedThemeToggler className="flex size-9 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-muted duration-150 cursor-pointer" />
+                        <AnimatedThemeToggler className="flex size-9 items-center justify-center rounded-sm border border-border bg-background text-foreground hover:bg-muted duration-150 cursor-pointer" />
                         <Link
                             href="/login"
-                            className="text-xs sm:text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:underline"
+                            className="text-xs sm:text-sm font-medium text-primary hover:underline"
                         >
                             Sign In
                         </Link>
@@ -156,43 +155,43 @@ export default function RegisterBusinessPage() {
             {/* Main Form Content */}
             <main className="flex-1 flex flex-col items-center px-4 sm:px-6 py-10 sm:py-14">
                 <div className="w-full max-w-3xl space-y-8">
-                    {/* Header Progress Bar & Badge (Image 1 top) */}
-                    <div className="rounded-2xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    {/* Header Progress Bar & Badge */}
+                    <div className="rounded-sm border border-border bg-card p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="space-y-2 flex-1">
                             <div className="flex items-center gap-2">
-                                <span className="size-6 rounded-full bg-emerald-700 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                                <span className="size-6 rounded-sm bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0">
                                     1
                                 </span>
-                                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                                <span className="text-xs font-bold uppercase tracking-wider text-primary">
                                     STEP 1 OF 2: BUSINESS PROFILE INFORMATION
                                 </span>
                             </div>
                             {/* Horizontal Progress Bar */}
                             <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                                <div className="h-full bg-emerald-700 dark:bg-emerald-500 w-1/2 rounded-full" />
+                                <div className="h-full bg-primary rounded-full w-1/2" />
                             </div>
                         </div>
 
-                        <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 self-start sm:self-auto shrink-0">
-                            <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <div className="inline-flex items-center gap-1.5 rounded-sm bg-primary/10 border border-primary/20 px-3 py-1 text-[10px] font-bold text-primary uppercase tracking-wider self-start sm:self-auto shrink-0">
+                            <ShieldCheck className="size-3.5 text-primary" />
                             <span>Verified Goan Partner Program</span>
                         </div>
                     </div>
 
-                    {/* Main White Card (Image 1 & Image 2) */}
-                    <div className="rounded-3xl border border-border/80 bg-card p-6 sm:p-10 shadow-lg space-y-8">
+                    {/* Main White Card */}
+                    <div className="rounded-sm border border-border bg-card p-6 sm:p-10 shadow-lg space-y-8">
                         {/* Title & Pitch */}
-                        <div className="space-y-2 border-b border-border/60 pb-6">
-                            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                        <div className="space-y-2 border-b border-border pb-6">
+                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                                 Register Your Business
                             </h1>
-                            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                            <p className="text-sm text-muted-foreground leading-relaxed">
                                 Connect with Goa&apos;s top creators and start launching authentic local campaigns across the sunshine coast.
                             </p>
                         </div>
 
                         {error && (
-                            <div className="rounded-xl bg-destructive/10 border border-destructive/20 p-3.5 text-xs text-destructive">
+                            <div className="rounded-sm bg-destructive/5 border border-destructive/20 p-3.5 text-xs text-destructive">
                                 {error}
                             </div>
                         )}
@@ -201,7 +200,7 @@ export default function RegisterBusinessPage() {
                             {/* SECTION 1: BUSINESS BASICS */}
                             <div className="space-y-4">
                                 <div className="flex items-start gap-3">
-                                    <div className="size-10 rounded-xl bg-teal-100 text-teal-800 dark:bg-teal-950/80 dark:text-teal-300 flex items-center justify-center shrink-0">
+                                    <div className="size-10 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0">
                                         <Store className="size-5" />
                                     </div>
                                     <div className="space-y-0.5">
@@ -228,7 +227,7 @@ export default function RegisterBusinessPage() {
                                             value={businessName}
                                             onChange={(e) => setBusinessName(e.target.value)}
                                             placeholder="Café Palmeira"
-                                            className="w-full rounded-xl border border-border bg-background pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                            className="w-full rounded-sm border border-border bg-background pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                         />
                                     </div>
                                 </div>
@@ -243,7 +242,7 @@ export default function RegisterBusinessPage() {
                                                 required
                                                 value={industry}
                                                 onChange={(e) => setIndustry(e.target.value)}
-                                                className="w-full rounded-xl border border-border bg-background pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                                                className="w-full rounded-sm border border-border bg-background pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                             >
                                                 <option value="" disabled>Select industry</option>
                                                 {INITIAL_CATEGORIES.map((cat) => (
@@ -263,7 +262,7 @@ export default function RegisterBusinessPage() {
                                                 required
                                                 value={locationId}
                                                 onChange={(e) => setLocationId(e.target.value)}
-                                                className="w-full rounded-xl border border-border bg-background pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                                                className="w-full rounded-sm border border-border bg-background pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                             >
                                                 <option value="" disabled>Select location in Goa</option>
                                                 {INITIAL_LOCATIONS.map((loc) => (
@@ -278,9 +277,9 @@ export default function RegisterBusinessPage() {
                             </div>
 
                             {/* SECTION 2: ABOUT YOUR BRAND */}
-                            <div className="space-y-4 pt-4 border-t border-border/60">
+                            <div className="space-y-4 pt-4 border-t border-border">
                                 <div className="flex items-start gap-3">
-                                    <div className="size-10 rounded-xl bg-teal-100 text-teal-800 dark:bg-teal-950/80 dark:text-teal-300 flex items-center justify-center shrink-0">
+                                    <div className="size-10 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0">
                                         <Sparkles className="size-5" />
                                     </div>
                                     <div className="space-y-0.5">
@@ -293,7 +292,7 @@ export default function RegisterBusinessPage() {
                                     </div>
                                 </div>
 
-                                {/* Description & Bio with 0/250 counter */}
+                                {/* Description & Bio */}
                                 <div className="space-y-1.5">
                                     <div className="flex items-center justify-between text-xs">
                                         <label className="font-semibold text-foreground">Description &amp; Bio *</label>
@@ -305,7 +304,7 @@ export default function RegisterBusinessPage() {
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
                                         placeholder="Heritage Portuguese-Goan cafe in Calangute serving artisanal coffees, poee sliders, and sunset sangrias."
-                                        className="w-full rounded-xl border border-border bg-background p-3 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500 leading-relaxed"
+                                        className="w-full rounded-sm border border-border bg-background p-3 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring leading-relaxed"
                                     />
                                 </div>
 
@@ -313,7 +312,7 @@ export default function RegisterBusinessPage() {
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-semibold text-foreground">Contact Phone *</label>
-                                        <div className="flex items-center rounded-xl border border-border bg-background overflow-hidden focus-within:ring-1 focus-within:ring-emerald-500">
+                                        <div className="flex items-center rounded-sm border border-border bg-background overflow-hidden focus-within:ring-1 focus-within:ring-ring">
                                             <span className="bg-muted px-2.5 py-2 text-xs font-semibold text-muted-foreground border-r border-border shrink-0">
                                                 +91
                                             </span>
@@ -330,7 +329,7 @@ export default function RegisterBusinessPage() {
 
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-semibold text-foreground">Official Instagram *</label>
-                                        <div className="flex items-center rounded-xl border border-border bg-background overflow-hidden focus-within:ring-1 focus-within:ring-emerald-500">
+                                        <div className="flex items-center rounded-sm border border-border bg-background overflow-hidden focus-within:ring-1 focus-within:ring-ring">
                                             <span className="bg-muted px-2.5 py-2 text-xs font-semibold text-muted-foreground border-r border-border shrink-0">
                                                 @
                                             </span>
@@ -354,17 +353,17 @@ export default function RegisterBusinessPage() {
                                                 value={websiteUrl}
                                                 onChange={(e) => setWebsiteUrl(e.target.value)}
                                                 placeholder="https://cafepalmeira.in"
-                                                className="w-full rounded-xl border border-border bg-background pl-8 pr-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                className="w-full rounded-sm border border-border bg-background pl-8 pr-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                             />
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* SECTION 3: ACCOUNT SECURITY (Image 2) */}
-                            <div className="space-y-4 pt-4 border-t border-border/60">
+                            {/* SECTION 3: ACCOUNT SECURITY */}
+                            <div className="space-y-4 pt-4 border-t border-border">
                                 <div className="flex items-start gap-3">
-                                    <div className="size-10 rounded-xl bg-teal-100 text-teal-800 dark:bg-teal-950/80 dark:text-teal-300 flex items-center justify-center shrink-0">
+                                    <div className="size-10 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0">
                                         <Lock className="size-5" />
                                     </div>
                                     <div className="space-y-0.5">
@@ -387,7 +386,7 @@ export default function RegisterBusinessPage() {
                                             value={workEmail}
                                             onChange={(e) => setWorkEmail(e.target.value)}
                                             placeholder="gm@cafepalmeira.com"
-                                            className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                            className="w-full rounded-sm border border-border bg-background px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                         />
                                     </div>
                                 </div>
@@ -404,7 +403,7 @@ export default function RegisterBusinessPage() {
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 placeholder="••••••••••••"
-                                                className="w-full rounded-xl border border-border bg-background pl-10 pr-10 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                className="w-full rounded-sm border border-border bg-background pl-10 pr-10 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                             />
                                             <button
                                                 type="button"
@@ -421,9 +420,9 @@ export default function RegisterBusinessPage() {
                                             <div className="flex items-center gap-2 pt-1">
                                                 <div className="h-1.5 flex-1 bg-muted rounded-full overflow-hidden">
                                                     <div
-                                                        className={`h-full ${strength.color} transition-all duration-300`}
-                                                        style={{ width: `${strength.pct}%` }}
-                                                    />
+                                                    className={`h-full transition-all duration-300`}
+                                                    style={{ width: `${strength.pct}%`, backgroundColor: strength.color }}
+                                                />
                                                 </div>
                                                 <span className="text-[10px] font-bold text-muted-foreground">
                                                     {strength.label}
@@ -442,7 +441,7 @@ export default function RegisterBusinessPage() {
                                                 value={confirmPassword}
                                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                                 placeholder="••••••••••••"
-                                                className="w-full rounded-xl border border-border bg-background pl-10 pr-10 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                className="w-full rounded-sm border border-border bg-background pl-10 pr-10 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                             />
                                             <button
                                                 type="button"
@@ -457,21 +456,21 @@ export default function RegisterBusinessPage() {
                                 </div>
 
                                 {/* Terms & Conditions Box */}
-                                <div className="rounded-xl border border-border/80 bg-muted/30 p-3.5 sm:p-4 flex items-center gap-3">
+                                <div className="rounded-sm border border-border bg-muted/30 p-3.5 sm:p-4 flex items-center gap-3">
                                     <input
                                         type="checkbox"
                                         id="terms"
                                         checked={agreedToTerms}
                                         onChange={(e) => setAgreedToTerms(e.target.checked)}
-                                        className="size-4 rounded border-border text-emerald-700 focus:ring-emerald-500 cursor-pointer shrink-0"
+                                        className="size-4 rounded border-border text-primary focus:ring-primary cursor-pointer shrink-0"
                                     />
                                     <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none">
                                         I agree to the{' '}
-                                        <Link href="#" className="font-semibold text-foreground hover:underline">
+                                        <Link href="#" className="font-bold text-foreground hover:underline">
                                             GoaConnect Terms of Service
                                         </Link>{' '}
                                         and{' '}
-                                        <Link href="#" className="font-semibold text-foreground hover:underline">
+                                        <Link href="#" className="font-bold text-foreground hover:underline">
                                             Privacy Policy
                                         </Link>{' '}
                                         for Goan Businesses.
@@ -482,7 +481,7 @@ export default function RegisterBusinessPage() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-[#0c4e40] hover:bg-[#093d32] text-white font-semibold rounded-xl h-12 text-sm flex items-center justify-center gap-2 shadow-sm cursor-pointer transition-colors duration-150"
+                                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm h-12 text-sm flex items-center justify-center gap-2 shadow-sm cursor-pointer transition-colors duration-150"
                                 >
                                     {loading ? (
                                         <>
@@ -503,7 +502,7 @@ export default function RegisterBusinessPage() {
                                         <div className="absolute inset-0 flex items-center">
                                             <div className="w-full border-t border-border/60" />
                                         </div>
-                                        <span className="relative bg-card px-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
+                                        <span className="relative bg-card px-3 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                                             OR
                                         </span>
                                     </div>
@@ -512,7 +511,7 @@ export default function RegisterBusinessPage() {
                                         Looking to register as a creator instead?{' '}
                                         <Link
                                             href="/join?role=creator"
-                                            className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline"
+                                            className="font-bold text-primary hover:underline"
                                         >
                                             Switch to Creator Sign Up &rarr;
                                         </Link>
@@ -522,18 +521,18 @@ export default function RegisterBusinessPage() {
                         </form>
                     </div>
 
-                    {/* Bottom Badges (Image 2 bottom) */}
+                    {/* Bottom Badges */}
                     <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground font-medium pt-2">
                         <div className="flex items-center gap-1.5">
-                            <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
+                            <CheckCircle2 className="size-4 text-primary" />
                             <span>100% Curated Local Talent</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <Store className="size-4 text-emerald-600 dark:text-emerald-400" />
+                            <Store className="size-4 text-primary" />
                             <span>Zero Booking Markup in Goa</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <MapPin className="size-4 text-emerald-600 dark:text-emerald-400" />
+                            <MapPin className="size-4 text-primary" />
                             <span>Local Support Office in Panjim</span>
                         </div>
                     </div>

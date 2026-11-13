@@ -117,14 +117,14 @@ function JoinContent() {
     return (
         <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-200">
             {/* Top Navigation */}
-            <header className="border-b border-border/60 bg-background/90 backdrop-blur-md sticky top-0 z-30">
+            <header className="border-b border-border bg-background/90 backdrop-blur-md sticky top-0 z-30">
                 <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
                         <Logo />
                     </Link>
 
                     <div className="flex items-center gap-3">
-                        <AnimatedThemeToggler className="flex size-9 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-muted duration-150 cursor-pointer" />
+                        <AnimatedThemeToggler className="flex size-9 items-center justify-center rounded-sm border border-border bg-background text-foreground hover:bg-muted duration-150 cursor-pointer" />
                         <Link
                             href="/login"
                             className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -141,20 +141,20 @@ function JoinContent() {
                     {step === 'select' ? (
                         <>
                             {/* Header Section */}
-                            <div className="flex flex-col items-center text-center space-y-3 mb-10 sm:mb-12">
+                            <div className="flex flex-col items-center text-center space-y-3 mb-10 sm:mb-14">
                                 {/* Top Badge */}
-                                <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
-                                    <Anchor className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                                <div className="inline-flex items-center gap-1.5 rounded-sm bg-primary/10 border border-primary/20 px-3.5 py-1 text-[10px] font-bold text-primary uppercase tracking-wider">
+                                    <Anchor className="size-3.5 text-primary" />
                                     <span>COASTAL CREATIVE MARKETPLACE</span>
                                 </div>
 
                                 {/* Main Title */}
-                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
+                                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
                                     Join GoaConnect
                                 </h1>
 
                                 {/* Subtitle */}
-                                <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+                                <p className="text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
                                     Select how you would like to use GoaConnect. Choose your account type to get started.
                                 </p>
                             </div>
@@ -164,38 +164,38 @@ function JoinContent() {
                                 {/* Card 1: Business / Brand */}
                                 <div
                                     onClick={() => setSelectedRole('business')}
-                                    className={`relative rounded-3xl border bg-card p-8 sm:p-10 shadow-xs hover:shadow-lg transition-all duration-200 flex flex-col justify-between cursor-pointer ${
+                                    className={`relative rounded-sm border bg-card p-8 sm:p-10 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer ${
                                         selectedRole === 'business'
-                                            ? 'border-emerald-600/70 ring-2 ring-emerald-600/30'
-                                            : 'border-border/80 hover:border-emerald-600/40'
+                                            ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                                            : 'border-border hover:border-primary/50'
                                     }`}
                                 >
                                     <div>
                                         {/* Top Row: Icon + Radio Indicator */}
                                         <div className="flex items-center justify-between">
-                                            <div className="size-12 rounded-2xl bg-teal-100 text-teal-800 dark:bg-teal-950/80 dark:text-teal-300 flex items-center justify-center">
-                                                <Store className="size-6" />
+                                            <div className="size-10 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                                                <Store className="size-5" />
                                             </div>
 
                                             <div
                                                 className={`size-5 rounded-full border-2 flex items-center justify-center ${
                                                     selectedRole === 'business'
-                                                        ? 'border-emerald-700 dark:border-emerald-400'
+                                                        ? 'border-primary bg-primary'
                                                         : 'border-border'
                                                 }`}
                                             >
                                                 {selectedRole === 'business' && (
-                                                    <span className="size-2.5 rounded-full bg-emerald-700 dark:bg-emerald-400" />
+                                                    <span className="size-2.5 rounded-full bg-primary-foreground" />
                                                 )}
                                             </div>
                                         </div>
 
                                         {/* Title & Description */}
                                         <div className="mt-6 space-y-2">
-                                            <h2 className="text-xl font-bold tracking-tight text-foreground">
+                                            <h2 className="text-lg font-bold text-foreground tracking-tight">
                                                 I&apos;m a Business / Brand
                                             </h2>
-                                            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                                            <p className="text-sm text-muted-foreground leading-relaxed">
                                                 For restaurants, cafes, hotels, nightlife spots, festivals, and brands in Goa looking to hire local creators.
                                             </p>
                                         </div>
@@ -208,8 +208,8 @@ function JoinContent() {
                                                 'Filter by audience demographics, engagement rate, & Goan taluka',
                                                 'Secure payments with campaign milestones & invoice management',
                                             ].map((text, idx) => (
-                                                <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-foreground/90">
-                                                    <span className="size-4 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-300 flex items-center justify-center p-0.5 shrink-0 mt-0.5">
+                                                <li key={idx} className="flex items-start gap-2.5 text-sm text-foreground/90">
+                                                    <span className="size-4 rounded-sm bg-primary text-primary-foreground flex items-center justify-center p-0.5 shrink-0 mt-0.5">
                                                         <Check className="size-3 stroke-[2.5]" />
                                                     </span>
                                                     <span>{text}</span>
@@ -225,7 +225,7 @@ function JoinContent() {
                                             e.stopPropagation()
                                             handleContinue('business')
                                         }}
-                                        className="mt-8 w-full bg-[#0c4e40] hover:bg-[#08382e] text-white font-semibold rounded-xl h-12 text-sm flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-colors duration-150"
+                                        className="mt-8 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-sm h-12 text-sm flex items-center justify-center gap-1.5 shadow-sm cursor-pointer transition-colors duration-150"
                                     >
                                         <span>Continue as Business</span>
                                         <span>&rarr;</span>
@@ -235,38 +235,38 @@ function JoinContent() {
                                 {/* Card 2: Content Creator */}
                                 <div
                                     onClick={() => setSelectedRole('creator')}
-                                    className={`relative rounded-3xl border bg-card p-8 sm:p-10 shadow-xs hover:shadow-lg transition-all duration-200 flex flex-col justify-between cursor-pointer ${
+                                    className={`relative rounded-sm border bg-card p-8 sm:p-10 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer ${
                                         selectedRole === 'creator'
-                                            ? 'border-sky-600/70 ring-2 ring-sky-600/30'
-                                            : 'border-border/80 hover:border-sky-600/40'
+                                            ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                                            : 'border-border hover:border-primary/50'
                                     }`}
                                 >
                                     <div>
                                         {/* Top Row: Icon + Radio Indicator */}
                                         <div className="flex items-center justify-between">
-                                            <div className="size-12 rounded-2xl bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300 flex items-center justify-center">
-                                                <Camera className="size-6" />
+                                            <div className="size-10 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                                                <Camera className="size-5" />
                                             </div>
 
                                             <div
                                                 className={`size-5 rounded-full border-2 flex items-center justify-center ${
                                                     selectedRole === 'creator'
-                                                        ? 'border-sky-700 dark:border-sky-400'
+                                                        ? 'border-primary bg-primary'
                                                         : 'border-border'
                                                 }`}
                                             >
                                                 {selectedRole === 'creator' && (
-                                                    <span className="size-2.5 rounded-full bg-sky-700 dark:bg-sky-400" />
+                                                    <span className="size-2.5 rounded-full bg-primary-foreground" />
                                                 )}
                                             </div>
                                         </div>
 
                                         {/* Title & Description */}
                                         <div className="mt-6 space-y-2">
-                                            <h2 className="text-xl font-bold tracking-tight text-foreground">
+                                            <h2 className="text-lg font-bold text-foreground tracking-tight">
                                                 I&apos;m a Content Creator
                                             </h2>
-                                            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                                            <p className="text-sm text-muted-foreground leading-relaxed">
                                                 For influencers, photographers, videographers, foodies, and storytellers based in or covering Goa.
                                             </p>
                                         </div>
@@ -279,8 +279,8 @@ function JoinContent() {
                                                 'Guaranteed on-time payouts with no payment chasing',
                                                 'Professional portfolio page and verified badge',
                                             ].map((text, idx) => (
-                                                <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-foreground/90">
-                                                    <span className="size-4 rounded-full bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-300 flex items-center justify-center p-0.5 shrink-0 mt-0.5">
+                                                <li key={idx} className="flex items-start gap-2.5 text-sm text-foreground/90">
+                                                    <span className="size-4 rounded-sm bg-primary text-primary-foreground flex items-center justify-center p-0.5 shrink-0 mt-0.5">
                                                         <Check className="size-3 stroke-[2.5]" />
                                                     </span>
                                                     <span>{text}</span>
@@ -296,7 +296,7 @@ function JoinContent() {
                                             e.stopPropagation()
                                             handleContinue('creator')
                                         }}
-                                        className="mt-8 w-full bg-[#035f85] hover:bg-[#024966] text-white font-semibold rounded-xl h-12 text-sm flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-colors duration-150"
+                                        className="mt-8 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-sm h-12 text-sm flex items-center justify-center gap-1.5 shadow-sm cursor-pointer transition-colors duration-150"
                                     >
                                         <span>Continue as Creator</span>
                                         <span>&rarr;</span>
@@ -309,7 +309,7 @@ function JoinContent() {
                                 Already have an account?{' '}
                                 <Link
                                     href="/login"
-                                    className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline inline-flex items-center gap-1"
+                                    className="font-medium text-primary hover:underline inline-flex items-center gap-1"
                                 >
                                     <span>Sign in here</span>
                                     <span>&rarr;</span>
@@ -318,37 +318,37 @@ function JoinContent() {
                         </>
                     ) : (
                         /* Step 2: Role-Specific Registration Form */
-                        <div className="max-w-xl mx-auto rounded-3xl border border-border/80 bg-card p-8 sm:p-10 shadow-lg animate-in fade-in duration-200">
+                        <div className="max-w-xl mx-auto rounded-sm border border-border bg-card p-8 sm:p-10 shadow-sm animate-in fade-in duration-200">
                             <button
                                 type="button"
                                 onClick={() => setStep('select')}
-                                className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground mb-6 cursor-pointer"
+                                className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground mb-6 cursor-pointer"
                             >
                                 <ArrowLeft className="size-3.5" />
                                 <span>Change account type</span>
                             </button>
 
                             <div className="space-y-2 mb-6">
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                                     {selectedRole === 'business' ? 'Business Profile Registration' : 'Creator Profile Registration'}
                                 </span>
-                                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                                <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
                                     {selectedRole === 'business' ? 'Set Up Your Brand on GoaConnect' : 'Create Your Creator Profile'}
                                 </h2>
-                                <p className="text-xs sm:text-sm text-muted-foreground">
+                                <p className="text-sm text-muted-foreground">
                                     Fill in your details to start connecting across Goa.
                                 </p>
                             </div>
 
                             {error && (
-                                <div className="rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-xs text-destructive mb-6">
+                                <div className="rounded-sm bg-destructive/5 border border-destructive/20 p-3 text-xs text-destructive mb-6">
                                     {error}
                                 </div>
                             )}
 
                             {successMessage && (
-                                <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-4 text-center space-y-2 mb-6">
-                                    <CheckCircle2 className="size-6 text-emerald-600 dark:text-emerald-400 mx-auto" />
+                                <div className="rounded-sm bg-primary/5 border border-primary/20 p-4 text-center space-y-2 mb-6">
+                                    <CheckCircle2 className="size-6 text-primary mx-auto" />
                                     <div className="text-sm font-bold text-foreground">{successMessage}</div>
                                     <p className="text-xs text-muted-foreground">Redirecting you to the platform...</p>
                                 </div>
@@ -359,40 +359,40 @@ function JoinContent() {
                                     {selectedRole === 'business' ? (
                                         <>
                                             <div className="space-y-1">
-                                                <label className="text-xs font-medium text-foreground">Business / Brand Name</label>
+                                                <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Business / Brand Name</label>
                                                 <input
                                                     type="text"
                                                     required
                                                     value={businessName}
                                                     onChange={(e) => setBusinessName(e.target.value)}
                                                     placeholder="e.g. Café Palmeira, Antares, Assagao Boutique Villa"
-                                                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                    className="w-full rounded-sm border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                                 />
                                             </div>
 
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div className="space-y-1">
-                                                    <label className="text-xs font-medium text-foreground">Industry</label>
+                                                    <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Industry</label>
                                                     <select
                                                         value={industry}
                                                         onChange={(e) => setIndustry(e.target.value)}
-                                                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                        className="w-full rounded-sm border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                                     >
-                                                        <option value="Food & Dining">Café &amp; Dining</option>
-                                                        <option value="Boutique Resorts">Boutique Stays &amp; Villas</option>
-                                                        <option value="Nightlife & Music">Nightlife &amp; Beach Club</option>
-                                                        <option value="Travel & Adventure">Water Sports &amp; Adventure</option>
-                                                        <option value="Fashion & Lifestyle">Lifestyle &amp; Fashion Brand</option>
-                                                        <option value="Yoga & Wellness">Spa &amp; Wellness</option>
+                                                        <option value="Food & Dining">Café & Dining</option>
+                                                        <option value="Boutique Resorts">Boutique Stays & Villas</option>
+                                                        <option value="Nightlife & Music">Nightlife & Beach Club</option>
+                                                        <option value="Travel & Adventure">Water Sports & Adventure</option>
+                                                        <option value="Fashion & Lifestyle">Lifestyle & Fashion Brand</option>
+                                                        <option value="Yoga & Wellness">Spa & Wellness</option>
                                                     </select>
                                                 </div>
 
                                                 <div className="space-y-1">
-                                                    <label className="text-xs font-medium text-foreground">Location in Goa</label>
+                                                    <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Location in Goa</label>
                                                     <select
                                                         value={bizLocation}
                                                         onChange={(e) => setBizLocation(e.target.value)}
-                                                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                        className="w-full rounded-sm border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                                     >
                                                         {INITIAL_LOCATIONS.map((loc) => (
                                                             <option key={loc.location_id} value={loc.location_id}>
@@ -405,26 +405,26 @@ function JoinContent() {
 
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div className="space-y-1">
-                                                    <label className="text-xs font-medium text-foreground">Contact Phone</label>
+                                                    <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Contact Phone</label>
                                                     <input
                                                         type="tel"
                                                         required
                                                         value={bizPhone}
                                                         onChange={(e) => setBizPhone(e.target.value)}
                                                         placeholder="+91 98221 00000"
-                                                        className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                        className="w-full rounded-sm border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                                     />
                                                 </div>
 
                                                 <div className="space-y-1">
-                                                    <label className="text-xs font-medium text-foreground">Instagram Handle</label>
+                                                    <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Instagram Handle</label>
                                                     <input
                                                         type="text"
                                                         required
                                                         value={bizInstagram}
                                                         onChange={(e) => setBizInstagram(e.target.value)}
                                                         placeholder="@yourbrand"
-                                                        className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                        className="w-full rounded-sm border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                                     />
                                                 </div>
                                             </div>
@@ -432,24 +432,24 @@ function JoinContent() {
                                     ) : (
                                         <>
                                             <div className="space-y-1">
-                                                <label className="text-xs font-medium text-foreground">Full Name</label>
+                                                <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Full Name</label>
                                                 <input
                                                     type="text"
                                                     required
                                                     value={fullName}
                                                     onChange={(e) => setFullName(e.target.value)}
                                                     placeholder="e.g. Rahul Naik, Sneha Fernandes"
-                                                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-sky-500"
+                                                    className="w-full rounded-sm border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                                 />
                                             </div>
 
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div className="space-y-1">
-                                                    <label className="text-xs font-medium text-foreground">Primary Niche</label>
+                                                    <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Primary Niche</label>
                                                     <select
                                                         value={creatorCategory}
                                                         onChange={(e) => setCreatorCategory(e.target.value)}
-                                                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-sky-500"
+                                                        className="w-full rounded-sm border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                                     >
                                                         {INITIAL_CATEGORIES.map((cat) => (
                                                             <option key={cat.category_id} value={cat.category_id}>
@@ -460,11 +460,11 @@ function JoinContent() {
                                                 </div>
 
                                                 <div className="space-y-1">
-                                                    <label className="text-xs font-medium text-foreground">Base Location</label>
+                                                    <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Base Location</label>
                                                     <select
                                                         value={creatorLocation}
                                                         onChange={(e) => setCreatorLocation(e.target.value)}
-                                                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-sky-500"
+                                                        className="w-full rounded-sm border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                                     >
                                                         {INITIAL_LOCATIONS.map((loc) => (
                                                             <option key={loc.location_id} value={loc.location_id}>
@@ -477,38 +477,38 @@ function JoinContent() {
 
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div className="space-y-1">
-                                                    <label className="text-xs font-medium text-foreground">Instagram Handle</label>
+                                                    <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Instagram Handle</label>
                                                     <input
                                                         type="text"
                                                         required
                                                         value={creatorInstagram}
                                                         onChange={(e) => setCreatorInstagram(e.target.value)}
                                                         placeholder="@rahul.goanbites"
-                                                        className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-sky-500"
+                                                        className="w-full rounded-sm border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                                     />
                                                 </div>
 
                                                 <div className="space-y-1">
-                                                    <label className="text-xs font-medium text-foreground">Base Rate per Reel (₹)</label>
+                                                    <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Base Rate per Reel (₹)</label>
                                                     <input
                                                         type="number"
                                                         required
                                                         value={minPaidRate}
                                                         onChange={(e) => setMinPaidRate(e.target.value)}
                                                         placeholder="8500"
-                                                        className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-sky-500"
+                                                        className="w-full rounded-sm border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                                     />
                                                 </div>
                                             </div>
 
                                             <div className="space-y-1">
-                                                <label className="text-xs font-medium text-foreground">Short Bio</label>
+                                                <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Short Bio</label>
                                                 <textarea
                                                     rows={2}
                                                     value={creatorBio}
                                                     onChange={(e) => setCreatorBio(e.target.value)}
                                                     placeholder="Tell Goan brands what you create (e.g. Goan culinary heritage & cafe reviews)"
-                                                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-sky-500"
+                                                    className="w-full rounded-sm border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                                 />
                                             </div>
 
@@ -518,7 +518,7 @@ function JoinContent() {
                                                     id="barter"
                                                     checked={acceptsBarter}
                                                     onChange={(e) => setAcceptsBarter(e.target.checked)}
-                                                    className="size-4 rounded border-border text-sky-600 focus:ring-sky-500 cursor-pointer"
+                                                    className="size-4 rounded border-border text-primary focus:ring-primary cursor-pointer"
                                                 />
                                                 <label htmlFor="barter" className="text-xs text-foreground cursor-pointer select-none">
                                                     Open to curated barter collaborations (resort stays &amp; dining experiences)
@@ -528,21 +528,21 @@ function JoinContent() {
                                     )}
 
                                     {/* Account Credentials */}
-                                    <div className="pt-2 border-t border-border/60 space-y-3">
+                                    <div className="pt-2 border-t border-border space-y-3">
                                         <div className="space-y-1">
-                                            <label className="text-xs font-medium text-foreground">Email Address</label>
+                                            <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Email Address</label>
                                             <input
                                                 type="email"
                                                 required
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
                                                 placeholder="you@domain.com"
-                                                className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                className="w-full rounded-sm border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                             />
                                         </div>
 
                                         <div className="space-y-1">
-                                            <label className="text-xs font-medium text-foreground">Password (min 6 chars)</label>
+                                            <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Password (min 6 chars)</label>
                                             <input
                                                 type="password"
                                                 required
@@ -550,7 +550,7 @@ function JoinContent() {
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 placeholder="••••••••"
-                                                className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                className="w-full rounded-sm border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                             />
                                         </div>
                                     </div>
@@ -558,11 +558,7 @@ function JoinContent() {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className={`w-full font-semibold rounded-xl h-12 text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer text-white mt-6 transition-colors duration-150 ${
-                                            selectedRole === 'business'
-                                                ? 'bg-[#0c4e40] hover:bg-[#08382e]'
-                                                : 'bg-[#035f85] hover:bg-[#024966]'
-                                        }`}
+                                        className={`w-full font-medium rounded-sm h-12 text-sm flex items-center justify-center gap-2 shadow-sm cursor-pointer text-white mt-6 transition-colors duration-150 bg-primary hover:bg-primary/90`}
                                     >
                                         {loading ? (
                                             <>
@@ -590,7 +586,7 @@ export default function JoinPage() {
     return (
         <Suspense fallback={
             <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
-                <Loader2 className="size-6 animate-spin text-emerald-700 dark:text-emerald-400" />
+                <Loader2 className="size-6 animate-spin text-primary" />
             </div>
         }>
             <JoinContent />

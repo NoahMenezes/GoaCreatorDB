@@ -2,11 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import {
-    CheckCircle2,
-    Send,
-    Star,
-} from 'lucide-react'
+import { CheckCircle2, Send, Star } from 'lucide-react'
 
 export default function BusinessReviewsPage() {
     const [rating, setRating] = useState(5)
@@ -59,50 +55,48 @@ export default function BusinessReviewsPage() {
     }
 
     return (
-        <main className="space-y-6">
-            <div className="border border-border bg-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <main className="space-y-8">
+            <div className="border border-border bg-card p-6 rounded-sm shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
-                        Business Ratings &amp; Reviews
+                    <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+                        Business Ratings & Reviews
                     </h1>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                         Verified post-collaboration reviews between Café Palmeira and Goan creators
                     </p>
                 </div>
 
                 <div className="flex items-center gap-4 text-xs font-semibold self-start md:self-auto">
-                    <div className="border border-border p-2.5 bg-background text-center">
-                        <div className="text-lg font-black text-amber-500">5.0 ★★★★★</div>
+                    <div className="border border-border p-2.5 bg-background rounded-sm text-center">
+                        <div className="text-lg font-black text-primary">5.0</div>
                         <span className="text-[10px] text-muted-foreground uppercase">Average Given</span>
                     </div>
 
-                    <div className="border border-border p-2.5 bg-background text-center">
+                    <div className="border border-border p-2.5 bg-background rounded-sm text-center">
                         <div className="text-lg font-black text-primary">100%</div>
                         <span className="text-[10px] text-muted-foreground uppercase">On-Time Delivery</span>
                     </div>
                 </div>
             </div>
 
-            <div className="border border-border bg-card p-6 space-y-4">
+            <div className="border border-border bg-card p-6 rounded-sm shadow-sm space-y-4">
                 <div className="border-b border-border pb-3">
-                    <h2 className="text-base font-bold text-foreground">
-                        Leave a Collaboration Review
-                    </h2>
+                    <h2 className="text-sm font-bold text-foreground">Leave a Collaboration Review</h2>
                     <p className="text-xs text-muted-foreground">
                         Reviews can be submitted only once collaboration deliverables are completed and verified via escrow.
                     </p>
                 </div>
 
                 {submitted ? (
-                    <div className="p-4 border border-primary text-primary text-xs font-bold bg-primary/10">
-                        ✓ Review published to creator&apos;s verified public profile and synced to GoaConnect DBMS ledger.
+                    <div className="p-4 border border-primary bg-primary/5 text-primary text-xs font-bold rounded-sm">
+                        ✓ Review published to creator&apos;s verified public profile and synced to the GoaConnect escrow ledger.
                     </div>
                 ) : (
                     <form onSubmit={handleSubmitReview} className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-foreground">Completed Collaboration</label>
-                                <select className="w-full border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
+                                <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Completed Collaboration</label>
+                                <select className="w-full border border-border bg-background rounded-sm px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer">
                                     <option value="cr-sneha">Sneha Fernandes — Monsoon Tasting Menu (REQ-1042)</option>
                                     <option value="cr-alisha">Alisha D&apos;Cruz — Artisanal Cold Brew (REQ-1039)</option>
                                     <option value="cr-keith">Keith Sequeira — Live Fire Tapas (REQ-1035)</option>
@@ -110,16 +104,16 @@ export default function BusinessReviewsPage() {
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-foreground">Rating (1 to 5 Stars)</label>
+                                <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Rating (1 to 5 Stars)</label>
                                 <div className="flex items-center gap-1.5 pt-1">
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <button
                                             key={star}
                                             type="button"
                                             onClick={() => setRating(star)}
-                                            className="cursor-pointer text-amber-500 hover:scale-110 transition-transform"
+                                            className="cursor-pointer text-primary hover:scale-105 transition-transform"
                                         >
-                                            <Star className={`size-5 ${star <= rating ? 'fill-amber-500' : 'text-muted'}`} />
+                                            <Star className={`size-5 ${star <= rating ? 'fill-primary' : 'text-muted-foreground'}`} />
                                         </button>
                                     ))}
                                     <span className="text-xs font-bold text-muted-foreground ml-2">
@@ -130,20 +124,20 @@ export default function BusinessReviewsPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-foreground">Detailed Feedback &amp; Results</label>
+                            <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Detailed Feedback &amp; Results</label>
                             <textarea
                                 required
                                 rows={3}
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
                                 placeholder="Describe campaign reach, creator professionalism, footage quality, and guest engagement..."
-                                className="w-full border border-border bg-background p-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                                className="w-full border border-border bg-background rounded-sm p-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                             />
                         </div>
 
                         <button
                             type="submit"
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs px-5 py-2.5 flex items-center gap-2 cursor-pointer"
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs px-5 py-2.5 flex items-center gap-2 cursor-pointer rounded-sm shadow-sm transition-colors"
                         >
                             <Send className="size-3.5" />
                             <span>Publish Verified Review</span>
@@ -153,7 +147,7 @@ export default function BusinessReviewsPage() {
             </div>
 
             <div className="space-y-4">
-                <h2 className="text-base font-bold text-foreground">
+                <h2 className="text-sm font-bold text-foreground">
                     Reviews Published by Café Palmeira ({completedCollabs.length})
                 </h2>
 
@@ -161,11 +155,11 @@ export default function BusinessReviewsPage() {
                     {completedCollabs.map((rev) => (
                         <div
                             key={rev.creator}
-                            className="border border-border bg-card p-6 space-y-3 hover:border-primary transition-colors"
+                            className="border border-border bg-card p-5 rounded-sm shadow-sm space-y-3 hover:border-primary/50 transition-colors"
                         >
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
                                 <div className="flex items-center gap-3">
-                                    <div className="size-12 overflow-hidden border border-border shrink-0 relative">
+                                    <div className="size-12 overflow-hidden border border-border shrink-0 relative rounded-md">
                                         <Image
                                             unoptimized
                                             src={rev.avatar}
@@ -191,7 +185,7 @@ export default function BusinessReviewsPage() {
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <div className="flex text-amber-500 text-sm">
+                                    <div className="flex text-primary text-sm">
                                         {'★'.repeat(rev.rating)}
                                     </div>
                                     <span className="text-xs text-muted-foreground">{rev.reviewDate}</span>
@@ -205,7 +199,7 @@ export default function BusinessReviewsPage() {
                             <div className="flex items-center justify-between text-xs pt-2 border-t border-border text-muted-foreground">
                                 <div className="flex items-center gap-1.5 font-semibold text-primary">
                                     <CheckCircle2 className="size-3.5" />
-                                    <span>Verified DBMS Escrow Review</span>
+                                    <span>Verified Escrow Review</span>
                                 </div>
                                 <span className="font-bold text-foreground">{rev.reachResult}</span>
                             </div>

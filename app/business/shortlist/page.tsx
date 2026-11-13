@@ -3,11 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import {
-    CheckCircle2,
-    MapPin,
-    Trash2,
-} from 'lucide-react'
+import { CheckCircle2, MapPin, Trash2 } from 'lucide-react'
 
 export default function BusinessShortlistPage() {
     const [shortlist, setShortlist] = useState([
@@ -70,24 +66,24 @@ export default function BusinessShortlistPage() {
     }
 
     return (
-        <main className="space-y-6">
-            <div className="border border-border bg-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <main className="space-y-8">
+            <div className="border border-border bg-card p-6 rounded-sm shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
+                    <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                         Shortlisted Goan Creators
                     </h1>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
-                        Manage your saved creator bookmarks for upcoming weekend tasting &amp; holiday campaigns
+                    <p className="text-sm text-muted-foreground">
+                        Manage your saved creator bookmarks for upcoming weekend tasting and holiday campaigns
                     </p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <span className="border border-border bg-muted px-3 py-1.5 text-xs font-bold text-foreground">
+                    <span className="border border-border bg-muted px-3 py-1.5 text-xs font-bold text-foreground rounded-sm">
                         {shortlist.length} Creators Saved
                     </span>
                     <Link
                         href="/business/discover"
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs px-4 py-2 transition-colors"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm px-5 py-3 transition-colors rounded-sm shadow-sm"
                     >
                         + Discover More
                     </Link>
@@ -98,11 +94,11 @@ export default function BusinessShortlistPage() {
                 {shortlist.map((cr) => (
                     <div
                         key={cr.id}
-                        className="border border-border bg-card p-5 space-y-4 hover:border-primary transition-colors"
+                        className="border border-border bg-card p-5 rounded-sm shadow-sm space-y-4 hover:border-primary/50 transition-colors"
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="size-14 overflow-hidden border border-border shrink-0 relative">
+                                <div className="size-14 overflow-hidden border border-border shrink-0 relative rounded-md">
                                     <Image
                                         unoptimized
                                         src={cr.avatar}
@@ -120,7 +116,7 @@ export default function BusinessShortlistPage() {
                                     <span className="text-xs text-muted-foreground font-mono">{cr.handle}</span>
                                     <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
                                         <MapPin className="size-3 text-primary" />
-                                        <span>{cr.location} • {cr.niche}</span>
+                                        <span>{cr.location} &bull; {cr.niche}</span>
                                     </div>
                                 </div>
                             </div>
@@ -129,7 +125,7 @@ export default function BusinessShortlistPage() {
                                 type="button"
                                 onClick={() => handleRemove(cr.id)}
                                 aria-label="Remove from shortlist"
-                                className="size-8 border border-border flex items-center justify-center text-muted-foreground hover:text-rose-600 transition-colors cursor-pointer"
+                                className="size-8 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-sm transition-colors cursor-pointer"
                             >
                                 <Trash2 className="size-4" />
                             </button>
@@ -153,14 +149,14 @@ export default function BusinessShortlistPage() {
                         <div className="flex items-center gap-2 pt-1">
                             <Link
                                 href="/business/profile"
-                                className="flex-1 border border-border bg-background hover:bg-muted text-foreground text-center font-bold text-xs py-2 transition-colors"
+                                className="flex-1 border border-border bg-background hover:bg-muted text-foreground text-center font-bold text-xs py-2 transition-colors rounded-sm"
                             >
                                 View Profile &rarr;
                             </Link>
 
                             <Link
                                 href="/business/requests"
-                                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground text-center font-bold text-xs py-2 transition-colors"
+                                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground text-center font-bold text-xs py-2 transition-colors rounded-sm"
                             >
                                 Send Collab Request
                             </Link>

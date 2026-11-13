@@ -64,7 +64,7 @@ export default function BusinessDashboardPage() {
         {
             name: 'Rahul Naik',
             handle: '@rahul_eats_goa',
-            desc: 'Traditional Goan Poe Sliders & Taverna Story Sequence',
+            desc: 'Traditional Goan Poee Sliders & Taverna Story Sequence',
             type: 'Paid · ₹6,500',
             status: 'PENDING',
             date: 'Responded: 4h ago',
@@ -107,17 +107,17 @@ export default function BusinessDashboardPage() {
     ]
 
     return (
-        <main className="space-y-8">
+        <main className="space-y-10">
             {/* 1. Header Banner */}
-            <div className="border border-border bg-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-1">
+            <div className="border border-border bg-card p-6 rounded-sm shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
                         <Store className="size-5 text-primary" />
-                        <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
+                        <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                             Welcome back, Café Palmeira
                         </h1>
                     </div>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                         Calangute, North Goa · Verified Partner · Peak Season
                     </p>
                 </div>
@@ -125,7 +125,7 @@ export default function BusinessDashboardPage() {
                 <div className="flex items-center gap-3">
                     <Link
                         href="/business/discover"
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs px-5 py-2.5 flex items-center gap-1.5 transition-colors"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm px-5 py-3 flex items-center gap-2 transition-colors rounded-sm shadow-sm"
                     >
                         <span>Discover Creators</span>
                         <ChevronRight className="size-4" />
@@ -133,7 +133,7 @@ export default function BusinessDashboardPage() {
 
                     <Link
                         href="/business/requests"
-                        className="border border-border bg-background hover:bg-muted font-bold text-xs px-4 py-2.5 flex items-center gap-1.5 transition-colors text-foreground"
+                        className="border border-border bg-background hover:bg-muted font-medium text-sm px-4 py-3 flex items-center gap-2 transition-colors text-foreground rounded-sm"
                     >
                         <Send className="size-4" />
                         <span>View Requests</span>
@@ -148,22 +148,20 @@ export default function BusinessDashboardPage() {
                     return (
                         <div
                             key={card.title}
-                            className="border border-border bg-card p-5 space-y-2"
+                            className="border border-border bg-card p-5 space-y-2 rounded-sm shadow-sm"
                         >
                             <div className="flex items-start justify-between gap-2">
                                 <div className="space-y-0.5">
-                                    <span className="text-[11px] font-bold uppercase text-muted-foreground tracking-wider block">
+                                    <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider block">
                                         {card.title}
                                     </span>
-                                    <span className="text-[11px] text-muted-foreground block">
-                                        {card.sub}
-                                    </span>
+                                    <span className="text-[10px] text-muted-foreground block">{card.sub}</span>
                                 </div>
-                                <div className="size-8 flex items-center justify-center border border-border bg-background">
+                                <div className="size-8 flex items-center justify-center rounded-md border border-border bg-background">
                                     <Icon className="size-4 text-primary" />
                                 </div>
                             </div>
-                            <div className="text-3xl font-black text-foreground tracking-tight pt-1">
+                            <div className="text-2xl sm:text-3xl font-black text-foreground tracking-tight pt-1">
                                 {card.value}
                             </div>
                         </div>
@@ -172,12 +170,10 @@ export default function BusinessDashboardPage() {
             </section>
 
             {/* 3. Active Collaboration Workflow */}
-            <section className="border border-border bg-card p-6 space-y-6">
+            <section className="border border-border bg-card p-6 rounded-sm shadow-sm space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
                     <div>
-                        <h2 className="text-base font-bold text-foreground">
-                            Active Collaborations
-                        </h2>
+                        <h2 className="text-sm font-bold text-foreground">Active Collaborations</h2>
                         <p className="text-xs text-muted-foreground">
                             Campaign briefs, dates, and escrow milestones
                         </p>
@@ -196,10 +192,10 @@ export default function BusinessDashboardPage() {
                     {collabRows.map((row) => (
                         <div
                             key={row.name}
-                            className="border border-border p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-primary transition-colors bg-background"
+                            className="border border-border p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-primary/50 transition-colors bg-background"
                         >
                             <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                                <div className="size-10 shrink-0 bg-secondary text-secondary-foreground flex items-center justify-center text-white font-bold text-xs border border-border">
+                                <div className="size-10 shrink-0 rounded-sm bg-primary text-primary-foreground flex items-center justify-center text-white font-bold text-xs border border-primary/20">
                                     {row.name.split(' ').map((n) => n[0]).join('')}
                                 </div>
                                 <div className="min-w-0 flex-1">
@@ -222,7 +218,7 @@ export default function BusinessDashboardPage() {
                                     {row.type}
                                 </span>
 
-                                <span className="text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider border border-border text-primary border-primary">
+                                <span className="text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider border border-primary/20 text-primary bg-primary/5">
                                     {row.status}
                                 </span>
 
@@ -232,7 +228,7 @@ export default function BusinessDashboardPage() {
 
                                 <Link
                                     href="/business/profile"
-                                    className="border border-border bg-background hover:bg-muted text-foreground text-xs font-bold px-3 py-1.5 transition-colors flex items-center gap-1"
+                                    className="border border-border bg-background hover:bg-muted text-foreground text-xs font-bold px-3 py-1.5 transition-colors flex items-center gap-1 rounded-sm"
                                 >
                                     <span>View Profile</span>
                                     <ExternalLink className="size-3" />
@@ -244,12 +240,10 @@ export default function BusinessDashboardPage() {
             </section>
 
             {/* 4. Curated Recommendations */}
-            <section className="border border-border bg-card p-6 space-y-4">
+            <section className="border border-border bg-card p-6 rounded-sm shadow-sm space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
                     <div>
-                        <h2 className="text-base font-bold text-foreground">
-                            Recommended Creators
-                        </h2>
+                        <h2 className="text-sm font-bold text-foreground">Recommended Creators</h2>
                         <p className="text-xs text-muted-foreground">
                             Creators for Calangute gastronomy, heritage courtyards, artisanal coffee
                         </p>
@@ -271,12 +265,12 @@ export default function BusinessDashboardPage() {
                         return (
                             <div
                                 key={creator.name}
-                                className="border border-border p-5 space-y-4 bg-background hover:border-primary transition-colors flex flex-col justify-between"
+                                className="border border-border p-5 space-y-4 bg-background rounded-sm shadow-sm hover:border-primary/50 transition-colors flex flex-col justify-between"
                             >
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2.5">
-                                            <div className="size-9 shrink-0 bg-secondary text-secondary-foreground flex items-center justify-center text-white font-bold text-xs border border-border">
+                                            <div className="size-9 shrink-0 rounded-sm bg-primary text-primary-foreground flex items-center justify-center text-white font-bold text-xs border border-primary/20">
                                                 {creator.name.split(' ').map((n) => n[0]).join('')}
                                             </div>
                                             <div>
@@ -293,9 +287,10 @@ export default function BusinessDashboardPage() {
                                             type="button"
                                             onClick={() => toggleBookmark(creator.name)}
                                             aria-label="Bookmark creator"
-                                            className={`size-8 border flex items-center justify-center cursor-pointer transition-colors ${isShortlisted
-                                                ? 'border-primary text-primary'
-                                                : 'border-border text-muted-foreground hover:text-foreground'
+                                            className={`size-8 border flex items-center justify-center cursor-pointer transition-colors rounded-sm ${
+                                                isShortlisted
+                                                    ? 'border-primary text-primary bg-primary/5'
+                                                    : 'border-border text-muted-foreground hover:text-primary hover:border-primary/50'
                                             }`}
                                         >
                                             <Bookmark className={`size-4 ${isShortlisted ? 'fill-current' : ''}`} />
@@ -306,7 +301,7 @@ export default function BusinessDashboardPage() {
                                         {creator.tags.map((tag) => (
                                             <span
                                                 key={tag}
-                                                className="px-2 py-0.5 text-[10px] font-semibold bg-muted border border-border text-muted-foreground"
+                                                className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-muted border border-border text-muted-foreground"
                                             >
                                                 {tag}
                                             </span>
@@ -314,7 +309,7 @@ export default function BusinessDashboardPage() {
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-2 pt-1">
-                                        <div className="bg-muted p-2.5 border border-border">
+                                        <div className="p-2.5 rounded-sm bg-muted border border-border/60">
                                             <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider block">
                                                 Reach
                                             </span>
@@ -322,7 +317,7 @@ export default function BusinessDashboardPage() {
                                                 {creator.reach}
                                             </span>
                                         </div>
-                                        <div className="bg-muted p-2.5 border border-border">
+                                        <div className="p-2.5 rounded-sm bg-muted border border-border/60">
                                             <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider block">
                                                 Engagement
                                             </span>
@@ -332,7 +327,7 @@ export default function BusinessDashboardPage() {
                                         </div>
                                     </div>
 
-                                    <div className="bg-muted p-2.5 border border-border flex items-center justify-between text-xs">
+                                    <div className="p-2.5 rounded-sm bg-muted border border-border/60 flex items-center justify-between text-xs">
                                         <span className="font-bold text-muted-foreground uppercase text-[10px]">
                                             Base Rate
                                         </span>
@@ -344,7 +339,7 @@ export default function BusinessDashboardPage() {
 
                                 <Link
                                     href="/business/requests"
-                                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs py-2.5 flex items-center justify-center gap-2 transition-colors"
+                                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-xs py-2.5 flex items-center justify-center gap-2 transition-colors rounded-sm shadow-sm"
                                 >
                                     <Send className="size-3.5" />
                                     <span>Send Collab Request</span>

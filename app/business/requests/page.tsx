@@ -3,10 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import {
-    Plus,
-    ShieldCheck,
-} from 'lucide-react'
+import { Plus, ShieldCheck } from 'lucide-react'
 
 export default function BusinessRequestsPage() {
     const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'accepted' | 'completed'>('all')
@@ -23,7 +20,6 @@ export default function BusinessRequestsPage() {
             offeredAmount: '₹14,000 + Weekend Brunch Table',
             status: 'accepted',
             statusLabel: 'Accepted • Shoot Scheduled',
-            statusBadge: 'border-primary text-primary bg-primary/10',
             date: 'Shoot: Oct 28, 2026',
             escrowStatus: '₹14,000 Locked in Escrow',
             deadline: 'Final Draft Due: Nov 02, 2026',
@@ -39,7 +35,6 @@ export default function BusinessRequestsPage() {
             offeredAmount: '₹6,500',
             status: 'pending',
             statusLabel: 'Pending Creator Response',
-            statusBadge: 'border-border text-muted-foreground bg-background',
             date: 'Requested: Yesterday',
             escrowStatus: '₹6,500 Reserved',
             deadline: 'Response Window: 24h Remaining',
@@ -55,7 +50,6 @@ export default function BusinessRequestsPage() {
             offeredAmount: '₹5,500 + Pastry Box',
             status: 'completed',
             statusLabel: 'Completed & Escrow Paid',
-            statusBadge: 'border-primary text-primary bg-primary/10',
             date: 'Published: Oct 15, 2026',
             escrowStatus: '₹5,500 Released via Escrow',
             deadline: 'Result: 54,200 Organic Views • 8.4% ER',
@@ -71,7 +65,6 @@ export default function BusinessRequestsPage() {
             offeredAmount: '₹11,000 + Chef Tasting Table',
             status: 'completed',
             statusLabel: 'Completed & Escrow Paid',
-            statusBadge: 'border-primary text-primary bg-primary/10',
             date: 'Published: Sep 29, 2026',
             escrowStatus: '₹11,000 Released via Escrow',
             deadline: 'Result: 72,100 Organic Views • 5.0 Rating Left',
@@ -84,27 +77,27 @@ export default function BusinessRequestsPage() {
     })
 
     return (
-        <main className="space-y-6">
-            <div className="border border-border bg-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <main className="space-y-8">
+            <div className="border border-border bg-card p-6 rounded-sm shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
-                        Collaboration Requests &amp; Deals
+                    <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+                        Collaboration Requests & Deals
                     </h1>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                         Track campaign briefs, dates, status, deliverables, and escrow milestones
                     </p>
                 </div>
 
                 <Link
                     href="/business/discover"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs px-4 py-2.5 flex items-center gap-1.5 transition-colors self-start md:self-auto"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm px-5 py-3 flex items-center gap-2 transition-colors rounded-sm shadow-sm self-start md:self-auto"
                 >
                     <Plus className="size-4" />
                     <span>New Booking Request</span>
                 </Link>
             </div>
 
-            <div className="flex flex-wrap gap-2 border-b border-border pb-2">
+            <div className="flex flex-wrap gap-2 border-b border-border pb-3">
                 {[
                     { id: 'all', label: `All Requests (${requests.length})` },
                     { id: 'pending', label: 'Pending Response (1)' },
@@ -115,10 +108,10 @@ export default function BusinessRequestsPage() {
                         key={tab.id}
                         type="button"
                         onClick={() => setStatusFilter(tab.id as typeof statusFilter)}
-                        className={`px-4 py-2 text-xs font-bold transition-colors cursor-pointer border ${
+                        className={`px-4 py-2 text-xs font-bold transition-colors cursor-pointer rounded-sm border ${
                             statusFilter === tab.id
                                 ? 'bg-primary text-primary-foreground border-primary'
-                                : 'bg-card text-muted-foreground border-border hover:text-foreground'
+                                : 'bg-background text-muted-foreground border-border hover:text-foreground hover:bg-muted'
                         }`}
                     >
                         {tab.label}
@@ -130,11 +123,11 @@ export default function BusinessRequestsPage() {
                 {filteredRequests.map((req) => (
                     <div
                         key={req.id}
-                        className="border border-border bg-card p-6 space-y-4 hover:border-primary transition-colors"
+                        className="border border-border bg-card p-5 rounded-sm shadow-sm space-y-4 hover:border-primary/50 transition-colors"
                     >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
                             <div className="flex items-center gap-3">
-                                <div className="size-12 overflow-hidden border border-border shrink-0 relative">
+                                <div className="size-12 overflow-hidden border border-border shrink-0 relative rounded-md">
                                     <Image
                                         unoptimized
                                         src={req.avatar}
@@ -157,13 +150,19 @@ export default function BusinessRequestsPage() {
                                         </span>
                                     </div>
                                     <div className="text-xs text-muted-foreground">
-                                        Collab Type: <strong className="text-foreground">{req.collabType}</strong> • Offer: <strong className="text-foreground">{req.offeredAmount}</strong>
+                                        Collab Type: <strong className="text-foreground">{req.collabType}</strong> &bull; Offer: <strong className="text-foreground">{req.offeredAmount}</strong>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <span className={`text-[10px] font-bold px-2.5 py-1 uppercase tracking-wider ${req.statusBadge}`}>
+                                <span className={`text-[10px] font-bold px-2.5 py-1 uppercase tracking-wider rounded-sm border ${
+                                    req.status === 'accepted'
+                                        ? 'border-primary/20 text-primary bg-primary/5'
+                                        : req.status === 'pending'
+                                        ? 'border-border text-muted-foreground bg-background'
+                                        : 'border-primary/20 text-primary bg-primary/5'
+                                }`}>
                                     {req.statusLabel}
                                 </span>
                             </div>
@@ -177,7 +176,7 @@ export default function BusinessRequestsPage() {
                                 {req.deliverables.map((deliv) => (
                                     <span
                                         key={deliv}
-                                        className="border border-border bg-muted px-2.5 py-1 text-muted-foreground font-medium"
+                                        className="border border-border bg-muted px-2.5 py-1 rounded-sm text-muted-foreground font-medium"
                                     >
                                         ✓ {deliv}
                                     </span>
@@ -198,14 +197,14 @@ export default function BusinessRequestsPage() {
                             <div className="flex items-center gap-2">
                                 <Link
                                     href="/business/profile"
-                                    className="border border-border bg-background hover:bg-muted font-bold text-xs px-3 py-1.5 text-foreground transition-colors"
+                                    className="border border-border bg-background hover:bg-muted font-medium text-xs px-3 py-1.5 text-foreground transition-colors rounded-sm"
                                 >
                                     Creator Profile &rarr;
                                 </Link>
                                 <button
                                     type="button"
                                     onClick={() => alert(`Direct escrow messaging opened for ${req.id}`)}
-                                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs px-3 py-1.5 transition-colors cursor-pointer"
+                                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-xs px-3 py-1.5 transition-colors cursor-pointer rounded-sm"
                                 >
                                     Campaign Chat
                                 </button>
