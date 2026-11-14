@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: goacreatordb_postgres
+    environment:
+      POSTGRES_USER: goacreator
+      POSTGRES_PASSWORD: goacreator_secret_password
+      POSTGRES_DB: goacreatordb
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U goacreator -d goacreatordb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+
