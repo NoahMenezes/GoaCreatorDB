@@ -246,15 +246,21 @@ export default function BusinessRequestsPage() {
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <h3 className="text-sm font-bold text-foreground">
+                                            <Link
+                                                href={`/business/requests/${req.request_id}`}
+                                                className="text-sm font-bold text-foreground hover:text-primary hover:underline transition-colors"
+                                            >
                                                 {req.creator_name}
-                                            </h3>
+                                            </Link>
                                             <span className="text-xs text-muted-foreground font-mono">
                                                 {req.creator_handle ? `@${req.creator_handle.replace(/^@/, '')}` : `@creator_${req.creator_id}`}
                                             </span>
-                                            <span className="text-[10px] text-muted-foreground border border-border px-1.5 py-0.5 font-mono">
+                                            <Link
+                                                href={`/business/requests/${req.request_id}`}
+                                                className="text-[10px] text-muted-foreground border border-border px-1.5 py-0.5 font-mono hover:border-primary hover:text-primary transition-colors"
+                                            >
                                                 REQ-{req.request_id}
-                                            </span>
+                                            </Link>
                                         </div>
                                         <div className="text-xs text-muted-foreground">
                                             Collab Type: <strong className="text-foreground capitalize">{req.collab_type}</strong> &bull; Offer: <strong className="text-foreground">{formatOfferedAmount(req)}</strong>
@@ -314,10 +320,16 @@ export default function BusinessRequestsPage() {
 
                                 <div className="flex items-center gap-2">
                                     <Link
+                                        href={`/business/requests/${req.request_id}`}
+                                        className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-xs px-3 py-1.5 transition-colors rounded-sm"
+                                    >
+                                        View Details &rarr;
+                                    </Link>
+                                    <Link
                                         href={`/business/discover?q=${encodeURIComponent(req.creator_name)}`}
                                         className="border border-border bg-background hover:bg-muted font-medium text-xs px-3 py-1.5 text-foreground transition-colors rounded-sm"
                                     >
-                                        Creator Profile &rarr;
+                                        Profile
                                     </Link>
 
                                     {req.status === 'accepted' && (

@@ -89,6 +89,12 @@ export async function GET(request: Request) {
       conditions.push(`(r.reviewer_id = $${params.length} OR r.reviewee_id = $${params.length})`)
     }
 
+    const requestIdParam = searchParams.get('request_id')
+    if (requestIdParam && !isNaN(Number(requestIdParam))) {
+      params.push(Number(requestIdParam))
+      conditions.push(`r.request_id = $${params.length}`)
+    }
+
     if (searchParams.get('with-comments') === 'true') {
       conditions.push("r.comment IS NOT NULL AND TRIM(r.comment) <> ''")
     }

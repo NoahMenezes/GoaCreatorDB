@@ -199,9 +199,12 @@ export default function CreatorRequestsPage() {
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <h3 className="text-sm font-bold text-foreground">
+                                            <Link
+                                                href={`/creator/requests/${req.request_id}`}
+                                                className="text-sm font-bold text-foreground hover:text-primary hover:underline transition-colors"
+                                            >
                                                 {req.business_name}
-                                            </h3>
+                                            </Link>
                                             <span className="text-[10px] text-muted-foreground font-mono">
                                                 #REQ-{req.request_id}
                                             </span>
@@ -279,19 +282,18 @@ export default function CreatorRequestsPage() {
                                     </div>
                                 ) : (
                                     <Link
-                                        href="/creator/collaborations"
+                                        href={`/creator/requests/${req.request_id}`}
                                         className="flex-1 border border-border bg-background hover:bg-muted font-medium text-xs px-4 py-2 transition-colors text-foreground rounded-sm text-center"
                                     >
-                                        View Collaboration
+                                        View Details
                                     </Link>
                                 )}
-                                <button
-                                    type="button"
-                                    onClick={() => setSelectedBrief(req)}
+                                <Link
+                                    href={`/creator/requests/${req.request_id}`}
                                     className="text-xs text-muted-foreground hover:text-primary underline decoration-primary/30 cursor-pointer"
                                 >
-                                    View Full Brief &rarr;
-                                </button>
+                                    View Full Details &rarr;
+                                </Link>
                             </div>
                         </div>
                     ))

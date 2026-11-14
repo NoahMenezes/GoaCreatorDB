@@ -27,7 +27,13 @@ export async function GET(
         b.industry,
         b.contact_phone,
         b.instagram_handle AS business_instagram,
+        lb.area_name AS business_area,
+        lb.taluka AS business_taluka,
+        lb.district AS business_district,
         c.full_name AS creator_name,
+        lc.area_name AS creator_area,
+        lc.taluka AS creator_taluka,
+        lc.district AS creator_district,
         ub.user_id AS business_user_id,
         uc.user_id AS creator_user_id,
         ub.email AS business_email,
@@ -35,6 +41,8 @@ export async function GET(
        FROM collaboration_requests cr
        JOIN businesses b ON cr.business_id = b.business_id
        JOIN creators c ON cr.creator_id = c.creator_id
+       LEFT JOIN locations lb ON b.location_id = lb.location_id
+       LEFT JOIN locations lc ON c.location_id = lc.location_id
        JOIN users ub ON b.user_id = ub.user_id
        JOIN users uc ON c.user_id = uc.user_id
        WHERE cr.request_id = $1`,
@@ -58,6 +66,25 @@ export async function GET(
         { status: 404 }
       )
     }
+
+    // Fetch existing reviews for this request
+    const reviewRes = await query(
+      `SELECT
+        r.review_id,
+        r.request_id,
+        r.reviewer_id,
+        r.reviewee_id,
+        r.rating,
+        r.comment,
+        r.created_at,
+        u.role AS reviewer_role
+       FROM reviews r
+       JOIN users u ON r.reviewer_id = u.user_id
+       WHERE r.request_id = $1
+       ORDER BY r.created_at ASC`,
+      [requestId]
+    )
+    row.reviews = reviewRes.rows
 
     // Privacy rules:
     // 1. Business contact_phone is only visible to creator if request is accepted or completed

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { ChevronRight, ShieldCheck, AlertCircle, RefreshCw, Loader2, MessageSquare } from 'lucide-react'
 
 interface CollaborationItem {
@@ -197,14 +198,13 @@ export default function CreatorCollaborationsPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <button
-                                                type="button"
-                                                onClick={() => setSelectedCollab(col)}
+                                            <Link
+                                                href={`/creator/requests/${col.request_id}`}
                                                 className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
                                             >
                                                 <span>Details</span>
                                                 <ChevronRight className="size-3.5" />
-                                            </button>
+                                            </Link>
                                         </td>
                                     </tr>
                                 ))}

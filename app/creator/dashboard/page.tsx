@@ -293,7 +293,7 @@ export default function CreatorDashboardPage() {
                                             </div>
                                             <div className="flex gap-2">
                                                 <Link
-                                                    href="/creator/requests"
+                                                    href={`/creator/requests/${req.request_id}`}
                                                     className="border border-border bg-background text-foreground text-xs font-bold px-4 py-2.5 rounded-sm transition-colors hover:bg-muted"
                                                 >
                                                     View Details
