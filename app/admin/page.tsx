@@ -60,26 +60,6 @@ interface DashboardData {
     top_businesses: TopBusinessRow[]
 }
 
-function TrustBadge({ score }: { score: number }) {
-    if (score >= 75)
-        return (
-            <span className="px-2 py-0.5 text-[10px] font-bold uppercase border border-primary/30 bg-primary/10 text-primary">
-                LOW
-            </span>
-        )
-    if (score >= 45)
-        return (
-            <span className="px-2 py-0.5 text-[10px] font-bold uppercase border border-warning/30 bg-warning/10 text-warning">
-                MEDIUM
-            </span>
-        )
-    return (
-        <span className="px-2 py-0.5 text-[10px] font-bold uppercase border border-destructive/30 bg-destructive/10 text-destructive">
-            HIGH
-        </span>
-    )
-}
-
 export default function AdminOverviewPage() {
     const [data, setData] = useState<DashboardData | null>(null)
     const [loading, setLoading] = useState(true)
@@ -157,6 +137,10 @@ export default function AdminOverviewPage() {
                 <p className="text-sm text-muted-foreground">
                     GoaConnect platform-wide metrics, verification queue, and ecosystem health.
                 </p>
+                <div className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs rounded-sm">
+                    <span className="font-bold uppercase tracking-wider text-[10px]">Demo Data Notice:</span>
+                    <span>All creator accounts, venues, metrics, and verifications displayed in this administration console are simulated test fixtures.</span>
+                </div>
             </div>
 
             {/* KPI Cards */}

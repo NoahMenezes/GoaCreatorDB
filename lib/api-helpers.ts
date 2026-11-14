@@ -3,5 +3,6 @@
  * Kept only for graceful backward-compatibility during call-site refactoring.
  */
 export function saveAndClose(_db?: unknown): void {
+  void _db
   // No-op in PostgreSQL data layer
 }

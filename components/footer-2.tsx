@@ -61,7 +61,7 @@ export default function Footer() {
                             </Link>
                             <Link
                                 href="#creators"
-                                aria-label="Reels & Visuals"
+                                aria-label="Visuals & Campaigns"
                                 className="size-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors"
                             >
                                 <Camera className="size-4" />
@@ -134,8 +134,13 @@ export default function Footer() {
                     </div>
                 </div>
 
+                {/* Demo Data Notice */}
+                <div className="mt-8 py-2.5 px-4 border border-dashed border-border bg-muted/40 rounded-sm text-center text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">Demo Data:</span> All business and creator profiles on this platform are simulated and fictional for demonstration and evaluation purposes.
+                </div>
+
                 {/* Bottom Row */}
-                <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row text-xs text-muted-foreground">
+                <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row text-xs text-muted-foreground">
                     <div>
                         &copy; 2026 GoaConnect Marketplace. Handcrafted for the coastal creative economy.
                     </div>

@@ -13,7 +13,7 @@ export async function GET() {
       categories: cats.rows,
       locations: locs.rows,
     })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch taxonomy' },
       { status: 500 }

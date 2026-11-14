@@ -2,7 +2,7 @@
 
 > **The Premier Platform for Creators, Luxury Stays & Hospitality Brands in Goa.**
 
-GoaConnect is a production-grade creator collaboration and discovery platform connecting storytellers, filmmakers, lifestyle creators, boutique villas, culinary experiences, and hospitality brands across North and South Goa. Discover brand partnerships, gain access to verified shoot locations across all 12 Goa talukas, manage negotiation workflows, and collaborate with escrow-backed transparency.
+GoaConnect is a production-grade creator collaboration and discovery platform connecting storytellers, filmmakers, lifestyle creators, boutique villas, culinary experiences, and hospitality brands across North and South Goa. Discover brand partnerships, gain access to verified shoot locations across all 12 Goa talukas, manage negotiation workflows, and collaborate with milestone-backed transparency.
 
 ---
 
@@ -86,7 +86,7 @@ All business tables employ `INT GENERATED ALWAYS AS IDENTITY` primary keys, expl
 5. **`creators`**: Influencer/creator profiles (`user_id UNIQUE FK`, `full_name`, `bio`, `location_id FK`, `accepts_barter`, `min_paid_rate >= 0`).
 6. **`creator_categories`**: Many-to-many junction (`creator_id FK`, `category_id FK`, `is_primary`, `PRIMARY KEY (creator_id, category_id)`). Exactly one primary category enforced per creator.
 7. **`social_accounts`**: Connected platforms (`creator_id FK`, `platform IN ('instagram','youtube')`, `handle`, `profile_url`, `UNIQUE (creator_id, platform)`).
-8. **`creator_metrics`**: Append-only engagement time-series (`account_id FK`, `follower_count`, `avg_views`, `avg_likes`, `avg_comments`, `engagement_rate`, `audience_goa_pct`, `data_source IN ('self_reported','api_synced','admin_verified')`, `verified_by FK`, `recorded_at`).
+8. **`creator_metrics`**: Append-only engagement time-series (`account_id FK`, `follower_count`, `avg_views`, `avg_likes`, `avg_comments`, `engagement_rate`, `audience_goa_pct`, `data_source IN ('self_reported','admin_verified')`, `verified_by FK`, `recorded_at`).
 9. **`collaboration_requests`**: Campaign agreements & state machine (`business_id FK`, `creator_id FK`, `collab_type IN ('paid','barter','hybrid')`, `offered_amount`, `deliverables`, `offer_details`, `message`, `deadline DATE`, `status IN ('pending','accepted','rejected','completed','cancelled')`, `requested_at`, `responded_at`).
 10. **`reviews`**: Two-sided verified feedback (`request_id UNIQUE FK`, `reviewer_id FK`, `reviewee_id FK`, `rating BETWEEN 1 AND 5`, `comment`, `created_at`). Only allowed on completed deals.
 11. **`shortlists`**: Business candidate bookmarks (`business_id FK`, `creator_id FK`, `note`, `saved_at`, `PRIMARY KEY (business_id, creator_id)`).
@@ -157,6 +157,7 @@ cp .env.example .env
 Ensure `.env` matches:
 ```env
 DATABASE_URL=postgresql://goacreator:goacreator_secret_password@localhost:5433/goacreatordb
+AUTH_SECRET=demo_auth_secret_must_be_configured_in_production_32chars
 ```
 
 ### 3. Launch PostgreSQL Container
@@ -170,10 +171,11 @@ docker compose ps
 
 ### 4. Run Migrations & Seed Database
 ```bash
-# Execute pure SQL migrations tracked in schema_migrations
-bun run db:migrate
+# Option A: One-command demo reset (resets schema, runs migrations, and seeds demo data)
+bun run demo:reset
 
-# Seed demo users, curated Goa creators, businesses, and sample collaborations
+# Option B: Individual step-by-step commands
+bun run db:migrate
 bun run db:seed
 ```
 
@@ -191,8 +193,8 @@ The seeded database contains pre-configured accounts for all three roles:
 
 | Role | Email | Password | Entity & Context |
 |------|-------|----------|-------------------|
-| **Business** | `palmeira@goaconnect.in` | `business123` | **Café Palmeira** (Calangute, North Goa) |
-| **Creator** | `rahul@goaconnect.in` | `creator123` | **Rahul Naik** (Culinary & Food Creator, 52k followers) |
+| **Business** | `palmeira@goaconnect.in` | `business123` | **Café Palmeira (Demo Fictional)** (Calangute, North Goa) |
+| **Creator** | `rahul@goaconnect.in` | `creator123` | **Rahul Naik (Demo Fictional)** (Culinary & Food Creator) |
 | **Admin** | `admin@goaconnect.in` | `admin123` | **System Administrator** |
 
 ---
@@ -291,7 +293,7 @@ All endpoints return JSON responses in the standard `{ success: boolean, data?: 
 The platform features a rigorous 4-tier testing hierarchy with complete database isolation:
 
 ```bash
-# Run unit, API, and DB constraint tests together (172 tests total)
+# Run unit, API, and DB constraint tests together (176 tests total + ERD check)
 bun run test
 
 # 1. Unit Tests (Password hashing, token generation, Zod schemas)
@@ -327,7 +329,7 @@ bun x playwright install chromium
 bun run test:e2e
 ```
 Flows verified:
-- **Flow A (`e2e/01-business-request.spec.ts`)**: Business logs in, discovers creators via directory, opens collaboration modal, and submits an escrow-backed proposal.
+- **Flow A (`e2e/01-business-request.spec.ts`)**: Business logs in, discovers creators via directory, opens collaboration modal, and submits a collaboration proposal.
 - **Flow B (`e2e/02-creator-accept.spec.ts`)**: Creator logs in, reviews the incoming proposal, and accepts it.
 - **Flow C (`e2e/03-business-complete-review.spec.ts`)**: Business marks accepted collaboration as completed, navigates to reviews, and publishes a verified 5-star rating.
 - **Flow D (`e2e/04-admin-verify.spec.ts`)**: Administrator reviews pending verifications, approves an unverified user account, and approves self-reported creator metrics.

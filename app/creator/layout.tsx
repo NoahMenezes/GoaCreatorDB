@@ -83,8 +83,8 @@ export default function CreatorLayout({
                             SF
                         </div>
                         <div className="text-left flex-1 min-w-0">
-                            <div className="text-xs font-bold text-foreground truncate">Sneha Fernandes</div>
-                            <div className="text-[10px] text-muted-foreground truncate">@sneha_curates · Assagao</div>
+                            <div className="text-xs font-bold text-foreground truncate">Sneha Ferns (Demo Fictional)</div>
+                            <div className="text-[10px] text-muted-foreground truncate">@sneha_demo · Assagao</div>
                         </div>
                     </div>
                     <button

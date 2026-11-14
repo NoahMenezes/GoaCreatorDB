@@ -79,7 +79,7 @@ export async function seedDatabase() {
   // 5. Seed Hand-curated Businesses & Creators
   console.log('🏢 Seeding hand-curated and demo accounts...')
 
-  // Demo Business: Café Palmeira
+  // Demo Business: Café Palmeira (Demo Fictional)
   const palmeiraLocId = findLocation('Calangute')
   const palmeiraUserRes = await query<{ user_id: number }>(
     `INSERT INTO users (email, password_hash, role, is_verified)
@@ -96,16 +96,16 @@ export async function seedDatabase() {
     [
       palmeiraUserId,
       palmeiraLocId,
-      'Café Palmeira',
+      'Café Palmeira (Demo Fictional)',
       'Food & Beach Dining',
-      'Authentic Portuguese-Goan bistro in Calangute with artisan sourdough & coffee.',
+      'Fictional Portuguese-Goan bistro in Calangute with artisan sourdough & coffee (Demo Data).',
       '+91 98221 44556',
-      '@cafepalmeiragoa',
+      '@cafepalmeira_demo',
     ]
   )
   const palmeiraBizId = palmeiraBizRes.rows[0].business_id
 
-  // Demo Creator: Rahul Naik
+  // Demo Creator: Rahul Naik (Demo Fictional)
   const rahulLocId = findLocation('Panjim')
   const rahulUserRes = await query<{ user_id: number }>(
     `INSERT INTO users (email, password_hash, role, is_verified)
@@ -121,8 +121,8 @@ export async function seedDatabase() {
     [
       rahulUserId,
       rahulLocId,
-      'Rahul Naik',
-      'Documenting Goan tavernas, Portuguese bakeries, and modern coastal culinary bars.',
+      'Rahul Naik (Demo Fictional)',
+      'Fictional food creator documenting Goan tavernas, bakeries, and coastal culinary bars (Demo Data).',
     ]
   )
   const rahulCreatorId = rahulCreatorRes.rows[0].creator_id
@@ -138,13 +138,13 @@ export async function seedDatabase() {
   )
   const rahulInstaRes = await query<{ account_id: number }>(
     `INSERT INTO social_accounts (creator_id, platform, handle, profile_url)
-     VALUES ($1, 'instagram', '@rahul.goanbites', 'https://instagram.com/rahul.goanbites')
+     VALUES ($1, 'instagram', '@rahul_demo', 'https://instagram.com/rahul_demo')
      RETURNING account_id`,
     [rahulCreatorId]
   )
   const rahulYoutubeRes = await query<{ account_id: number }>(
     `INSERT INTO social_accounts (creator_id, platform, handle, profile_url)
-     VALUES ($1, 'youtube', '@RahulGoanBites', 'https://youtube.com/@RahulGoanBites')
+     VALUES ($1, 'youtube', '@RahulDemoBites', 'https://youtube.com/@RahulDemoBites')
      RETURNING account_id`,
     [rahulCreatorId]
   )
@@ -166,65 +166,65 @@ export async function seedDatabase() {
 
   const curatedCreators: CuratedCreator[] = [
     {
-      name: 'Sneha Fernandes',
+      name: 'Sneha Ferns (Demo Fictional)',
       email: 'sneha@goaconnect.in',
       area: 'Assagao',
-      bio: 'Highlighting private Portuguese estates, heritage villas, and luxury tropical interiors.',
+      bio: 'Fictional creator highlighting private Portuguese estates, heritage villas, and luxury tropical interiors (Demo Data).',
       minRate: 14000,
       barter: false,
       primaryCat: 'Travel',
       secondaryCat: 'Fashion',
-      handle: '@sneha_curates',
+      handle: '@sneha_demo',
       followers: 120000,
       er: 7.8,
     },
     {
-      name: "Rohan D'Souza",
+      name: 'Rohan Tide (Demo Fictional)',
       email: 'rohan@goaconnect.in',
       area: 'Morjim',
-      bio: 'Surf instructor, coastal filmmaker, and backwater trail guide across North Goa.',
+      bio: 'Fictional surf instructor, coastal filmmaker, and backwater trail guide across North Goa (Demo Data).',
       minRate: 6000,
       barter: true,
       primaryCat: 'Wellness',
       secondaryCat: 'Travel',
-      handle: '@wavesofgoa',
+      handle: '@rohan_demo',
       followers: 62000,
       er: 8.1,
     },
     {
-      name: 'Ananya Kamat',
+      name: 'Ananya Vogue (Demo Fictional)',
       email: 'ananya@goaconnect.in',
       area: 'Panjim',
-      bio: 'Curating resort fashion, bohemian aesthetics, and luxury brand pop-ups in Panaji.',
+      bio: 'Fictional curator of resort fashion, bohemian aesthetics, and luxury brand pop-ups in Panaji (Demo Data).',
       minRate: 10000,
       barter: true,
       primaryCat: 'Fashion',
       secondaryCat: 'Nightlife',
-      handle: '@panjimfashionista',
+      handle: '@ananya_demo',
       followers: 94000,
       er: 5.9,
     },
     {
-      name: 'Kabir Mehta',
+      name: 'Kabir Skyscape (Demo Fictional)',
       email: 'kabir@goaconnect.in',
       area: 'Siolim',
-      bio: 'DGCA-certified drone cinema capturing luxury villas, clifftops, and river backwaters.',
+      bio: 'Fictional drone cinema specialist capturing luxury villas, clifftops, and river backwaters (Demo Data).',
       minRate: 12500,
       barter: false,
       primaryCat: 'Travel',
-      handle: '@kabir.drone',
+      handle: '@kabir_demo',
       followers: 110000,
       er: 8.5,
     },
     {
-      name: 'Zoya Alvares',
+      name: 'Zoya Beats (Demo Fictional)',
       email: 'zoya@goaconnect.in',
       area: 'Vagator',
-      bio: 'Electronic music DJ, sunset festival curator, and music culture storyteller in Goa.',
+      bio: 'Fictional electronic music DJ, sunset festival curator, and music culture storyteller in Goa (Demo Data).',
       minRate: 9000,
       barter: true,
       primaryCat: 'Nightlife',
-      handle: '@zoya.sundowner',
+      handle: '@zoya_demo',
       followers: 78000,
       er: 7.2,
     },
@@ -249,7 +249,7 @@ export async function seedDatabase() {
     {
       creatorId: rahulCreatorId,
       userId: rahulUserId,
-      fullName: 'Rahul Naik',
+      fullName: 'Rahul Naik (Demo Fictional)',
       minRate: 8500,
       accounts: [rahulInstaRes.rows[0].account_id, rahulYoutubeRes.rows[0].account_id],
     },
@@ -259,7 +259,7 @@ export async function seedDatabase() {
     {
       businessId: palmeiraBizId,
       userId: palmeiraUserId,
-      businessName: 'Café Palmeira',
+      businessName: 'Café Palmeira (Demo Fictional)',
     },
   ]
 
@@ -304,43 +304,43 @@ export async function seedDatabase() {
     })
   }
 
-  // Curated Businesses from frontend
+  // Curated Businesses from frontend (fictionalized)
   const curatedBusinesses = [
     {
-      name: 'Antares Restaurant & Beach Club',
-      email: 'antares@goaconnect.in',
+      name: 'Sol & Mirage Beach Club (Fictional)',
+      email: 'solmirage@goaconnect.in',
       area: 'Vagator',
       industry: 'Nightlife & Sunsets',
-      desc: 'Perched atop Vagator clifftops offering Australian culinary flair and sunset sundowners.',
+      desc: 'Fictional clifftop beach club offering fusion coastal dining and sunset sundowners (Demo Data).',
       phone: '+91 98221 11223',
-      handle: '@antares_goa',
+      handle: '@solmirage_demo',
     },
     {
-      name: 'Gunpowder Assagao',
-      email: 'gunpowder@goaconnect.in',
+      name: 'Spice Pavilion Assagao (Fictional)',
+      email: 'spicepavilion@goaconnect.in',
       area: 'Assagao',
       industry: 'Food & Beach Dining',
-      desc: 'Homestyle peninsular South Indian recipes served in a vibrant heritage villa in Assagao.',
+      desc: 'Fictional peninsular coastal recipes served in a vibrant heritage villa in Assagao (Demo Data).',
       phone: '+91 98221 33445',
-      handle: '@gunpowder_goa',
+      handle: '@spicepavilion_demo',
     },
     {
-      name: 'Villa Alentejo Stays',
-      email: 'alentejo@goaconnect.in',
+      name: 'Villa Terra Ficticia (Fictional)',
+      email: 'villaterra@goaconnect.in',
       area: 'Anjuna',
       industry: 'Travel & Villas',
-      desc: 'Ultra-luxury private pool estates and Portuguese restored mansions for discerning travelers.',
+      desc: 'Fictional ultra-luxury private pool estates and Portuguese restored mansions (Demo Data).',
       phone: '+91 98221 55667',
-      handle: '@villaalentejogoa',
+      handle: '@villaterra_demo',
     },
     {
-      name: 'Babka Goa Deli',
-      email: 'babka@goaconnect.in',
+      name: 'Sourdough & Cinnamon Deli (Fictional)',
+      email: 'sourdough@goaconnect.in',
       area: 'Anjuna',
       industry: 'Food & Beach Dining',
-      desc: 'European patisserie and artisanal sourdough bakery crafting fresh babkas and specialty brews.',
+      desc: 'Fictional European patisserie and artisanal sourdough bakery (Demo Data).',
       phone: '+91 98221 77889',
-      handle: '@babkagoa',
+      handle: '@sourdough_demo',
     },
   ]
 
@@ -381,7 +381,7 @@ export async function seedDatabase() {
   ]
 
   for (let i = 1; i <= 35; i++) {
-    const bizName = `${faker.company.name()} Goa`
+    const bizName = `${faker.company.name()} (Demo Fictional)`
     const email = `biz_${i}_${faker.internet.username().toLowerCase()}@example.com`
     const loc = faker.helpers.arrayElement(locations)
     const industry = faker.helpers.arrayElement(businessIndustries)
@@ -417,7 +417,7 @@ export async function seedDatabase() {
 
   // Bulk Creators (114)
   for (let i = 1; i <= 114; i++) {
-    const fullName = `${faker.person.firstName()} ${faker.person.lastName()}`
+    const fullName = `${faker.person.firstName()} ${faker.person.lastName()} (Demo Fictional)`
     const email = `creator_${i}_${faker.internet.username().toLowerCase()}@example.com`
     const loc = faker.helpers.arrayElement(locations)
     const minRate = faker.helpers.arrayElement([0, 3000, 5000, 7500, 10000, 15000, 20000, 25000])

@@ -65,6 +65,8 @@ export const closeDb = closePool
 
 if (typeof process !== 'undefined') {
   const handleExit = async () => {
+    if (isShuttingDown) return
+    isShuttingDown = true
     try {
       await closePool()
     } catch {
@@ -230,14 +232,9 @@ export interface CollaborationRequestRow {
   business_id: number
   creator_id: number
   collab_type: 'paid' | 'barter' | 'hybrid'
-  compensation_type?: string
   offered_amount: number
-  compensation_amount?: number
   offer_details: string | null
   deliverables: string | null
-  collaboration_type?: string
-  title?: string
-  objective?: string
   message: string | null
   status: 'pending' | 'accepted' | 'rejected' | 'completed' | 'cancelled'
   requested_at: string

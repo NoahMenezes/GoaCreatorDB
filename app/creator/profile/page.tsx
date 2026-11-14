@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
     Camera,
-    MapPin,
     CheckCircle2,
     Globe,
     Link as LinkIcon,
@@ -31,8 +30,8 @@ interface LocationOption {
 }
 
 export default function CreatorProfilePage() {
-    const [fullName, setFullName] = useState('Sneha Fernandes')
-    const [handle, setHandle] = useState('sneha_curates')
+    const [fullName, setFullName] = useState('Sneha Ferns (Demo Fictional)')
+    const [handle, setHandle] = useState('sneha_demo')
     const [bio, setBio] = useState(
         "Visual storyteller & food writer documenting Goa's emerging culinary culture, artisanal cafes, and boutique heritage stays."
     )

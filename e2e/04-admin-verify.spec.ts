@@ -31,25 +31,36 @@ test.describe('Flow D: Admin Verification Flow', () => {
 
     // Redirected to admin overview
     await expect(page).toHaveURL(/\/admin/, { timeout: 15000 })
-    await expect(page.locator('h1')).toContainText('Admin Overview & Control Center')
+    await expect(page.locator('h1')).toContainText('Platform Control Center')
 
-    // 2. Verify an unverified user account
-    await expect(page.locator('button:has-text("Accounts")')).toBeVisible()
-    const approveAccountBtn = page.locator('button:has-text("Approve Account")').first()
+    // 2. Navigate to verifications page
+    await page.goto('/admin/verifications')
+    await expect(page.locator('button:has-text("Accounts")')).toBeVisible({ timeout: 10000 })
+    const approveAccountBtn = page.locator('table button:has-text("Approve")').first()
     await expect(approveAccountBtn).toBeVisible({ timeout: 10000 })
     await approveAccountBtn.click()
 
+    // Confirm in dialog modal
+    const confirmApproveBtn = page.locator('.fixed button:has-text("Approve")').last()
+    await expect(confirmApproveBtn).toBeVisible({ timeout: 5000 })
+    await confirmApproveBtn.click()
+
     // Verify success banner appears for user verification
-    await expect(page.locator('text=verified successfully')).toBeVisible({ timeout: 10000 })
+    await expect(page.locator('text=approved successfully')).toBeVisible({ timeout: 10000 })
 
     // 3. Switch to Metrics tab and verify a metrics snapshot
-    await page.click('button:has-text("Metrics Snapshots")')
-    const approveMetricBtn = page.locator('button:has-text("Approve Metric")').first()
+    await page.click('button:has-text("Metrics")')
+    const approveMetricBtn = page.locator('table button:has-text("Approve")').first()
     await expect(approveMetricBtn).toBeVisible({ timeout: 10000 })
     await approveMetricBtn.click()
 
+    // Confirm in dialog modal
+    const confirmMetricBtn = page.locator('.fixed button:has-text("Approve")').last()
+    await expect(confirmMetricBtn).toBeVisible({ timeout: 5000 })
+    await confirmMetricBtn.click()
+
     // Verify success banner appears for metrics approval
-    await expect(page.locator('text=approved and verified')).toBeVisible({ timeout: 10000 })
+    await expect(page.locator('text=approved successfully')).toBeVisible({ timeout: 10000 })
   })
 })
 

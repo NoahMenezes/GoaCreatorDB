@@ -12,14 +12,14 @@ const steps = [
         step: 'STEP 02',
         title: 'Send Booking Request',
         description:
-            'Specify your campaign goals, deliverables (Reels, Stories, UGC), dates, and offer (paid or barter stay/experience). Clear brief templates eliminate confusion upfront.',
+            'Specify your campaign goals, deliverables (Campaign Content, Stories, UGC), dates, and offer (paid or barter stay/experience). Clear brief templates eliminate confusion upfront.',
         icon: Mail,
     },
     {
         step: 'STEP 03',
         title: 'Seamless Collaboration',
         description:
-            'Chat directly, approve draft content before posting, release payment safely via escrow, and track campaign ROI with unified analytics reports.',
+            'Connect directly, review deliverables, confirm collaboration completion, and build verified reputational track records.',
         icon: ShieldCheck,
     },
 ]

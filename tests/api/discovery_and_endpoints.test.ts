@@ -27,9 +27,7 @@ describe('Discovery, Views, Privacy & Ownership API Suite', () => {
   let secondCreatorId: number
   let secondCreatorAccountId: number
 
-  let testBizUserId: number
   let testBizId: number
-  let testCreatorUserId: number
   let testCreatorId: number
   let testValidLocationId: number
   let testPendingRequestId: number
@@ -79,12 +77,10 @@ describe('Discovery, Views, Privacy & Ownership API Suite', () => {
     // 2. Login demo business and demo creator
     const bizLogin = await loginUser('palmeira@goaconnect.in', 'business123')
     demoBizToken = bizLogin.token
-    testBizUserId = bizLogin.user.user_id
     testBizId = (bizLogin.profile as { business_id: number }).business_id
 
     const creatorLogin = await loginUser('rahul@goaconnect.in', 'creator123')
     demoCreatorToken = creatorLogin.token
-    testCreatorUserId = creatorLogin.user.user_id
     testCreatorId = (creatorLogin.profile as { creator_id: number }).creator_id
 
     // 3. Register a second creator for ownership & isolation checks
@@ -301,15 +297,15 @@ describe('Discovery, Views, Privacy & Ownership API Suite', () => {
       expect(match).toBe(true)
     })
 
-    it('3. Trigram search: searches by social handle (q="goanbites")', async () => {
-      const req = new Request('http://localhost:3000/api/creators?q=goanbites')
+    it('3. Trigram search: searches by social handle (q="rahul_demo")', async () => {
+      const req = new Request('http://localhost:3000/api/creators?q=rahul_demo')
       const res = await getCreatorsHandler(req)
       const body = await res.json()
       expect(body.success).toBe(true)
       expect(body.data.length).toBeGreaterThan(0)
       const match = body.data.some(
         (c: { full_name: string; handle: string }) =>
-          c.handle.toLowerCase().includes('goanbites') || c.full_name.toLowerCase().includes('rahul')
+          c.handle.toLowerCase().includes('rahul_demo') || c.full_name.toLowerCase().includes('rahul')
       )
       expect(match).toBe(true)
     })

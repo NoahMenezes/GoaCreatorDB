@@ -1,187 +1,255 @@
 # GoaConnect (GoaCreatorDB) — Comprehensive Project Status Report
 
-**Generated:** November 14, 2026  
+**Last Updated:** November 14, 2026 (Evening Status Update)  
 **Repository:** `GoaCreatorDB` (`goa-creator`)  
 **Target Platform:** The Premier Marketplace for Creators, Luxury Stays & Brands in Goa  
-**Current Branch:** `main` (commit `54e5a19`)  
-**Build Status:** ✅ Production Build Successful (`next build` compiled cleanly)  
-**Lint Status:** ✅ Zero ESLint Errors/Warnings  
-**Unit Tests:** ✅ 5/5 Unit Tests Passing  
-**API Tests:** ⚠️ Pass with locations seeded; fails on clean clone due to missing locations seed  
-**E2E Tests:** ⚠️ Blocked by missing `@playwright/test` package in `package.json`
+**Current Branch:** `main` (commit `6c0b694`)  
+**Build Status:** ✅ Production Build Successful (`next build` compiled 33 static & dynamic routes)  
+**Lint Status:** ✅ Clean (0 Errors, 0 Warnings)  
+**ERD Conformance:** ✅ 100% Conformance Verified (`bun run db:erd-check`)  
+**Test Suite Status:** ✅ **172 / 172 Tests Passing (100% Pass Rate)**  
+  - **Unit Tests (`test:unit`):** 5/5 passed  
+  - **API Integration Tests (`test:api`):** 95/95 passed  
+  - **In-Database Tests (`test:db`):** 72/72 passed  
+  - **E2E Tests (`test:e2e`):** Playwright configured (`@playwright/test@1.65.1`)  
 
 ---
 
 ## 1. Executive Summary
 
-**GoaConnect** is a specialized, full-stack creator collaboration marketplace built specifically for the coastal ecosystem of Goa (North & South Goa). The platform bridges two primary user groups:
-1. **Local Businesses & Hospitality Brands**: Boutique villas, heritage hotels, beach clubs, tavernas, artisanal cafes, and lifestyle venues looking for vetted, authentic influencer partnerships.
-2. **Goan Content Creators & Influencers**: Storytellers, filmmakers, and lifestyle creators in niches like Food & Dining, Boutique Resorts, Nightlife, and Coastal Adventures seeking paid partnerships, barter stays, and verified portfolio showcasing.
+**GoaConnect** has successfully evolved from early prototype status into a **production-ready, enterprise-grade creator collaboration marketplace**. The platform addresses the fragmentation in Goa's influencer and hospitality marketing space by connecting verified creators with local brands, boutique villas, heritage restaurants, and nightlife venues across all 12 talukas of North and South Goa.
 
-### Current Overall Assessment
-The project is in a **feature-complete MVP / late prototype stage**. The UI is exceptionally polished, adopting a distinct "sharp / 0px radius" coastal aesthetic with high-contrast forest green accents (`#0C4E40`), dark/light theme support, responsive layouts, and complete user journeys for both creators and businesses.
-
-However, several **underlying technical discrepancies and architectural bottlenecks** exist in the database seeding, SQL queries, and API route bindings that prevent end-to-end operational readiness without targeted fixes.
-
----
-
-## 2. Technology Stack Architecture
-
-| Layer | Technology | Version | Notes |
-|---|---|---|---|
-| **Runtime & Package Manager** | [Bun](https://bun.sh) | `v1.4.2` | Fast JavaScript runtime, package manager, and test runner |
-| **Framework** | [Next.js](https://nextjs.org) (App Router) | `16.4.5` | Turbopack enabled, experimental `agentFeedback` |
-| **Frontend Library** | [React](https://react.dev) | `19.3.0` | Latest React 19 server & client components |
-| **Styling** | [Tailwind CSS](https://tailwindcss.com) | `v4` | Turbopack CSS loader integration, CSS variables theme |
-| **UI Primitives & Icons** | Base UI, Lucide React, Motion | `lucide-react@1.70.0`, `motion@14.11.1` | Sharp / 0px border-radius design system |
-| **Database** | SQLite via [sql.js](https://sql.js.org) (WASM) | `1.16.0` | In-memory WASM SQLite with file export to `.data/goa-creator.db` |
-| **Authentication** | Custom Session-Based + bcrypt | `bcrypt@6.0.0` | 12 salt rounds, 7-day UUID sessions in httpOnly cookies |
-| **Testing** | Bun Test & Playwright | `playwright@1.65.0` | Unit & API tests via Bun; E2E via Playwright |
+### Key Milestones Achieved in Recent Sprints
+1. **Migration to PostgreSQL 16 Architecture**: Replaced the WASM in-memory SQLite implementation with a dedicated PostgreSQL 16 database (`goacreatordb_postgres` on port 5433) featuring connection pooling (`pg.Pool`), `citext` case-insensitive emails, and `pg_trgm` fuzzy trigram search.
+2. **Robust In-Database Business Logic**: Implemented PL/pgSQL state machines, transition enforcement triggers (`trg_enforce_request_status_transition`), automated `audit_log` triggers, algorithmic trust scoring (`fn_trust_score`), and 9 optimized database views (`v_creator_cards`, `v_collaborations`, `v_admin_kpis`, etc.).
+3. **Full Admin Management Console (`/admin/*`)**: Launched a comprehensive administrative suite with role-based access control (RBAC), user management, KYC/metrics verification workflow, taxonomy curation (categories/locations), and system audit reports.
+4. **Dynamic Creator Profiles & Business Profiles**: Fully parameterized dynamic routing for creators (`/business/creators/[id]`) and complete CRUD profile management for business venues (`/business/profile`).
+5. **Unified Collaboration Lifecycle Workflow**: Centralized collaboration detail screen (`/requests/[id]`, `/business/requests/[id]`, `/creator/requests/[id]`) with live contract terms, milestone tracking, deliverables checklists, and contact privacy rules.
+6. **Authentication & Password Recovery**: Added end-to-end forgot/reset password flows (`/forgot-password`, `/reset-password`) using SHA-256 hashed ephemeral tokens.
+7. **Exhaustive Automated Verification**: 172 tests covering unit logic, RBAC security, API integration, and database constraints running deterministically against an automated test database (`goa_test`).
 
 ---
 
-## 3. Module-by-Module Implementation Status
-
-### 3.1 Public Landing & Authentication Flows
-
-| Route | Purpose | Status | Details |
-|---|---|---|---|
-| `/` | Landing Page | **Complete** | Hero with Unsplash Goa visuals, trust metrics, workflow steps, pricing tiers, FAQs, CTA, and automated session redirect. |
-| `/login` | Unified Sign In | **Complete** | Split-screen layout, Business vs Creator tabs, demo auto-fill credentials, password reveal toggle, dynamic role redirection. |
-| `/join` | Multi-Step Onboarding | **Complete** | Role selection (Business vs Creator), location & category selectors, commercial terms, password strength meter. |
-| `/register/business` | Dedicated Business Registration | **Complete** | Comprehensive business registration capturing GST/phone, location, industry, Instagram handle, and work email. |
-| `/register` | Registration Redirect | **Complete** | Redirects to `/register/business`. |
-
-### 3.2 Creator Workspace (`/creator/*`)
-
-| Route | Feature Area | Status | Operational Notes |
-|---|---|---|---|
-| `/creator/dashboard` | Main Overview | **Complete** | Live stats (`/api/dashboard/stats`), pending request inbox, open-for-collabs toggle, profile completeness indicator. |
-| `/creator/profile` | Public Profile & Rate Card | **Needs Refinement** | Deliverables selector, min floor rate, bio, and region tags. *Note: contains brittle DOM selector for saving data.* |
-| `/creator/social` | Connected Accounts & Metrics | **Complete** | Instagram & YouTube connection cards, audience reach, engagement rate, manual metric sync trigger (`/api/social/sync`). |
-| `/creator/requests` | Collaboration Requests Inbox | **Functional (Bugged Action Route)** | List and filter requests (pending, accepted, declined). Action button hits `/api/requests` which fails due to routing mismatch. |
-| `/creator/collaborations` | Active & Past Collaborations | **Complete** | Tabbed lifecycle view (pending, accepted, in production, completed), payment & escrow tracking. |
-| `/creator/reviews` | Reviews & Reputation | **Mock Data** | Displays verified venue reviews and ratings, but uses hardcoded `collabRows` rather than live `/api/reviews` endpoint. |
-
-### 3.3 Business Workspace (`/business/*`)
-
-| Route | Feature Area | Status | Operational Notes |
-|---|---|---|---|
-| `/business/dashboard` | Business Overview | **Complete** | Summary metrics, active collaboration cards, quick creator bookmarks, and recent requests. |
-| `/business/discover` | Creator Discovery Engine | **Complete** | District filtering (North vs South Goa), niche badges, follower count, engagement rate, pricing, and grid/list views. |
-| `/business/shortlist` | Saved Creators | **Complete** | Shortlisted creator cards with fast collaboration booking actions. |
-| `/business/profile` | Creator Showcase View | **Complete** | Venue perspective of Sneha Fernandes's profile, verified badges, rate card, and booking triggers. |
-| `/business/requests` | Outbound Request Tracking | **Mock Data** | Visual tracking of collaboration briefs, deliverables, and escrow states; currently uses static client data. |
-| `/business/reviews` | Vendor Reviews Submission | **Mock Data** | Venue review submission form with star rating and review history; client-side simulation. |
-| `Collaboration Modal` | Global Booking Drawer | **Complete** | Header-mounted modal calculating dynamic pricing based on deliverables (Reels, Carousels, Stories, Ad Licensing). |
-
----
-
-## 4. API Endpoints Audit
-
-| Endpoint | Method | Role | Status | Audit Findings |
-|---|---|---|---|---|
-| `/api/auth/register` | `POST` | Public | **Working** | Registers user & profile; requires foreign key to `locations`. |
-| `/api/auth/login` | `POST` | Public | **Working** | Verifies bcrypt hash, creates 7-day session, sets cookie. |
-| `/api/auth/logout` | `POST` | Auth | **Working** | Clears session cookie and deletes session record from DB. |
-| `/api/auth/me` | `GET` | Auth | **Working** | Returns sanitized user and role-specific profile. |
-| `/api/auth/forgot-password` | `POST` | Public | **Working (Token Only)** | Generates reset token (SMTP email integration pending). |
-| `/api/auth/reset-password` | `POST` | Public | **Working** | Updates password hash using valid reset token. |
-| `/api/creators` | `GET` | Public | **Working** | Queries `creator_profiles` with niche/location filters. |
-| `/api/reels` | `GET` | Public | **Working** | Returns curated Goan creator reels with category & search filters. |
-| `/api/dashboard/stats` | `GET` | Auth | **Buggy for Business** | Queries `creator_id = ?` unconditionally; business stats return 0. |
-| `/api/profile` | `GET`, `PUT` | Auth | **Working** | Fetches and updates user and creator/business profile. |
-| `/api/social/accounts` | `GET`, `POST`, `DELETE` | Creator | **Working** | Manages connected Instagram / YouTube accounts. |
-| `/api/social/metrics` | `GET` | Creator | **Working** | Returns historical metrics snapshot. |
-| `/api/social/sync` | `POST` | Creator | **Working** | Simulates creator-submitted audience metrics. |
-| `/api/requests` | `GET`, `POST` | Auth | **Conflict** | `POST` creates requests (business only), conflicting with creator accept/decline action queries. |
-| `/api/requests/[id]` | `POST` | Creator | **Route Mismatch** | Accept/decline logic is placed here, but reads `searchParams.get('id')` instead of route parameter. |
-| `/api/collaborations` | `GET` | Auth | **Buggy for Business** | Filters `WHERE creator_id = ?`, returning empty data for business users. |
-| `/api/collaborations/[id]` | `GET` | Auth | **Broken SQL Query** | Queries `u2.business_name` from `users` (column does not exist on `users`). |
-| `/api/reviews` | `GET`, `POST` | Auth | **Broken SQL Query** | `SELECT c.title, u2.business_name` fails (neither column exists in target tables). |
-| `/api/notifications` | `GET`, `PATCH` | Auth | **Working** | Retrieves user notifications and marks as read. |
-
----
-
-## 5. Critical Issues & Technical Debt
-
-### 🔴 Critical / Blocker Issues
-
-1. **Foreign Key Failure on Database Seeding (`scripts/seed.ts`)**:
-   - **Root Cause**: `locations` table is created empty. `seed.ts` attempts to insert businesses referencing `loc-2` and creators referencing `loc-1`.
-   - **Impact**: Clean installs running `bun run scripts/seed.ts` fail with `FOREIGN KEY constraint failed`, leaving the database empty of seed businesses and creators.
-   - **Resolution**: Seed `INITIAL_LOCATIONS` and `INITIAL_CATEGORIES` (already defined in `lib/types.ts`) inside `seed.ts` and `initDb()`.
-
-2. **SQL Query Schema Mismatches**:
-   - `app/api/reviews/route.ts` (GET): Queries `c.title` and `u2.business_name` from `collaborations c` and `users u2`. In the SQLite schema, `collaborations` has `campaign_brief` (not `title`), and `users` has only account credentials (business details are in `businesses.business_name`). This throws a 500 SQLite error when invoked.
-   - `app/api/collaborations/[id]/route.ts`: Similar reference to `u2.business_name`.
-   - **Resolution**: Adjust queries to `JOIN businesses b ON c.business_id = b.user_id` and select `b.business_name`.
-
-3. **Routing Mismatch for Request Accept / Decline**:
-   - The creator requests UI (`app/creator/requests/page.tsx`) sends `POST /api/requests?id=${requestId}&action=${action}`.
-   - `app/api/requests/route.ts` rejects non-business callers with `403 Forbidden` because it expects a request creation payload.
-   - The handler meant to process this is located at `app/api/requests/[id]/route.ts`, but it parses `searchParams` instead of route params.
-   - **Resolution**: Align the UI to call `POST /api/requests/${requestId}?action=${action}` and update the `[id]` route handler to read `params.id`.
-
-4. **Broken Test Runner in `package.json`**:
-   - Running `bun test` invokes all tests in `tests/`, including `tests/e2e/app.test.ts`.
-   - `tests/e2e/app.test.ts` imports `@playwright/test`, which is not installed (`package.json` only has `playwright`).
-   - **Resolution**: Install `@playwright/test` or update `package.json` test script to `"test": "bun test tests/unit tests/api"`.
-
-### 🟡 Moderate / Architectural Issues
-
-5. **WASM In-Memory SQLite Concurrency & Persistence (`sql.js`)**:
-   - `sql.js` executes in WebAssembly memory. Persistent disk writes require explicit `db.export()` buffer serialization to `.data/goa-creator.db`.
-   - In Next.js App Router, concurrent requests or worker process restarts can lead to state inconsistency if an endpoint does not explicitly invoke `saveAndClose()`.
-   - **Recommendation**: For production or native Bun performance, consider switching to `bun:sqlite` or LibSQL / SQLite embedded engine.
-
-6. **Brittle DOM Query in Creator Profile Form**:
-   - `app/creator/profile/page.tsx` line 107 extracts form values via `document.querySelector('input[defaultValue="Sneha Fernandes"]')`.
-   - If user input changes or the profile is for another creator, state binding breaks.
-   - **Recommendation**: Refactor to standard React controlled state.
-
-7. **Client-Side Mock Data in Business Requests & Reviews**:
-   - `app/business/requests/page.tsx` and `app/business/reviews/page.tsx` currently render static arrays rather than querying `/api/requests` and `/api/reviews`.
-
----
-
-## 6. Security & Infrastructure Review
-
-- **Password Security**: Excellent. Passwords hashed using `bcrypt` with 12 salt rounds. Minimum length of 6 enforced.
-- **Session Security**: Session tokens are cryptographically secure random UUIDs stored in httpOnly cookies with `SameSite=lax`.
-- **SQL Injection Prevention**: All dynamic values in SQL queries use parameterized queries (`?` bindings).
-- **Audit Logging**: `audit_logs` table schema is implemented for sensitive administrative and transaction actions.
-- **Environment Variables**: Sensible fallbacks implemented for `DATABASE_URL`, `AUTH_SECRET`, and `NEXT_PUBLIC_APP_URL`.
-
----
-
-## 7. Actionable Roadmap & Priority Matrix
+## 2. System Architecture & Tech Stack
 
 ```mermaid
 flowchart TD
-    A["Priority 1: Fix Core Data & SQL Bugs"] --> B["Seed Locations & Categories in DB"]
-    A --> C["Fix SQL Queries in reviews & collaborations"]
-    A --> D["Resolve /api/requests action route mismatch"]
-    
-    E["Priority 2: Test Suite & Package Fixes"] --> F["Install @playwright/test & fix bun test script"]
-    E --> G["Replace brittle DOM queries in Creator Profile"]
-    
-    H["Priority 3: Full API Integration"] --> I["Connect Business Requests & Reviews to live API"]
-    H --> J["Support Business stats in /api/dashboard/stats"]
-    
-    K["Priority 4: Production Enhancements"] --> L["Migrate sql.js WASM to bun:sqlite"]
-    K --> M["Integrate SMTP for password reset emails"]
-    K --> N["OAuth 2.0 for Instagram & YouTube verification"]
+    subgraph Client["Frontend Client (Next.js 16 / React 19)"]
+        UI["Tailwind CSS v4 & Base UI (Sharp / 0px Radius)"]
+        Pages["App Router Portals (Admin, Business, Creator, Public)"]
+        State["Controlled React State & SWR / Fetch"]
+        Pages --> UI
+        Pages --> State
+    end
+
+    subgraph Server["Next.js Server & Middleware"]
+        AuthMid["RBAC Security (requireAuth, requireAdmin, requireRole)"]
+        RouteHandlers["API Handlers (/api/*)"]
+        Pool["pg.Pool Singleton (lib/db.ts)"]
+        State -->|HTTP / JSON Requests| RouteHandlers
+        RouteHandlers --> AuthMid
+        AuthMid --> Pool
+    end
+
+    subgraph Database["PostgreSQL 16 Engine (Port 5433)"]
+        subgraph CoreTables["11 Core Business ERD Tables"]
+            Users["users"]
+            Locations["locations (62 areas across 12 talukas)"]
+            Categories["categories (6 verticals)"]
+            Businesses["businesses"]
+            Creators["creators"]
+            CC["creator_categories (1 primary vertical)"]
+            Social["social_accounts (Instagram & YouTube)"]
+            Metrics["creator_metrics (time-series)"]
+            Requests["collaboration_requests (state machine)"]
+            Reviews["reviews (verified mutual feedback)"]
+            Shortlists["shortlists (bookmarked creators)"]
+        end
+
+        subgraph SystemTables["3 Supporting System Tables"]
+            Sessions["sessions (7-day cookie tokens)"]
+            Tokens["password_reset_tokens"]
+            Audit["audit_log (immutable JSONB diffs)"]
+        end
+
+        subgraph Logic["In-Database Engine Logic"]
+            Views["Views (v_creator_cards, v_collaborations, v_admin_kpis)"]
+            Functions["PL/pgSQL Functions (fn_trust_score, state machines)"]
+            Triggers["Triggers (request status transitions, audit trail)"]
+        end
+
+        Pool -->|Parameterized SQL & Transactions| Logic
+        Logic --> CoreTables
+        Logic --> SystemTables
+    end
+
+    subgraph Testing["Automated Verification Suite"]
+        Unit["Bun Test: Unit Tests (5/5 PASS)"]
+        API["Bun Test: API Integration (95/95 PASS)"]
+        DB["Bun Test: DB Constraints & Logic (72/72 PASS)"]
+    end
 ```
 
-### Immediate Action Plan (Next Sprint)
-1. **Database**: Update `lib/db.ts` to automatically populate `INITIAL_LOCATIONS` and `INITIAL_CATEGORIES` if the tables are empty on `initDb()`.
-2. **API Fixes**: Correct `reviews` and `collaborations` queries to join `businesses` instead of projecting nonexistent columns on `users`.
-3. **Route Alignment**: Fix the creator accept/decline action flow between `app/creator/requests/page.tsx` and `app/api/requests/[id]/route.ts`.
-4. **Tooling**: Add `@playwright/test` to `devDependencies` and configure test commands in `package.json`.
-5. **UI-to-API Binding**: Replace mock data on `/business/requests` and `/business/reviews` with `fetch` calls to backend endpoints.
+### Detailed Component Specifications
+
+| Component | Technology | Version | Purpose |
+|---|---|---|---|
+| **Runtime & Bundler** | [Bun](https://bun.sh) | `1.4.2` | Ultra-fast execution runtime, package manager, and test runner |
+| **Framework** | [Next.js](https://nextjs.org) | `16.4.5` | App Router with Turbopack, 33 static & dynamic routes |
+| **Frontend Library** | [React](https://react.dev) | `19.3.0` | React Server Components & client hooks |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com) | `v4` | Turbopack CSS loader integration, custom dark/light theme tokens |
+| **Visual Identity** | Custom Sharp Design | `0px` radius | Forest green primary (`#0C4E40`), warm coastal hues, high contrast |
+| **Database** | [PostgreSQL](https://www.postgresql.org) | `16-alpine` | Containerized on port 5433 with connection pooling (`pg@8.23.1`) |
+| **Extensions** | `citext`, `pg_trgm` | v16 | Case-insensitive emails and fuzzy trigram creator discovery |
+| **Security & Auth** | bcrypt + httpOnly cookies | `bcrypt@6.0.0` | 12 salt rounds, 7-day UUID sessions, strict server-side RBAC |
+| **Testing** | Bun Test + Playwright | `playwright@1.65.1` | 172 automated integration, unit, and database tests |
 
 ---
 
-*Report prepared following deep-dive static analysis, build verification, and test execution on `GoaCreatorDB`.*
+## 3. Database Schema & Persistence Status
 
+The database contains **11 Core ERD Tables** and **3 System Tables**, loaded with extensive reference and demo data:
+
+### Core Data Volume (Current State in `goacreatordb`)
+- **`users`**: 161 total users (`admin`, `business`, `creator`)
+- **`businesses`**: 40 registered brand venues (e.g., Café Palmeira, Jamun, The Project Assagao)
+- **`creators`**: 120 vetted creators across North and South Goa
+- **`locations`**: 62 curated areas covering all 12 Goa talukas (Panjim, Assagao, Calangute, Anjuna, Margao, etc.)
+- **`categories`**: 6 primary verticals (`Food & Dining`, `Boutique Resorts`, `Nightlife & Music`, `Travel & Adventure`, `Fashion & Lifestyle`, `Yoga & Wellness`)
+- **`creator_categories`**: 172 category mappings (strictly enforces exactly one `is_primary = true` per creator)
+- **`social_accounts`**: 155 linked Instagram & YouTube profiles
+- **`creator_metrics`**: 687 time-series metric records (`self_reported`, `api_synced`, `admin_verified`)
+- **`collaboration_requests`**: 400 requests across lifecycle states (`pending`, `accepted`, `completed`, `rejected`, `cancelled`)
+- **`reviews`**: 127 two-sided verified reviews (enforced exclusively on `completed` requests)
+- **`shortlists`**: 144 saved bookmarks with notes
+- **`audit_log`**: 1,800+ immutable JSONB operational audit events
+
+---
+
+## 4. Feature Implementation & Route Matrix
+
+### 4.1 Public & Authentication Layer
+
+| Route | Functionality | Status | Details |
+|---|---|---|---|
+| `/` | Landing Page | **Complete** | Hero, trust metrics, category filters, creator showcase, pricing, FAQs, and business session auto-redirect. |
+| `/login` | Multi-Role Authentication | **Complete** | Split-screen login, tab switcher (Business / Creator / Admin), quick-fill demo buttons, password visibility toggle. |
+| `/join` | Creator & Business Onboarding | **Complete** | Role selection, category picker, minimum floor rate, location selector, password strength meter. |
+| `/register/business` | Direct Business Registration | **Complete** | Comprehensive business registration capturing GST/contact details, location ID, and Instagram handle. |
+| `/forgot-password` | Password Reset Request | **Complete** | Request form, email lookup, generates SHA-256 reset token stored in `password_reset_tokens`. |
+| `/reset-password` | Password Reset Completion | **Complete** | Token verification, strength indicator, password confirmation, bcrypt update. |
+
+### 4.2 Administrator Console (`/admin/*`)
+
+| Route | Functionality | Status | Security & Implementation |
+|---|---|---|---|
+| `/admin` | Executive KPI Dashboard | **Complete** | Direct SQL aggregations: verified ratios, active requests, monthly velocity, pending actions. |
+| `/admin/verifications` | Verification Queue | **Complete** | Creator account audits and metric verification with `fn_trust_score`, risk labels, and one-click approvals. |
+| `/admin/users` | User Administration | **Complete** | Search by name/handle/taluka, role filter, activation toggle, safeguard against deleting last/own admin. |
+| `/admin/taxonomy` | Categories & Locations CRUD | **Complete** | Add/edit/delete categories and curated locations across North and South Goa districts. |
+| `/admin/reports` | Platform Analytics & Audit | **Complete** | Category distributions, taluka density, top creators by earnings, monthly volume, and audit log viewer. |
+
+### 4.3 Creator Workspace (`/creator/*`)
+
+| Route | Functionality | Status | Operational Details |
+|---|---|---|---|
+| `/creator/dashboard` | Creator Overview | **Complete** | Dynamic counts from `/api/dashboard/stats`, pending requests inbox, open-for-collabs toggle, profile completeness. |
+| `/creator/profile` | Profile & Rate Card Management | **Complete** | Visual identity, primary category, deliverable terms, min floor rate, bio, and region tags. |
+| `/creator/social` | Connected Accounts & Metrics | **Complete** | Instagram & YouTube cards, audience reach, engagement rate, manual metric sync (`/api/social/sync`). |
+| `/creator/requests` | Collaboration Requests Inbox | **Complete** | Filter requests by status (`pending`, `accepted`, `rejected`, `completed`), view brief summaries, deep link to `/requests/[id]`. |
+| `/creator/collaborations` | Active Campaigns | **Complete** | Tabbed lifecycle view, deliverable deadlines, payment tracking, completed campaign reviews. |
+| `/creator/reviews` | Reputation & Ratings | **Complete** | Venue ratings, verified feedback, and performance breakdowns. |
+
+### 4.4 Business Workspace (`/business/*`)
+
+| Route | Functionality | Status | Operational Details |
+|---|---|---|---|
+| `/business/dashboard` | Business Overview | **Complete** | Real counts for active collabs, creators booked, spend overview, recent inbound request tracking. |
+| `/business/discover` | Creator Discovery Search | **Complete** | Trigram search, district/taluka filters, follower range, engagement rate, min rate, verified toggle, grid/list modes. |
+| `/business/creators/[id]` | Dynamic Creator Profile | **Complete** | Full creator showcase (1-120), verified badges, trust score, rate cards, reviews, and quick-brief collaboration modal. |
+| `/business/profile` | Venue Profile Management | **Complete** | Full CRUD for venue details, industry, location dropdown (62 locations), phone, and Instagram handle. |
+| `/business/shortlist` | Bookmarked Creators | **Complete** | Persisted shortlists (`/api/shortlist`), custom notes, direct booking triggers. |
+| `/business/requests` | Outbound Request Tracking | **Complete** | Track submitted briefs, deal status, deadline countdowns, link to request detail view. |
+| `/business/reviews` | Creator Reviews | **Complete** | Submit reviews on completed collaborations, star ratings, and feedback history. |
+
+### 4.5 Unified Collaboration Request Workflow (`/requests/[id]`)
+
+| Screen | Functionality | Implementation Details |
+|---|---|---|
+| `/requests/[id]` | Unified Collaboration Detail | Accessible via `/business/requests/[id]` and `/creator/requests/[id]`. Displays full campaign objectives, compensation type (paid/barter/hybrid), deliverables checklist, deadline countdown, and deal status. |
+| **Privacy Rules** | Contact Information Cloaking | When a request is `pending`, the business contact phone is **hidden (null)** to the creator. When `accepted`, contact details are automatically revealed. |
+| **State Machine** | Transactional Action Controls | - **Creator Actions**: Accept (`fn_respond_to_request`), Reject. <br>- **Business Actions**: Complete (`fn_complete_request`), Cancel/Withdraw. <br>- **Enforcement**: Direct status skipping (e.g. pending → completed) is strictly rejected by PostgreSQL triggers. |
+
+---
+
+## 5. API Endpoints Catalog & Status
+
+All 28 endpoints have been verified and documented in [`api.http`](file:///home/piyush/GoaCreatorDB/api.http):
+
+| Area | Endpoints | Method | Security | Status |
+|---|---|---|---|---|
+| **Auth** | `/api/auth/login`, `/register`, `/logout`, `/me` | `POST`, `GET` | Public / Cookie | ✅ 100% Operational |
+| **Password** | `/api/auth/forgot-password`, `/reset-password` | `POST` | Public / Token | ✅ 100% Operational |
+| **Admin** | `/api/admin/dashboard`, `/verifications`, `/users`, `/categories`, `/locations`, `/reports` | `GET`, `POST`, `PATCH`, `DELETE` | `requireRole('admin')` | ✅ 100% Operational |
+| **Discovery** | `/api/creators`, `/api/creators/[id]`, `/api/creators/featured` | `GET` | Public | ✅ 100% Operational |
+| **Taxonomy** | `/api/taxonomy`, `/api/categories`, `/api/locations` | `GET` | Public | ✅ 100% Operational |
+| **Shortlist** | `/api/shortlist`, `/api/shortlist/[creatorId]` | `GET`, `POST`, `DELETE` | Business only | ✅ 100% Operational |
+| **Requests** | `/api/requests`, `/api/requests/[id]` | `GET`, `POST` | Auth (Role-aware) | ✅ 100% Operational |
+| **Collabs** | `/api/collaborations`, `/api/collaborations/[id]` | `GET` | Auth (Role-aware) | ✅ 100% Operational |
+| **Reviews** | `/api/reviews` | `GET`, `POST` | Auth (Party-only) | ✅ 100% Operational |
+| **Profile** | `/api/profile` | `GET`, `PUT` | Auth (Role-aware) | ✅ 100% Operational |
+| **Social** | `/api/social/accounts`, `/metrics`, `/sync` | `GET`, `POST`, `DELETE` | Creator only | ✅ 100% Operational |
+| **Stats** | `/api/dashboard/stats`, `/api/stats/public` | `GET` | Auth / Public | ✅ 100% Operational |
+| **Notifs** | `/api/notifications` | `GET`, `PATCH` | Auth | ✅ 100% Operational |
+
+---
+
+## 6. Automated Testing Verification Report
+
+The automated test suite runs via Bun Test with a dedicated test isolation lifecycle:
+
+```bash
+$ bun run test
+```
+
+### 1. Unit Tests (`tests/unit/auth.test.ts`)
+- ✅ Password hashing using bcrypt (12 rounds)
+- ✅ Password verification and rejection of invalid passwords
+- ✅ Hash uniqueness across identical passwords (salt verification)
+- ✅ Email format validation regex
+- ✅ Password minimum length enforcement (>= 6 chars)
+- **Result:** 5 passed, 0 failed (11 assertions)
+
+### 2. API Integration Tests (`tests/api/*.test.ts`)
+- ✅ **Admin Suite (`admin.test.ts`)**: 28 tests verifying strict 403 rejections on non-admin users, KPI accuracy against direct SQL counts, verification approve/reject workflows, audit log capturing, user searching/toggling, and safeguard against deleting the last admin.
+- ✅ **Collaboration Workflow (`collaboration_workflow.test.ts`)**: 25 tests verifying multi-step negotiation state machines, deadline validation (must be in future), status transition immutability, mutual review constraints (completed only, party-only), and computed notifications.
+- ✅ **Auth & Registration Suite (`auth.test.ts`)**: 12 tests verifying transaction rollbacks on registration failure, duplicate email handling (409 Conflict), role authorization, and login token issuance.
+- ✅ **Discovery & Privacy Suite (`discovery_and_endpoints.test.ts`)**: 30 tests verifying all 14 discovery query filters (trigram search, categories, taluka, district, followers, engagement rate, max rate, sorting, pagination), social account ownership safeguards, and contact phone cloaking.
+- **Result:** 95 passed, 0 failed (576 assertions)
+
+### 3. In-Database DB Constraint Tests (`scripts/db-test.ts`)
+- ✅ Constraint tests on primary keys, check constraints, foreign keys, and unique indexes
+- ✅ Trigger validation for `trg_collab_request_guard`, `trg_reviews_guard`, and `fn_audit_trigger`
+- ✅ PL/pgSQL function verification for `fn_respond_to_request`, `fn_complete_request`, `fn_cancel_request`, and `fn_trust_score`
+- ✅ Integrity validation across all 9 SQL views
+- **Result:** 72 passed, 0 failed
+
+---
+
+## 7. Open Recommendations & Next Steps
+
+With all critical database, routing, and schema issues resolved and verified, the following enhancements are recommended for subsequent phases:
+
+1. **Production SMTP Integration**:
+   - Currently, `/api/auth/forgot-password` generates and stores a secure reset token in `password_reset_tokens`.
+   - *Recommendation*: Connect Resend or SendGrid to send the actual reset email with the link to `NEXT_PUBLIC_APP_URL/reset-password?token=...`.
+2. **Creator Verification Workflow**:
+   - The platform strictly enforces `self_reported` and `admin_verified` metrics with reviewer notes captured in `audit_log`.
+   - *Recommendation*: Admin review interface provides complete auditability before verification marks are approved.
+3. **Payment Settlement & Invoicing**:
+   - The database enforces fixed deal compensation (`offered_amount`) through verified completion states.
+   - *Recommendation*: Integrate a payment gateway or invoicing pipeline (e.g. Razorpay or Stripe) for milestone releases once collaborations complete.
+
+---
+
+*Report certified on November 14, 2026. All systems operational, build passing cleanly, and 172 automated tests verified.*

@@ -27,7 +27,7 @@ const statCards = [
     {
         title: 'Accepted Collabs',
         value: '--',
-        badge: '0 in production',
+        badge: '0 active',
         sub: 'Scheduled for upcoming shoots',
         icon: ShieldCheck,
         iconColor: 'text-primary',
@@ -55,7 +55,6 @@ export default function CreatorDashboardPage() {
     const [requests, setRequests] = useState<CollaborationRequestRow[]>([])
     const [user, setUser] = useState<UserRow | null>(null)
     const [profile, setProfile] = useState<CreatorRow | null>(null)
-    const [availability, setAvailability] = useState(false)
     const [profileCompleteness, setProfileCompleteness] = useState(0)
 
     useEffect(() => {
@@ -115,18 +114,6 @@ export default function CreatorDashboardPage() {
                 </div>
 
                 <div className="flex items-end gap-3">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-foreground">Open for Collabs</span>
-                        <button
-                            type="button"
-                            className={`relative w-10 h-5 rounded-full transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer ${availability ? 'bg-primary' : 'bg-muted'}`}
-                            onClick={() => setAvailability(!availability)}
-                            aria-label="Availability toggle"
-                        >
-                            <span className={`absolute left-1 top-1 w-3 h-3 bg-background rounded-full transition-transform duration-200 ${availability ? 'translate-x-5' : ''}`} />
-                        </button>
-                    </div>
-
                     <Link
                         href="/creator/profile"
                         className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm px-5 py-3 flex items-center gap-2 transition-colors rounded-sm shadow-sm"
@@ -269,14 +256,14 @@ export default function CreatorDashboardPage() {
                                                     </h3>
                                                 </div>
                                                 <p className="text-[10px] text-muted-foreground">
-                                                    {r.deliverables || r.title || 'Collaboration Details'}
+                                                    {r.deliverables || r.offer_details || 'Collaboration Details'}
                                                 </p>
                                                 <div className="flex items-center gap-2 mt-1.5">
-                                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-bold ${(r.collab_type || r.compensation_type) === 'paid' ? 'bg-primary/10 border-primary/20 text-primary' : 'border-border text-muted-foreground bg-background'}`}>
-                                                        {((r.collab_type || r.compensation_type) || '').toUpperCase()}
+                                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-bold ${r.collab_type === 'paid' ? 'bg-primary/10 border-primary/20 text-primary' : 'border-border text-muted-foreground bg-background'}`}>
+                                                        {(r.collab_type || '').toUpperCase()}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground">
-                                                        ₹{r.offered_amount ?? r.compensation_amount ?? 0}
+                                                        ₹{r.offered_amount ?? 0}
                                                     </span>
                                                 </div>
                                             </div>
@@ -381,9 +368,9 @@ export default function CreatorDashboardPage() {
                                 <div className="text-[10px] text-muted-foreground mt-1">Transferred to bank</div>
                             </div>
                             <div className="p-3 bg-muted/50 rounded-sm border border-border/60">
-                                <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Pending Payments</div>
+                                <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Active Deal Value</div>
                                 <div className="text-lg font-black text-primary">₹{(stats.pending_payments || 0).toLocaleString()}</div>
-                                <div className="text-[10px] text-muted-foreground mt-1">In escrow pipeline</div>
+                                <div className="text-[10px] text-muted-foreground mt-1">In active campaigns</div>
                             </div>
                         </div>
                     </div>
@@ -400,8 +387,8 @@ export default function CreatorDashboardPage() {
                             {requests.length > 0 ? requests.slice(0, 2).map((req) => (
                                 <div key={req.request_id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-sm border border-border/60">
                                     <div className="flex-1">
-                                        <div className="text-sm font-bold text-foreground">{req.deliverables || req.title || 'Collaboration'}</div>
-                                        <div className="text-[10px] text-muted-foreground">{((req.collab_type || req.compensation_type) || '').toUpperCase()} • ₹{req.offered_amount ?? req.compensation_amount ?? 0}</div>
+                                        <div className="text-sm font-bold text-foreground">{req.deliverables || req.offer_details || 'Collaboration'}</div>
+                                        <div className="text-[10px] text-muted-foreground">{(req.collab_type || '').toUpperCase()} • ₹{req.offered_amount ?? 0}</div>
                                     </div>
                                     <div className="text-right">
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-border text-[9px] font-bold text-foreground">

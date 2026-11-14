@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useTransition, Suspense } from 'react'
+import { useState, useEffect, useCallback, useTransition, Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -180,7 +180,7 @@ function DiscoverViewContent() {
     }, [])
 
     // 2. Fetch Creators based on active filters
-    const fetchCreators = async () => {
+    const fetchCreators = useCallback(async () => {
         setLoading(true)
         setError(null)
         try {
@@ -273,11 +273,11 @@ function DiscoverViewContent() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [currentPage, searchQuery, verifiedOnly, minEngagement, selectedCategories, selectedLocations, collabModel, sortBy])
 
     useEffect(() => {
         fetchCreators()
-    }, [currentPage, verifiedOnly, minEngagement, collabModel, sortBy, selectedCategories, selectedLocations, searchQuery])
+    }, [fetchCreators])
 
     const toggleCategory = (cat: string) => {
         setCurrentPage(1)

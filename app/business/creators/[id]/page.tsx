@@ -3,14 +3,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import {
     AlertCircle,
     ArrowLeft,
     Bookmark,
-    Calendar,
     CheckCircle2,
-    Compass,
     ExternalLink,
     Loader2,
     MapPin,
@@ -19,7 +17,6 @@ import {
     ShieldCheck,
     Sparkles,
     Star,
-    Store,
     Users,
     Utensils,
     X,
@@ -106,7 +103,6 @@ interface CreatorData {
 
 export default function BusinessCreatorProfilePage() {
     const params = useParams()
-    const router = useRouter()
     const creatorId = Number(params?.id)
 
     const [data, setData] = useState<CreatorData | null>(null)
@@ -335,7 +331,6 @@ export default function BusinessCreatorProfilePage() {
 
     // Primary social metrics
     const instagram = social_accounts.find((s) => s.platform === 'instagram')
-    const youtube = social_accounts.find((s) => s.platform === 'youtube')
 
     const primaryFollowers = instagram?.follower_count || profile.total_followers || 0
     const primaryEngagement = instagram?.engagement_rate || profile.avg_engagement_rate || 0
@@ -550,7 +545,7 @@ export default function BusinessCreatorProfilePage() {
                             sub: 'Engagement baseline',
                         },
                         {
-                            label: 'Avg. Reel Views',
+                            label: 'Avg. Views',
                             value: fmt(primaryAvgViews),
                             change: 'Video momentum',
                             sub: 'High reach',
@@ -883,13 +878,13 @@ export default function BusinessCreatorProfilePage() {
                         <div className="space-y-1.5 border-b border-border pb-4">
                             <div className="inline-flex items-center gap-1.5 bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[11px] font-bold text-primary uppercase">
                                 <ShieldCheck className="size-3.5 text-primary" />
-                                <span>Escrow Guarantee</span>
+                                <span>Verified Collaboration</span>
                             </div>
                             <h2 className="text-xl font-extrabold text-foreground tracking-tight">
                                 Send Collaboration Request
                             </h2>
                             <p className="text-xs text-muted-foreground">
-                                Propose a campaign to <strong className="text-foreground">{profile.full_name}</strong>. Funds remain protected in escrow until work is delivered.
+                                Propose a campaign to <strong className="text-foreground">{profile.full_name}</strong>. Deliverables and compensation terms are recorded directly in the agreement.
                             </p>
                         </div>
 
@@ -1009,7 +1004,7 @@ export default function BusinessCreatorProfilePage() {
                                             </div>
                                         ))}
                                     <div className="flex items-center justify-between pt-2 border-t border-border text-sm font-bold">
-                                        <span className="text-foreground">Total Escrow Budget:</span>
+                                        <span className="text-foreground">Total Campaign Budget:</span>
                                         <span className="text-primary font-black">
                                             ₹{calculatedTotal.toLocaleString('en-IN')}
                                         </span>
@@ -1025,7 +1020,7 @@ export default function BusinessCreatorProfilePage() {
                                     <span>
                                         {requestSubmitting
                                             ? 'Submitting Request...'
-                                            : 'Lock Deal & Submit Request'}
+                                            : 'Submit Collaboration Request'}
                                     </span>
                                 </button>
                             </form>

@@ -14,6 +14,12 @@ test.describe('Flow C: Business Complete & Review Flow', () => {
     const businessId = bizRes.rows[0]?.business_id
     if (!businessId) return
 
+    // Clean any prior reviews from Palmeira so that newly completed requests are reviewable
+    await query(`
+      DELETE FROM reviews
+      WHERE request_id IN (SELECT request_id FROM collaboration_requests WHERE business_id = $1)
+    `, [businessId])
+
     const acceptedCheck = await query<{ count: string }>(`
       SELECT COUNT(*)::text AS count
       FROM collaboration_requests

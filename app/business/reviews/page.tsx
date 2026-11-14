@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { CheckCircle2, Send, Star, Loader2, AlertCircle, RefreshCw } from 'lucide-react'
 
 interface ReviewItem {
@@ -33,7 +33,7 @@ export default function BusinessReviewsPage() {
     const [completedRequests, setCompletedRequests] = useState<CompletedRequest[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const [businessName, setBusinessName] = useState('Café Palmeira')
+    const [businessName, setBusinessName] = useState('Café Palmeira (Demo Fictional)')
 
     const [selectedRequestId, setSelectedRequestId] = useState<number | ''>('')
     const [rating, setRating] = useState(5)
@@ -42,7 +42,7 @@ export default function BusinessReviewsPage() {
     const [submitSuccess, setSubmitSuccess] = useState<string | null>(null)
     const [submitError, setSubmitError] = useState<string | null>(null)
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true)
         setError(null)
         try {
@@ -60,8 +60,14 @@ export default function BusinessReviewsPage() {
             if (reqRes.ok && reqData.success) {
                 const completed: CompletedRequest[] = reqData.data || []
                 setCompletedRequests(completed)
-                if (completed.length > 0 && selectedRequestId === '') {
-                    setSelectedRequestId(completed[0].request_id)
+                const reviewedIds = new Set((revData.data || []).map((r: ReviewItem) => r.request_id))
+                const unreviewed = completed.filter((c) => !reviewedIds.has(c.request_id))
+                if (unreviewed.length > 0) {
+                    setSelectedRequestId((curr) =>
+                        curr === '' || reviewedIds.has(Number(curr)) ? unreviewed[0].request_id : curr
+                    )
+                } else if (completed.length > 0) {
+                    setSelectedRequestId((curr) => (curr === '' ? completed[0].request_id : curr))
                 }
             }
 
@@ -76,11 +82,11 @@ export default function BusinessReviewsPage() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [])
 
     useEffect(() => {
         fetchData()
-    }, [])
+    }, [fetchData])
 
     const handleSubmitReview = async (e: React.FormEvent) => {
         e.preventDefault()

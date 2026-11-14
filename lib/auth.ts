@@ -34,6 +34,14 @@ export class AuthError extends Error {
 
 const SALT_ROUNDS = 12
 
+export function assertAuthSecret(): string {
+  const secret = process.env.AUTH_SECRET
+  if (process.env.NODE_ENV === 'production' && !secret) {
+    throw new Error('FATAL: AUTH_SECRET environment variable is required in production.')
+  }
+  return secret || 'dev-insecure-auth-secret-12345'
+}
+
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, SALT_ROUNDS)
 }
@@ -134,6 +142,8 @@ export interface RegisterUserData {
 }
 
 export async function registerUser(data: RegisterUserData) {
+  assertAuthSecret()
+
   // Reject role=admin immediately (admins can only be seeded)
   if ((data.role as string) === 'admin') {
     throw new AuthError('Admin accounts cannot be registered.', 403)
@@ -354,6 +364,8 @@ export async function registerUser(data: RegisterUserData) {
 // User Login & Logout
 // -----------------------------------------------------------------------------
 export async function loginUser(email: string, password: string, clientIp: string = '127.0.0.1') {
+  assertAuthSecret()
+
   if (!email || !password) {
     throw new AuthError('Invalid email or password.', 401)
   }
@@ -463,6 +475,8 @@ export function getTestSessionToken(): string | null {
 }
 
 export async function getSession(tokenOverride?: string): Promise<SessionData | null> {
+  assertAuthSecret()
+
   let token: string | undefined = tokenOverride || testSessionToken || undefined
   if (!token) {
     try {

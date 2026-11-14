@@ -11,11 +11,13 @@
     "db:reset": "bun run scripts/db-reset.ts",
     "db:test": "bun run scripts/db-test.ts",
     "db:seed": "bun run scripts/seed.ts",
+    "demo:reset": "bun run db:reset && bun run db:seed",
+    "db:erd-check": "bun run scripts/erd-check.ts",
     "test:unit": "bun test tests/unit/",
     "test:api": "DATABASE_URL=postgresql://goacreator:goacreator_secret_password@localhost:5433/goa_test bun run scripts/setup-test-db.ts && DATABASE_URL=postgresql://goacreator:goacreator_secret_password@localhost:5433/goa_test bun test tests/api/",
     "test:db": "bun run scripts/db-test.ts",
     "test:e2e": "playwright test",
-    "test": "bun run test:unit && bun run test:api && bun run test:db"
+    "test": "bun run db:erd-check && bun run test:unit && bun run test:api && bun run test:db"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

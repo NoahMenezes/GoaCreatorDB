@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import {
     AlertCircle,
     ArrowLeft,
@@ -11,11 +10,9 @@ import {
     Clock,
     FileText,
     Loader2,
-    Mail,
     MapPin,
     MessageSquare,
     Phone,
-    ShieldAlert,
     ShieldCheck,
     Star,
     X,
@@ -138,8 +135,7 @@ function StatusTimeline({ request }: { request: RequestDetail }) {
     const isRejected = request.status === 'rejected'
     const isCancelled = request.status === 'cancelled'
 
-    // Step 1: Requested
-    const step1Done = true
+    // Step 1: Requested (always true for existing requests)
     // Step 2: Responded
     const step2Active = isPending
     const step2Done = isAccepted || isCompleted
@@ -250,7 +246,7 @@ function StatusTimeline({ request }: { request: RequestDetail }) {
                         {isCompleted
                             ? 'Completed & Finalized'
                             : isAccepted
-                            ? 'In Production (Shooting)'
+                            ? 'In Progress (Accepted)'
                             : isCancelled
                             ? 'Cancelled'
                             : isRejected
@@ -279,7 +275,6 @@ export function RequestDetailView({
     requestId: number | string
     backHref?: string
 }) {
-    const router = useRouter()
     const [request, setRequest] = useState<RequestDetail | null>(null)
     const [auth, setAuth] = useState<UserAuth | null>(null)
     const [loading, setLoading] = useState(true)
@@ -413,7 +408,6 @@ export function RequestDetailView({
     const currentUserRole = auth?.user?.role
     const isCreator = currentUserRole === 'creator' || currentUserId === request?.creator_user_id
     const isBusiness = currentUserRole === 'business' || currentUserId === request?.business_user_id
-    const isAdmin = currentUserRole === 'admin'
 
     const counterpartName = isCreator
         ? request?.business_name
@@ -607,7 +601,7 @@ export function RequestDetailView({
                         </div>
                         <div className="text-[10px] text-muted-foreground font-medium">
                             {request.collab_type === 'paid'
-                                ? 'Escrow Protected Deal'
+                                ? 'Fixed Compensation Deal'
                                 : request.collab_type === 'barter'
                                 ? 'Complimentary Experience'
                                 : 'Hybrid Compensation'}

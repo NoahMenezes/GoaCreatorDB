@@ -13,7 +13,7 @@ export default function FAQs() {
         {
             id: 'item-2',
             question: 'How do brand collaborations and payouts work?',
-            answer: 'Brands post collaboration briefs specifying deliverables and budget. When you are selected, campaign funds are secured in escrow. Once deliverables are reviewed and approved, payments are released directly to your account.',
+            answer: 'Brands post collaboration briefs specifying deliverables and budget. When you are selected, campaign agreements are confirmed. Once deliverables are reviewed and completed, collaborations are finalized directly between parties.',
         },
         {
             id: 'item-3',

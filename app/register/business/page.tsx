@@ -10,7 +10,6 @@ import {
     EyeOff,
     Globe,
     Key,
-    Link2,
     Loader2,
     Lock,
     MapPin,
@@ -33,7 +32,6 @@ export default function RegisterBusinessPage() {
     const [description, setDescription] = useState('')
     const [contactPhone, setContactPhone] = useState('')
     const [instagramHandle, setInstagramHandle] = useState('')
-    const [websiteUrl, setWebsiteUrl] = useState('')
     const [workEmail, setWorkEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
@@ -125,7 +123,6 @@ export default function RegisterBusinessPage() {
                     description: description.trim(),
                     contact_phone: contactPhone.trim(),
                     instagram_handle: formattedInstagram,
-                    website_url: websiteUrl.trim(),
                 },
             }
 
@@ -236,7 +233,7 @@ export default function RegisterBusinessPage() {
                                 <div className="space-y-1.5">
                                     <div className="flex items-center justify-between text-xs">
                                         <label className="font-semibold text-foreground">Business Name *</label>
-                                        <span className="text-muted-foreground">e.g. Café Palmeira</span>
+                                        <span className="text-muted-foreground">e.g. Café Palmeira (Demo)</span>
                                     </div>
                                     <div className="relative flex items-center">
                                         <Building2 className="absolute left-3.5 size-4 text-muted-foreground" />
@@ -245,7 +242,7 @@ export default function RegisterBusinessPage() {
                                             required
                                             value={businessName}
                                             onChange={(e) => setBusinessName(e.target.value)}
-                                            placeholder="Café Palmeira"
+                                            placeholder="Café Palmeira (Demo)"
                                             className="w-full rounded-sm border border-border bg-background pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                         />
                                     </div>
@@ -359,20 +356,6 @@ export default function RegisterBusinessPage() {
                                                 onChange={(e) => setInstagramHandle(e.target.value)}
                                                 placeholder="cafepalmeiragoa"
                                                 className="w-full bg-transparent px-2.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-foreground">Website URL</label>
-                                        <div className="relative flex items-center">
-                                            <Link2 className="absolute left-3 size-3.5 text-muted-foreground" />
-                                            <input
-                                                type="url"
-                                                value={websiteUrl}
-                                                onChange={(e) => setWebsiteUrl(e.target.value)}
-                                                placeholder="https://cafepalmeira.in"
-                                                className="w-full rounded-sm border border-border bg-background pl-8 pr-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                             />
                                         </div>
                                     </div>

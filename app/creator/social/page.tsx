@@ -41,7 +41,6 @@ export default function CreatorSocialPage() {
     }
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadData()
     }, [])
 
@@ -76,9 +75,9 @@ export default function CreatorSocialPage() {
         })
     }
 
-    const getLatestMetric = (accountId: number | string) => {
-        const m = (metrics as unknown as { account_id: number | string; metrics: { followers: number; engagement_rate: number; avg_likes: number; source: string; verified: number } | null }[]).find((metric) => String(metric.account_id) === String(accountId))
-        return m?.metrics || null
+    const getLatestMetric = (accountId: number | string): SocialMetricRow | null => {
+        const found = metrics.find((metric) => Number(metric.account_id) === Number(accountId))
+        return found || null
     }
 
     return (
@@ -154,9 +153,9 @@ export default function CreatorSocialPage() {
                                 <div className="mt-6 space-y-4">
                                     <div className="grid grid-cols-3 gap-3">
                                         {[
-                                            { label: 'Followers', value: metric?.followers || '--', source: metric?.source || 'creator_submitted' },
-                                            { label: 'Engagement Rate', value: metric?.engagement_rate ? `${metric.engagement_rate}%` : '--', source: metric?.source || 'creator_submitted' },
-                                            { label: 'Avg Likes', value: metric?.avg_likes || '--', source: metric?.source || 'creator_submitted' },
+                                            { label: 'Followers', value: metric?.follower_count ? metric.follower_count.toLocaleString() : '--', source: metric?.data_source || 'self_reported' },
+                                            { label: 'Engagement Rate', value: metric?.engagement_rate ? `${metric.engagement_rate}%` : '--', source: metric?.data_source || 'self_reported' },
+                                            { label: 'Avg Likes', value: metric?.avg_likes ? Number(metric.avg_likes).toLocaleString() : '--', source: metric?.data_source || 'self_reported' },
                                         ].map((m) => (
                                             <div key={m.label} className="p-3 rounded-sm border border-border bg-background">
                                                 <div className="text-[10px] font-bold uppercase text-muted-foreground block mb-1">{m.label}</div>
@@ -181,7 +180,7 @@ export default function CreatorSocialPage() {
                                     </div>
 
                                     <div className="text-[10px] text-muted-foreground italic mt-2">
-                                        {metric?.verified ? 'Verified via official API' : 'Creator-submitted data — not verified by official platform API. Configure OAuth credentials for verified sync.'}
+                                        {metric?.data_source === 'admin_verified' ? 'Admin-verified metrics' : 'Self-reported metrics — pending admin verification.'}
                                     </div>
                                 </div>
                             )}
@@ -217,13 +216,13 @@ export default function CreatorSocialPage() {
                     <div className="flex items-start gap-3">
                         <LinkIcon className="size-4 text-primary shrink-0 mt-0.5" />
                         <div>
-                            <strong>Verified metrics:</strong> When OAuth credentials are configured, metrics come directly from the platform API and are marked as verified.
+                            <strong>Admin-verified metrics:</strong> Metrics verified by platform administrators are marked as Admin-verified with verified badges.
                         </div>
                     </div>
                     <div className="flex items-start gap-3">
                         <Download className="size-4 text-primary shrink-0 mt-0.5" />
                         <div>
-                            <strong>Creator-submitted fallback:</strong> Without API credentials, you can manually enter metrics. These are clearly labelled as creator-submitted and not verified.
+                            <strong>Self-reported metrics:</strong> Connected or synced metrics start as self-reported until verified by platform administrators.
                         </div>
                     </div>
                 </div>

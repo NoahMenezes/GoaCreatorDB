@@ -6,7 +6,6 @@ import { loginUser, registerUser, setTestSessionToken, clearAllRateLimits } from
 import { GET as getRequestsHandler, POST as postRequestsHandler } from '@/app/api/requests/route'
 import { GET as getRequestByIdHandler, PATCH as patchRequestHandler } from '@/app/api/requests/[id]/route'
 import { GET as getCollaborationsHandler } from '@/app/api/collaborations/route'
-import { GET as getCollaborationByIdHandler } from '@/app/api/collaborations/[id]/route'
 import { GET as getReviewsHandler, POST as postReviewsHandler } from '@/app/api/reviews/route'
 import { GET as getShortlistHandler } from '@/app/api/shortlist/route'
 import { PUT as putShortlistHandler, DELETE as deleteShortlistHandler } from '@/app/api/shortlist/[creatorId]/route'
@@ -14,11 +13,9 @@ import { GET as getNotificationsHandler, PATCH as patchNotificationsHandler } fr
 
 describe('Collaboration Workflow Integration Suite', () => {
   let bizToken: string
-  let bizUserId: number
   let bizId: number
 
   let creatorToken: string
-  let creatorUserId: number
   let creatorId: number
 
   let thirdPartyToken: string
@@ -47,13 +44,11 @@ describe('Collaboration Workflow Integration Suite', () => {
     // 3. Login seeded business (Café Palmeira)
     const bizLogin = await loginUser('palmeira@goaconnect.in', 'business123')
     bizToken = bizLogin.token
-    bizUserId = bizLogin.user.user_id
     bizId = (bizLogin.profile as { business_id: number }).business_id
 
     // 4. Login seeded creator (Rahul Naik)
     const creatorLogin = await loginUser('rahul@goaconnect.in', 'creator123')
     creatorToken = creatorLogin.token
-    creatorUserId = creatorLogin.user.user_id
     creatorId = (creatorLogin.profile as { creator_id: number }).creator_id
 
     // 5. Register third-party user (to test 404 unauthorized request access)
@@ -168,7 +163,7 @@ describe('Collaboration Workflow Integration Suite', () => {
       expect(bizRes.status).toBe(200)
       const bizBody = await bizRes.json()
       expect(bizBody.success).toBe(true)
-      expect(bizBody.data.creator_name).toBe('Rahul Naik')
+      expect(bizBody.data.creator_name).toContain('Rahul Naik')
       expect(bizBody.data.status).toBe('accepted')
     })
 

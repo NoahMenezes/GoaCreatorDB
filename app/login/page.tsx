@@ -340,14 +340,14 @@ function LoginContent() {
                                         onClick={() => fillDemo('palmeira@goaconnect.in', 'business123', 'business')}
                                         className="rounded-sm border border-border bg-background p-1.5 text-center text-[10px] font-semibold hover:border-primary cursor-pointer truncate"
                                     >
-                                        Business (Palmeira)
+                                        Business (Palmeira Demo)
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => fillDemo('rahul@goaconnect.in', 'creator123', 'creator')}
                                         className="rounded-sm border border-border bg-background p-1.5 text-center text-[10px] font-semibold hover:border-primary cursor-pointer truncate"
                                     >
-                                        Creator (Rahul)
+                                        Creator (Rahul Demo)
                                     </button>
                                     <button
                                         type="button"
@@ -445,7 +445,7 @@ function LoginContent() {
 
                         {/* Quote Body */}
                         <p className="text-sm font-medium text-foreground leading-relaxed">
-                            &ldquo;GoaConnect helped Café Palmeira sell out our weekend monsoon brunch through 3 local food creators.&rdquo;
+                            &ldquo;GoaConnect helped Café Palmeira (Demo Fictional) sell out our weekend monsoon brunch through 3 local food creators.&rdquo;
                         </p>
 
                         {/* Author Row */}
@@ -455,8 +455,8 @@ function LoginContent() {
                                     MB
                                 </div>
                                 <div>
-                                    <div className="text-xs font-bold text-foreground">Miguel Braganza</div>
-                                    <div className="text-[10px] text-muted-foreground">Owner at Café Palmeira, Calangute</div>
+                                    <div className="text-xs font-bold text-foreground">Demo Brand Manager</div>
+                                    <div className="text-[10px] text-muted-foreground">Manager at Café Palmeira (Demo Fictional), Calangute</div>
                                 </div>
                             </div>
 

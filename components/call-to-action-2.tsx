@@ -61,11 +61,11 @@ export default function CallToAction() {
                     </div>
                     <div className="flex items-center gap-1.5">
                         <Check className="size-3.5 text-primary stroke-[3]" />
-                        <span>Escrow secured</span>
+                        <span>Verified contracts</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                         <Check className="size-3.5 text-primary stroke-[3]" />
-                        <span>Instant direct chat</span>
+                        <span>Direct verified contact</span>
                     </div>
                 </div>
             </div>

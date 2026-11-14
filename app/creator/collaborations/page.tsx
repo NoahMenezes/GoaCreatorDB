@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ChevronRight, ShieldCheck, AlertCircle, RefreshCw, Loader2, MessageSquare } from 'lucide-react'
 
@@ -32,7 +32,7 @@ export default function CreatorCollaborationsPage() {
     const [error, setError] = useState<string | null>(null)
     const [selectedCollab, setSelectedCollab] = useState<CollaborationItem | null>(null)
 
-    const loadCollaborations = async () => {
+    const loadCollaborations = useCallback(async () => {
         setLoading(true)
         setError(null)
         try {
@@ -49,11 +49,11 @@ export default function CreatorCollaborationsPage() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [filter])
 
     useEffect(() => {
         loadCollaborations()
-    }, [filter])
+    }, [loadCollaborations])
 
     const getInitials = (name: string) => {
         return name

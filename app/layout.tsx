@@ -11,7 +11,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Goa Creator — Creator discovery and collaboration for Goan hospitality",
   description:
-    "GoaConnect connects hotels, resorts, cafés and brands with verified Goan creators for reels, photo carousels and story campaigns. Escrow-held budgets, verified reviews, direct booking.",
+    "GoaConnect connects hotels, resorts, cafés and brands with verified Goan creators for brand campaigns, photo carousels and story content. Verified reviews, direct booking.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

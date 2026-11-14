@@ -4,7 +4,6 @@ import { query, closePool } from '@/lib/db'
 import {
   registerUser,
   loginUser,
-  logoutUser,
   getSession,
   requireUser,
   requireRoleForToken,
@@ -13,20 +12,18 @@ import {
 } from '@/lib/auth'
 import { POST as registerHandler } from '@/app/api/auth/register/route'
 import { POST as loginHandler } from '@/app/api/auth/login/route'
+import { POST as forgotPasswordHandler } from '@/app/api/auth/forgot-password/route'
 import { POST as resetPasswordHandler } from '@/app/api/auth/reset-password/route'
 import { proxy } from '@/proxy'
 import { NextRequest } from 'next/server'
 
 describe('Authentication & Authorization Suite', () => {
   let validLocationId: number
-  let validCategoryId: number
 
   beforeAll(async () => {
     // Fetch valid reference IDs
     const locRes = await query<{ location_id: number }>('SELECT location_id FROM locations LIMIT 1')
-    const catRes = await query<{ category_id: number }>('SELECT category_id FROM categories LIMIT 1')
     validLocationId = locRes.rows[0].location_id
-    validCategoryId = catRes.rows[0].category_id
   })
 
   afterAll(async () => {
@@ -338,7 +335,7 @@ describe('Authentication & Authorization Suite', () => {
   // 7. Rate Limiting on Login
   // ---------------------------------------------------------------------------
   describe('Rate Limiting', () => {
-    it('should enforce rate limiting after repeated failed login attempts', async () => {
+    it('should enforce rate limiting after repeated failed login attempts via function', async () => {
       const email = 'ratelimit_target@authtest.com'
       const clientIp = '192.168.1.100'
 
@@ -362,6 +359,143 @@ describe('Authentication & Authorization Suite', () => {
           expect(err.message).toContain('Too many login attempts')
         }
       }
+    })
+
+    it('should enforce 429 rate limit via POST /api/auth/login endpoint', async () => {
+      const email = 'ratelimit_http@authtest.com'
+      const clientIp = '192.168.1.101'
+
+      // Perform 5 failed login attempts over HTTP
+      for (let i = 0; i < 5; i++) {
+        const req = new Request('http://localhost:3000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-forwarded-for': clientIp,
+          },
+          body: JSON.stringify({ email, password: 'wrongpassword' }),
+        })
+        const res = await loginHandler(req)
+        expect(res.status).toBe(401)
+      }
+
+      // 6th attempt must return HTTP 429
+      const reqBlocked = new Request('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': clientIp,
+        },
+        body: JSON.stringify({ email, password: 'wrongpassword' }),
+      })
+      const resBlocked = await loginHandler(reqBlocked)
+      expect(resBlocked.status).toBe(429)
+      const dataBlocked = await resBlocked.json()
+      expect(dataBlocked.error).toContain('Too many login attempts')
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // 8. Production Safety & Dev-Only Behavior
+  // ---------------------------------------------------------------------------
+  describe('Production Safety Safeguards', () => {
+    it('forgot-password returns reset_url only when NODE_ENV !== production', async () => {
+      const originalEnv = process.env.NODE_ENV
+
+      // Seed a user for forgot-password
+      const email = 'forgot_prod_test@authtest.com'
+      await registerUser({
+        email,
+        password: 'Password123!',
+        role: 'business',
+        business_name: 'Prod Forgot Cafe',
+        location_id: validLocationId,
+      })
+
+      // 1. In non-production (e.g. test / development): reset_url IS present
+      process.env.NODE_ENV = 'development'
+      const devReq = new Request('http://localhost:3000/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const devRes = await forgotPasswordHandler(devReq)
+      const devData = await devRes.json()
+      expect(devRes.status).toBe(200)
+      expect(devData.reset_url).toBeDefined()
+      expect(devData.reset_url).toContain('/reset-password?token=')
+
+      // 2. In production: reset_url is strictly omitted
+      process.env.NODE_ENV = 'production'
+      const prodReq = new Request('http://localhost:3000/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const prodRes = await forgotPasswordHandler(prodReq)
+      const prodData = await prodRes.json()
+      expect(prodRes.status).toBe(200)
+      expect(prodData.reset_url).toBeUndefined()
+      expect(prodData.reset_token).toBeUndefined()
+      expect(prodData.message).toContain('If an account exists')
+
+      // Restore environment
+      process.env.NODE_ENV = originalEnv
+    })
+
+    it('requires AUTH_SECRET in production mode', async () => {
+      const originalEnv = process.env.NODE_ENV
+      const originalSecret = process.env.AUTH_SECRET
+
+      process.env.NODE_ENV = 'production'
+      delete process.env.AUTH_SECRET
+
+      // Attempting to register or login in production without AUTH_SECRET throws fatal error
+      try {
+        await loginUser('admin@goaconnect.in', 'admin123')
+        expect.unreachable('Should have thrown missing AUTH_SECRET error')
+      } catch (err: unknown) {
+        expect(err instanceof Error).toBe(true)
+        expect((err as Error).message).toContain('FATAL: AUTH_SECRET environment variable is required in production')
+      }
+
+      // Restoring AUTH_SECRET allows execution
+      process.env.AUTH_SECRET = 'super-secret-auth-key-production-32-chars'
+      // Should not throw missing AUTH_SECRET
+      try {
+        await loginUser('admin@goaconnect.in', 'admin123')
+      } catch (err: unknown) {
+        expect((err as Error).message).not.toContain('FATAL: AUTH_SECRET')
+      }
+
+      // Restore environment
+      process.env.NODE_ENV = originalEnv
+      process.env.AUTH_SECRET = originalSecret
+    })
+
+    it('sets Secure cookie in production mode', async () => {
+      const originalEnv = process.env.NODE_ENV
+      const originalSecret = process.env.AUTH_SECRET
+      process.env.NODE_ENV = 'production'
+      process.env.AUTH_SECRET = 'super-secret-auth-key-production-32-chars'
+
+      const req = new Request('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': '127.0.0.1',
+        },
+        body: JSON.stringify({ email: 'admin@goaconnect.in', password: 'admin123' }),
+      })
+      const res = await loginHandler(req)
+      expect(res.status).toBe(200)
+
+      const cookieHeader = res.headers.get('set-cookie') || ''
+      expect(cookieHeader.toLowerCase()).toContain('secure')
+
+      // Restore environment
+      process.env.NODE_ENV = originalEnv
+      process.env.AUTH_SECRET = originalSecret
     })
   })
 })

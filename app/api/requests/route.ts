@@ -144,8 +144,8 @@ export async function GET(request: Request) {
 
     // Format deliverables and clean up internal columns
     const data = res.rows.map((row) => {
-      const { total_count, ...cleanRow } = row
-      return cleanRow
+      delete (row as Record<string, unknown>).total_count
+      return row
     })
 
     return NextResponse.json({

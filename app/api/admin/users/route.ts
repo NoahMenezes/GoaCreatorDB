@@ -87,8 +87,8 @@ export async function GET(request: Request) {
     const totalPages = Math.ceil(total / limit)
 
     const data = res.rows.map((row) => {
-      const { total_count, ...cleanRow } = row
-      return cleanRow
+      delete (row as Record<string, unknown>).total_count
+      return row
     })
 
     return NextResponse.json({

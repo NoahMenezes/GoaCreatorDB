@@ -25,10 +25,8 @@ describe('Admin API Suite (/api/admin/*)', () => {
   let adminUserId: number
 
   let creatorToken: string
-  let creatorUserId: number
 
   let businessToken: string
-  let businessUserId: number
 
   let testUnverifiedUserId: number
   let testUnverifiedCreatorId: number
@@ -49,12 +47,10 @@ describe('Admin API Suite (/api/admin/*)', () => {
     // 3. Login creator account (rahul@goaconnect.in)
     const creatorLogin = await loginUser('rahul@goaconnect.in', 'creator123')
     creatorToken = creatorLogin.token
-    creatorUserId = creatorLogin.user.user_id
 
     // 4. Login business account (palmeira@goaconnect.in)
     const bizLogin = await loginUser('palmeira@goaconnect.in', 'business123')
     businessToken = bizLogin.token
-    businessUserId = bizLogin.user.user_id
 
     // 5. Clean up any previous test user
     await query(`

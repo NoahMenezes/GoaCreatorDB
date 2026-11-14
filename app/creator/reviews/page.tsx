@@ -460,7 +460,7 @@ export default function CreatorReviewsPage() {
                         )}
                     </section>
 
-                    {/* 5. ESCROW SHIELD CTA */}
+                    {/* 5. VERIFIED REPUTATION CTA */}
                     <section className="border border-primary/30 bg-primary/10 text-primary p-6 sm:p-8 rounded-sm shadow-sm relative overflow-hidden">
                         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="space-y-1">

@@ -28,7 +28,7 @@ export default function BusinessLayout({
     const [isCollabModalOpen, setIsCollabModalOpen] = useState(false)
     const [selectedAddons, setSelectedAddons] = useState<string[]>(['reel'])
     const [campaignBrief, setCampaignBrief] = useState(
-        'Monsoon Weekend Tasting Menu & Heritage Sourdough Walkthrough for Café Palmeira'
+        'Monsoon Weekend Tasting Menu & Heritage Sourdough Walkthrough for Café Palmeira (Demo Fictional)'
     )
     const [selectedCreatorId, setSelectedCreatorId] = useState<number | ''>('')
     const [availableCreators, setAvailableCreators] = useState<{ id: number; name: string }[]>([])
@@ -113,7 +113,7 @@ export default function BusinessLayout({
                     offer_details: campaignBrief,
                     deliverables: selectedDeliverablesText,
                     deadline: futureDeadline,
-                    message: `Booking request from Café Palmeira: ${campaignBrief}`,
+                    message: `Booking request from Café Palmeira (Demo Fictional): ${campaignBrief}`,
                 }),
             })
 
@@ -198,7 +198,7 @@ export default function BusinessLayout({
                                 <Store className="size-4.5" />
                             </div>
                             <div className="text-left">
-                                <div className="text-xs font-bold text-foreground">Café Palmeira</div>
+                                <div className="text-xs font-bold text-foreground">Café Palmeira (Demo Fictional)</div>
                                 <div className="text-[11px] text-muted-foreground">Calangute, Goa</div>
                             </div>
                         </div>
@@ -302,13 +302,13 @@ export default function BusinessLayout({
                         <div className="space-y-1.5 border-b border-border pb-4">
                             <div className="inline-flex items-center gap-1.5 bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[11px] font-bold text-primary dark:text-primary/80 uppercase">
                                 <ShieldCheck className="size-3.5 text-primary" />
-                                <span>Escrow Guarantee</span>
+                                <span>Verified Collaboration</span>
                             </div>
                             <h2 className="text-xl font-extrabold text-foreground tracking-tight">
                                 Send Collaboration Request
                             </h2>
                             <p className="text-xs text-muted-foreground">
-                                Lock campaign funds in escrow. Payment releases after deliverables are approved.
+                                Propose deliverables, campaign terms, and compensation directly to the creator.
                             </p>
                         </div>
 
@@ -411,7 +411,7 @@ export default function BusinessLayout({
                                         </div>
                                     ))}
                                     <div className="flex items-center justify-between pt-2 border-t border-border text-sm font-bold">
-                                        <span className="text-foreground">Total Escrow Budget:</span>
+                                        <span className="text-foreground">Total Campaign Budget:</span>
                                         <span className="text-primary">₹{calculatedTotal.toLocaleString()}</span>
                                     </div>
                                 </div>
@@ -422,7 +422,7 @@ export default function BusinessLayout({
                                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-11 text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50"
                                 >
                                     <ShieldCheck className="size-4" />
-                                    <span>{requestSubmitting ? 'Submitting Request...' : 'Lock Deal & Submit Request'}</span>
+                                    <span>{requestSubmitting ? 'Submitting Request...' : 'Submit Collaboration Request'}</span>
                                 </button>
                             </form>
                         )}

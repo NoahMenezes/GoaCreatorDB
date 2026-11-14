@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       message: 'If an account exists, a reset link has been sent.',
-      ...(process.env.NODE_ENV === 'development' && {
+      ...(process.env.NODE_ENV !== 'production' && {
         reset_token: rawToken,
         reset_url: `/reset-password?token=${rawToken}`,
       }),

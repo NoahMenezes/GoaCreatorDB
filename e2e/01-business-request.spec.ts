@@ -52,7 +52,7 @@ test.describe('Flow A: Business Registration / Login & Collaboration Request', (
     await briefInput.fill('E2E Goa Creator Showcase Campaign')
 
     // Submit request
-    await page.click('button:has-text("Lock Deal & Submit Request")')
+    await page.click('button:has-text("Submit Collaboration Request"), button:has-text("Lock Deal & Submit Request")')
 
     // Verify request submitted successfully
     await expect(page.locator('h3:has-text("Request Sent")')).toBeVisible({ timeout: 10000 })

@@ -226,7 +226,7 @@ function JoinContent() {
                                                 'Discover 450+ verified creators in Panjim, Calangute, Assagao & more',
                                                 'Direct booking with fixed deliverables & transparent pricing',
                                                 'Filter by audience demographics, engagement rate, & Goan taluka',
-                                                'Secure payments with campaign milestones & invoice management',
+                                                'Secure agreements with campaign milestones & clear deliverables',
                                             ].map((text, idx) => (
                                                 <li key={idx} className="flex items-start gap-2.5 text-sm text-foreground/90">
                                                     <span className="size-4 rounded-sm bg-primary text-primary-foreground flex items-center justify-center p-0.5 shrink-0 mt-0.5">
@@ -296,7 +296,7 @@ function JoinContent() {
                                             {[
                                                 'Get inbound booking requests from top Goan venues & brands',
                                                 'Set your own rates (paid gigs and curated barter stays)',
-                                                'Guaranteed on-time payouts with no payment chasing',
+                                                'Structured collaboration workflows with transparent agreements',
                                                 'Professional portfolio page and verified badge',
                                             ].map((text, idx) => (
                                                 <li key={idx} className="flex items-start gap-2.5 text-sm text-foreground/90">
@@ -385,7 +385,7 @@ function JoinContent() {
                                                     required
                                                     value={businessName}
                                                     onChange={(e) => setBusinessName(e.target.value)}
-                                                    placeholder="e.g. Café Palmeira, Antares, Assagao Boutique Villa"
+                                                    placeholder="e.g. Café Palmeira (Demo), Sol & Mirage Club, Villa Terra (Demo)"
                                                     className="w-full rounded-sm border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                                 />
                                             </div>
@@ -458,7 +458,7 @@ function JoinContent() {
                                                     required
                                                     value={fullName}
                                                     onChange={(e) => setFullName(e.target.value)}
-                                                    placeholder="e.g. Rahul Naik, Sneha Fernandes"
+                                                    placeholder="e.g. Rahul Naik (Demo), Sneha Ferns (Demo)"
                                                     className="w-full rounded-sm border border-border bg-background px-3.5 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                                                 />
                                             </div>
@@ -509,7 +509,7 @@ function JoinContent() {
                                                 </div>
 
                                                 <div className="space-y-1">
-                                                    <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Base Rate per Reel (₹)</label>
+                                                    <label className="text-[10px] font-bold text-foreground uppercase tracking-wider">Minimum Paid Rate (₹)</label>
                                                     <input
                                                         type="number"
                                                         required

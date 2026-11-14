@@ -65,7 +65,7 @@ export default function BusinessDashboardPage() {
     const [recommendations, setRecommendations] = useState<RecommendedCreator[]>([])
     const [savedBookmarks, setSavedBookmarks] = useState<Record<number, boolean>>({})
     const [businessProfile, setBusinessProfile] = useState<{ name: string; location: string }>({
-        name: 'Café Palmeira',
+        name: 'Café Palmeira (Demo Fictional)',
         location: 'Calangute, North Goa · Verified Partner · Peak Season',
     })
     const [loading, setLoading] = useState(true)

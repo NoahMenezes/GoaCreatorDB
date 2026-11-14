@@ -28,39 +28,39 @@ const niches = [
 const creators = [
     {
         id: 'f1',
-        name: 'Sneha Fernandes',
-        handle: '@sneha.tastesgoa',
+        name: 'Sneha Ferns (Demo Fictional)',
+        handle: '@sneha_demo',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
         cover: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=800&auto=format&fit=crop',
         tag: 'Food & Dining',
         location: 'Assagao',
         followers: '120K',
         engagement: '7.8%',
-        rate: '₹8,000 / reel',
+        rate: 'Min ₹8,000',
     },
     {
         id: 'f2',
-        name: 'Rahul Naik',
-        handle: '@rahul_eats_goa',
+        name: 'Rahul Naik (Demo Fictional)',
+        handle: '@rahul_demo',
         avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop',
         cover: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=800&auto=format&fit=crop',
         tag: 'Heritage Dining',
         location: 'Panjim',
         followers: '85K',
         engagement: '9.2%',
-        rate: '₹6,500 / reel',
+        rate: 'Min ₹6,500',
     },
     {
         id: 'f3',
-        name: 'Rohan D\'Souza',
-        handle: '@rohan.cocktailchronicles',
+        name: "Rohan Tide (Demo Fictional)",
+        handle: '@rohan_demo',
         avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop',
         cover: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=800&auto=format&fit=crop',
         tag: 'Cocktails & Nightlife',
         location: 'Anjuna',
         followers: '195K',
         engagement: '6.5%',
-        rate: '₹14,000 / reel',
+        rate: 'Min ₹14,000',
     },
 ]
 
@@ -78,7 +78,7 @@ export default function FeaturesThree() {
                             Explore by Goa Niches
                         </h2>
                         <p className="text-sm text-muted-foreground">
-                            Filter by coastal specialization. Reels and portfolios update dynamically.
+                            Filter by coastal specialization. Creator portfolios update dynamically.
                         </p>
                     </div>
 

@@ -1,14 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
     Store,
     MapPin,
     Phone,
-    Camera,
     Building2,
-    FileText,
     ShieldCheck,
     CheckCircle2,
     AlertCircle,
@@ -182,7 +180,7 @@ export default function BusinessProfileEditorPage() {
     }, [])
 
     // Real-time validation
-    const validate = (): boolean => {
+    const validate = useCallback((): boolean => {
         const nextErrors: FormErrors = {}
 
         if (!businessName.trim()) {
@@ -223,7 +221,7 @@ export default function BusinessProfileEditorPage() {
 
         setErrors(nextErrors)
         return Object.keys(nextErrors).length === 0
-    }
+    }, [businessName, industry, customIndustry, locationId, contactPhone, instagramHandle, description])
 
     const markTouched = (field: string) => {
         setTouched((prev) => ({ ...prev, [field]: true }))
@@ -234,7 +232,7 @@ export default function BusinessProfileEditorPage() {
         if (!loading) {
             validate()
         }
-    }, [businessName, industry, customIndustry, locationId, contactPhone, instagramHandle, description, loading])
+    }, [loading, validate])
 
     const handleDiscard = () => {
         if (!originalProfile) return
@@ -506,7 +504,7 @@ export default function BusinessProfileEditorPage() {
                                     if (touched.business_name) validate()
                                 }}
                                 onBlur={() => markTouched('business_name')}
-                                placeholder="e.g. Café Palmeira, Gunpowder, Antares"
+                                placeholder="e.g. Café Palmeira (Demo), Spice Pavilion, Sol & Mirage"
                                 className={`w-full bg-background border px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 rounded-none transition-colors ${
                                     touched.business_name && errors.business_name
                                         ? 'border-destructive focus:ring-destructive'
@@ -736,7 +734,7 @@ export default function BusinessProfileEditorPage() {
                                     </p>
                                 )}
                                 <p className="text-[11px] text-muted-foreground">
-                                    Allows creators to tag your business profile in collaborated reels and stories.
+                                    Allows creators to tag your business profile in collaborated campaigns and stories.
                                 </p>
                             </div>
                         </div>

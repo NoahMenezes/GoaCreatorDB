@@ -272,7 +272,7 @@ function ForgotPasswordContent() {
                             </div>
 
                             <p className="text-sm font-medium text-foreground leading-relaxed">
-                                &ldquo;Account security protects your brand rate cards, verified audience insights, and active escrow collaboration contracts.&rdquo;
+                                &ldquo;Account security protects your brand rate cards, verified audience insights, and active collaboration contracts.&rdquo;
                             </p>
 
                             <div className="flex items-center justify-between pt-2 border-t border-border">
