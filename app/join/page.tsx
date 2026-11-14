@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
@@ -14,7 +14,6 @@ import {
 } from 'lucide-react'
 import { Logo } from '@/components/logo'
 import { AnimatedThemeToggler } from '@/registry/magicui/animated-theme-toggler'
-import { INITIAL_LOCATIONS, INITIAL_CATEGORIES } from '@/lib/types'
 
 function JoinContent() {
     const searchParams = useSearchParams()
@@ -31,19 +30,40 @@ function JoinContent() {
 
     // Business form fields
     const [businessName, setBusinessName] = useState('')
-    const [industry, setIndustry] = useState('Food & Dining')
-    const [bizLocation, setBizLocation] = useState('loc-2')
+    const [industry, setIndustry] = useState('Food & Beach Dining')
+    const [bizLocation, setBizLocation] = useState('1')
     const [bizPhone, setBizPhone] = useState('')
     const [bizInstagram, setBizInstagram] = useState('')
 
     // Creator form fields
     const [fullName, setFullName] = useState('')
-    const [creatorCategory, setCreatorCategory] = useState('cat-1')
-    const [creatorLocation, setCreatorLocation] = useState('loc-1')
+    const [creatorCategory, setCreatorCategory] = useState('1')
+    const [creatorLocation, setCreatorLocation] = useState('1')
     const [creatorInstagram, setCreatorInstagram] = useState('')
     const [acceptsBarter, setAcceptsBarter] = useState(true)
     const [minPaidRate, setMinPaidRate] = useState('8500')
     const [creatorBio, setCreatorBio] = useState('')
+
+    // Taxonomy state from DB
+    const [locations, setLocations] = useState<Array<{ location_id: number; area_name: string; taluka: string; district: string }>>([])
+    const [categories, setCategories] = useState<Array<{ category_id: number; category_name: string }>>([])
+
+    useEffect(() => {
+        fetch('/api/taxonomy')
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.locations?.length) {
+                    setLocations(data.locations)
+                    setBizLocation(String(data.locations[0].location_id))
+                    setCreatorLocation(String(data.locations[0].location_id))
+                }
+                if (data.categories?.length) {
+                    setCategories(data.categories)
+                    setCreatorCategory(String(data.categories[0].category_id))
+                }
+            })
+            .catch(() => {})
+    }, [])
 
     // Common auth fields
     const [email, setEmail] = useState('')
@@ -394,7 +414,7 @@ function JoinContent() {
                                                         onChange={(e) => setBizLocation(e.target.value)}
                                                         className="w-full rounded-sm border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                                     >
-                                                        {INITIAL_LOCATIONS.map((loc) => (
+                                                        {locations.map((loc) => (
                                                             <option key={loc.location_id} value={loc.location_id}>
                                                                 {loc.area_name} ({loc.district})
                                                             </option>
@@ -451,7 +471,7 @@ function JoinContent() {
                                                         onChange={(e) => setCreatorCategory(e.target.value)}
                                                         className="w-full rounded-sm border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                                     >
-                                                        {INITIAL_CATEGORIES.map((cat) => (
+                                                        {categories.map((cat) => (
                                                             <option key={cat.category_id} value={cat.category_id}>
                                                                 {cat.category_name}
                                                             </option>
@@ -466,7 +486,7 @@ function JoinContent() {
                                                         onChange={(e) => setCreatorLocation(e.target.value)}
                                                         className="w-full rounded-sm border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                                     >
-                                                        {INITIAL_LOCATIONS.map((loc) => (
+                                                        {locations.map((loc) => (
                                                             <option key={loc.location_id} value={loc.location_id}>
                                                                 {loc.area_name} ({loc.district})
                                                             </option>

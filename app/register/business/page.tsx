@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -20,7 +20,6 @@ import {
 } from 'lucide-react'
 import { Logo } from '@/components/logo'
 import { AnimatedThemeToggler } from '@/registry/magicui/animated-theme-toggler'
-import { INITIAL_LOCATIONS, INITIAL_CATEGORIES } from '@/lib/types'
 
 export default function RegisterBusinessPage() {
     const router = useRouter()
@@ -41,6 +40,26 @@ export default function RegisterBusinessPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [agreedToTerms, setAgreedToTerms] = useState(false)
+
+    // Taxonomy state
+    const [locations, setLocations] = useState<Array<{ location_id: number; area_name: string; taluka: string; district: string }>>([])
+    const [categories, setCategories] = useState<Array<{ category_id: number; category_name: string }>>([])
+
+    useEffect(() => {
+        fetch('/api/taxonomy')
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.locations?.length) {
+                    setLocations(data.locations)
+                    setLocationId(String(data.locations[0].location_id))
+                }
+                if (data.categories?.length) {
+                    setCategories(data.categories)
+                    setIndustry(data.categories[0].category_name)
+                }
+            })
+            .catch(() => {})
+    }, [])
 
     // Password strength calculation
     const getPasswordStrength = (pass: string) => {
@@ -245,7 +264,7 @@ export default function RegisterBusinessPage() {
                                                 className="w-full rounded-sm border border-border bg-background pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                             >
                                                 <option value="" disabled>Select industry</option>
-                                                {INITIAL_CATEGORIES.map((cat) => (
+                                                {categories.map((cat) => (
                                                     <option key={cat.category_id} value={cat.category_name}>
                                                         {cat.category_name}
                                                     </option>
@@ -265,7 +284,7 @@ export default function RegisterBusinessPage() {
                                                 className="w-full rounded-sm border border-border bg-background pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                             >
                                                 <option value="" disabled>Select location in Goa</option>
-                                                {INITIAL_LOCATIONS.map((loc) => (
+                                                {locations.map((loc) => (
                                                     <option key={loc.location_id} value={loc.location_id}>
                                                         {loc.area_name} ({loc.taluka}, {loc.district})
                                                     </option>

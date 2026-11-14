@@ -245,7 +245,7 @@ export default function CreatorDashboardPage() {
                             </div>
                         ) : (
                             requests.slice(0, 3).map((req) => {
-        const r = req as unknown as { business_email: string; title: string; compensation_type: string; compensation_amount: number; status: string; deadline: string | null }
+        const r = req
         return (
                                 <div
                                     key={req.request_id}
@@ -269,14 +269,14 @@ export default function CreatorDashboardPage() {
                                                     </h3>
                                                 </div>
                                                 <p className="text-[10px] text-muted-foreground">
-{r.title}
+                                                    {r.deliverables || r.title || 'Collaboration Details'}
                                                 </p>
                                                 <div className="flex items-center gap-2 mt-1.5">
-                                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-bold ${req.compensation_type === 'paid' ? 'bg-primary/10 border-primary/20 text-primary' : 'border-border text-muted-foreground bg-background'}`}>
-                                                        {req.compensation_type.toUpperCase()}
+                                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-bold ${(r.collab_type || r.compensation_type) === 'paid' ? 'bg-primary/10 border-primary/20 text-primary' : 'border-border text-muted-foreground bg-background'}`}>
+                                                        {((r.collab_type || r.compensation_type) || '').toUpperCase()}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground">
-                                                        ₹{req.compensation_amount}
+                                                        ₹{r.offered_amount ?? r.compensation_amount ?? 0}
                                                     </span>
                                                 </div>
                                             </div>
@@ -400,8 +400,8 @@ export default function CreatorDashboardPage() {
                             {requests.length > 0 ? requests.slice(0, 2).map((req) => (
                                 <div key={req.request_id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-sm border border-border/60">
                                     <div className="flex-1">
-                                        <div className="text-sm font-bold text-foreground">{req.title}</div>
-                                        <div className="text-[10px] text-muted-foreground">{req.compensation_type.toUpperCase()} • ₹{req.compensation_amount}</div>
+                                        <div className="text-sm font-bold text-foreground">{req.deliverables || req.title || 'Collaboration'}</div>
+                                        <div className="text-[10px] text-muted-foreground">{((req.collab_type || req.compensation_type) || '').toUpperCase()} • ₹{req.offered_amount ?? req.compensation_amount ?? 0}</div>
                                     </div>
                                     <div className="text-right">
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-border text-[9px] font-bold text-foreground">

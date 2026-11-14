@@ -1,9 +1,7 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
-import { initDb } from '@/lib/db'
-import { requireAuth, saveAndClose } from '@/lib/api-auth'
-import crypto from 'crypto'
-
+import { query } from '@/lib/db'
+import { requireAuth } from '@/lib/api-auth'
 
 export async function GET(request: Request) {
   const auth = await requireAuth()
@@ -11,36 +9,36 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url)
   const filter = searchParams.get('filter') || 'all'
-  const business = searchParams.get('business')
+  const userId = Number(auth.user.user_id)
 
-  const db = await initDb()
   try {
-    let query = `
-      SELECT r.*, c.title as campaign_title,
-             u2.business_name, u2.email as business_email
+    let sql = `
+      SELECT
+        r.*,
+        cr.offer_details,
+        b.business_name,
+        c.full_name AS creator_name,
+        ur.email AS reviewer_email,
+        ue.email AS reviewee_email
       FROM reviews r
-      JOIN collaborations c ON r.collaboration_id = c.collaboration_id
-      JOIN users u2 ON c.business_id = u2.user_id
-      WHERE r.reviewer_id = ?
+      JOIN collaboration_requests cr ON r.request_id = cr.request_id
+      JOIN businesses b ON cr.business_id = b.business_id
+      JOIN creators c ON cr.creator_id = c.creator_id
+      JOIN users ur ON r.reviewer_id = ur.user_id
+      JOIN users ue ON r.reviewee_id = ue.user_id
+      WHERE r.reviewer_id = $1 OR r.reviewee_id = $1
     `
-    const params: unknown[] = [auth.user.user_id]
+    const params: unknown[] = [userId]
 
     if (filter === 'with-reviews') {
-      query += ' AND r.comment IS NOT NULL AND r.comment != ""'
+      sql += ' AND r.comment IS NOT NULL AND TRIM(r.comment) <> \'\''
     }
 
-    if (business) {
-      query += ' AND u2.user_id = ?'
-      params.push(business)
-    }
+    sql += ' ORDER BY r.created_at DESC'
 
-    query += ' ORDER BY r.created_at DESC'
-
-    const rows = db.query(query).all(params) as unknown as Record<string, unknown>[]
-    saveAndClose(db)
-    return NextResponse.json({ success: true, data: rows })
+    const res = await query(sql, params)
+    return NextResponse.json({ success: true, data: res.rows })
   } catch {
-    saveAndClose(db)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch reviews' },
       { status: 500 }
@@ -53,86 +51,83 @@ export async function POST(request: Request) {
   if (auth instanceof Response) return auth
 
   const body = await request.json()
-  const { collaboration_id, rating, comment } = body
+  const requestId = Number(body.request_id || body.collaboration_id)
+  const rating = Number(body.rating)
+  const comment = body.comment || null
 
-  if (!collaboration_id || !rating || rating < 1 || rating > 5) {
+  if (!requestId || !rating || rating < 1 || rating > 5) {
     return NextResponse.json(
-      { success: false, error: 'Valid collaboration ID and rating (1-5) are required' },
+      { success: false, error: 'Valid request ID and rating (1-5) are required' },
       { status: 400 }
     )
   }
 
-  const db = await initDb()
-  try {
-    // Verify collaboration exists, is completed, and belongs to this creator
-    const collab = db
-      .query(
-        'SELECT * FROM collaborations WHERE collaboration_id = ? AND creator_id = ? AND status = ?'
-      )
-      .get(collaboration_id, auth.user.user_id, 'completed') as unknown as { [key: string]: unknown } | null
+  const reviewerId = Number(auth.user.user_id)
 
-    if (!collab) {
-      saveAndClose(db)
+  try {
+    // Look up the request to find counterpart reviewee
+    const reqRes = await query<{
+      request_id: number
+      status: string
+      business_user_id: number
+      creator_user_id: number
+    }>(
+      `SELECT
+        cr.request_id,
+        cr.status,
+        b.user_id AS business_user_id,
+        c.user_id AS creator_user_id
+       FROM collaboration_requests cr
+       JOIN businesses b ON cr.business_id = b.business_id
+       JOIN creators c ON cr.creator_id = c.creator_id
+       WHERE cr.request_id = $1`,
+      [requestId]
+    )
+
+    if (reqRes.rows.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Collaboration not found, not completed, or not owned by you' },
+        { success: false, error: 'Collaboration request not found' },
         { status: 404 }
       )
     }
 
-    // Check for duplicate review
-    const existing = db
-      .query('SELECT COUNT(*) as cnt FROM reviews WHERE collaboration_id = ? AND reviewer_id = ?')
-      .get(collaboration_id, auth.user.user_id) as { cnt: number } | null
-
-    if (existing && existing.cnt > 0) {
-      saveAndClose(db)
+    const reqData = reqRes.rows[0]
+    if (reqData.status !== 'completed') {
       return NextResponse.json(
-        { success: false, error: 'You have already reviewed this collaboration' },
-        { status: 409 }
+        { success: false, error: 'Reviews are only allowed for completed collaborations' },
+        { status: 400 }
       )
     }
 
-    const reviewId = `rev-${crypto.randomUUID().slice(0, 8)}`
-    const now = new Date().toISOString()
+    let revieweeId: number
+    if (reviewerId === reqData.business_user_id) {
+      revieweeId = reqData.creator_user_id
+    } else if (reviewerId === reqData.creator_user_id) {
+      revieweeId = reqData.business_user_id
+    } else {
+      return NextResponse.json(
+        { success: false, error: 'Only participants in this collaboration can leave a review' },
+        { status: 403 }
+      )
+    }
 
-    db.query(
-      `INSERT INTO reviews (review_id, collaboration_id, reviewer_id, reviewee_id, rating, comment, is_verified, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      reviewId,
-      collaboration_id,
-      auth.user.user_id,
-      collab.business_id,
-      rating,
-      comment || null,
-      1,
-      now,
-      now
+    const insertRes = await query<{ review_id: number }>(
+      `INSERT INTO reviews (request_id, reviewer_id, reviewee_id, rating, comment)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING review_id`,
+      [requestId, reviewerId, revieweeId, rating, comment]
     )
 
-    // Notify business
-    const notifId = `notif-${crypto.randomUUID().slice(0, 8)}`
-    db.query(
-      `INSERT INTO notifications (notification_id, user_id, type, title, message, is_read, link, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      notifId,
-      collab.business_id,
-      'review_received',
-      'New Review Received',
-      `You received a new ${rating}-star review for collaboration "${collab.title || collab.campaign_title}".`,
-      0,
-      `/business/reviews`,
-      now
-    )
-
-    saveAndClose(db)
-    return NextResponse.json({ success: true, data: { review_id: reviewId } })
-  } catch {
-    saveAndClose(db)
+    return NextResponse.json({
+      success: true,
+      data: { review_id: insertRes.rows[0].review_id },
+    })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Failed to submit review'
+    const status = message.includes('duplicate') || message.includes('unique') ? 409 : 400
     return NextResponse.json(
-      { success: false, error: 'Failed to submit review' },
-      { status: 500 }
+      { success: false, error: message },
+      { status }
     )
   }
 }

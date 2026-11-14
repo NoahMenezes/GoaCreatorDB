@@ -1,135 +1,178 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
-import { initDb } from '@/lib/db'
-import { requireAuth, saveAndClose } from '@/lib/api-auth'
-import crypto from 'crypto'
+import { query } from '@/lib/db'
+import { requireAuth } from '@/lib/api-auth'
 
-
-export async function POST(request: Request) {
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const auth = await requireAuth()
   if (auth instanceof Response) return auth
 
-  const { searchParams } = new URL(request.url)
-  const requestId = searchParams.get('id')
-  const action = searchParams.get('action') // 'accept' or 'decline'
-
-  if (!requestId || !action || !['accept', 'decline'].includes(action)) {
+  const resolvedParams = await params
+  const requestId = Number(resolvedParams.id)
+  if (!requestId) {
     return NextResponse.json(
-      { success: false, error: 'Valid request ID and action (accept/decline) are required' },
+      { success: false, error: 'Invalid request ID' },
       { status: 400 }
     )
   }
 
-  const db = await initDb()
   try {
-    // Verify the request exists and belongs to this creator
-    const existing = db
-      .query(
-        'SELECT * FROM collaboration_requests WHERE request_id = ? AND creator_id = ? AND status = ?'
-      )
-      .get(requestId, auth.user.user_id, 'pending') as unknown as { [key: string]: unknown } | null
+    const res = await query(
+      `SELECT
+        cr.*,
+        b.business_name,
+        b.industry,
+        b.contact_phone,
+        b.instagram_handle AS business_instagram,
+        c.full_name AS creator_name,
+        ub.user_id AS business_user_id,
+        uc.user_id AS creator_user_id,
+        ub.email AS business_email,
+        uc.email AS creator_email
+       FROM collaboration_requests cr
+       JOIN businesses b ON cr.business_id = b.business_id
+       JOIN creators c ON cr.creator_id = c.creator_id
+       JOIN users ub ON b.user_id = ub.user_id
+       JOIN users uc ON c.user_id = uc.user_id
+       WHERE cr.request_id = $1`,
+      [requestId]
+    )
 
-    if (!existing) {
-      saveAndClose(db)
+    if (res.rows.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Request not found, not pending, or not owned by you' },
+        { success: false, error: 'Request not found' },
         { status: 404 }
       )
     }
 
-    const now = new Date().toISOString()
+    const row = res.rows[0]
+    const userId = Number(auth.user.user_id)
 
-    if (action === 'accept') {
-      // Update request status
-      db.query(
-        'UPDATE collaboration_requests SET status = ?, updated_at = ?, responded_at = ? WHERE request_id = ?'
-      ).run('accepted', now, now, requestId)
-
-      // Create collaboration record
-      const collabId = `collab-${crypto.randomUUID().slice(0, 8)}`
-      db.query(
-        `INSERT INTO collaborations (collaboration_id, request_id, creator_id, business_id, status, campaign_brief, deliverables, deadline, payment_amount, payment_status, escrow_locked, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).run(
-        collabId,
-        requestId,
-        existing.creator_id,
-        existing.business_id,
-        'accepted',
-        existing.objective,
-        existing.deliverables,
-        existing.deadline || null,
-        existing.compensation_amount,
-        'pending',
-        existing.compensation_amount,
-        now,
-        now
-      )
-
-      // Create payment record
-      const paymentId = `pay-${crypto.randomUUID().slice(0, 8)}`
-      db.query(
-        `INSERT INTO payments (payment_id, collaboration_id, amount, status, escrow_locked, escrow_released, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-      ).run(
-        paymentId,
-        collabId,
-        existing.compensation_amount,
-        'pending',
-        existing.compensation_amount,
-        0,
-        now,
-        now
-      )
-
-      // Notify business
-      const notifId = `notif-${crypto.randomUUID().slice(0, 8)}`
-      db.query(
-        `INSERT INTO notifications (notification_id, user_id, type, title, message, is_read, link, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-      ).run(
-        notifId,
-        existing.business_id,
-        'request_accepted',
-        'Collaboration Request Accepted',
-        `Your request "${existing.title}" has been accepted by the creator.`,
-        0,
-        `/business/requests`,
-        now
-      )
-    } else {
-      // Decline
-      db.query(
-        'UPDATE collaboration_requests SET status = ?, updated_at = ?, responded_at = ? WHERE request_id = ?'
-      ).run('declined', now, now, requestId)
-
-      // Notify business
-      const notifId = `notif-${crypto.randomUUID().slice(0, 8)}`
-      db.query(
-        `INSERT INTO notifications (notification_id, user_id, type, title, message, is_read, link, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-      ).run(
-        notifId,
-        existing.business_id,
-        'request_declined',
-        'Collaboration Request Declined',
-        `Your request "${existing.title}" has been declined by the creator.`,
-        0,
-        `/business/requests`,
-        now
+    // Authorization: only the business or creator party can view the request
+    if (userId !== row.business_user_id && userId !== row.creator_user_id && auth.role !== 'admin') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized to view this request' },
+        { status: 403 }
       )
     }
 
-    saveAndClose(db)
+    return NextResponse.json({ success: true, data: row })
+  } catch {
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch collaboration request' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return handleAction(request, params)
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return handleAction(request, params)
+}
+
+async function handleAction(
+  request: Request,
+  paramsPromise: Promise<{ id: string }>
+) {
+  const auth = await requireAuth()
+  if (auth instanceof Response) return auth
+
+  const resolvedParams = await paramsPromise
+  const requestId = Number(resolvedParams.id)
+  if (!requestId) {
+    return NextResponse.json(
+      { success: false, error: 'Invalid request ID' },
+      { status: 400 }
+    )
+  }
+
+  const body = await request.json().catch(() => ({}))
+  let action: string = body.action || ''
+
+  // Fallback: URL searchParams action (e.g. ?action=accept)
+  if (!action) {
+    const url = new URL(request.url)
+    action = url.searchParams.get('action') || ''
+  }
+
+  // Remap 'decline' to 'reject' per D3/D14
+  if (action === 'decline') {
+    action = 'reject'
+  }
+
+  if (!['accept', 'reject', 'complete', 'cancel'].includes(action)) {
+    return NextResponse.json(
+      { success: false, error: 'Invalid action. Must be accept, reject, complete, or cancel' },
+      { status: 400 }
+    )
+  }
+
+  try {
+    const userId = Number(auth.user.user_id)
+    let updateRes
+
+    if (action === 'accept' || action === 'reject') {
+      // Find creator_id for this user
+      const crLookup = await query<{ creator_id: number }>(
+        'SELECT creator_id FROM creators WHERE user_id = $1',
+        [userId]
+      )
+      if (crLookup.rows.length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'Creator profile not found for user' },
+          { status: 403 }
+        )
+      }
+      const creatorId = crLookup.rows[0].creator_id
+      updateRes = await query(
+        'SELECT * FROM fn_respond_to_request($1, $2, $3)',
+        [requestId, creatorId, action]
+      )
+    } else if (action === 'complete') {
+      const bizLookup = await query<{ business_id: number }>(
+        'SELECT business_id FROM businesses WHERE user_id = $1',
+        [userId]
+      )
+      if (bizLookup.rows.length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'Business profile not found for user' },
+          { status: 403 }
+        )
+      }
+      const businessId = bizLookup.rows[0].business_id
+      updateRes = await query(
+        'SELECT * FROM fn_complete_request($1, $2)',
+        [requestId, businessId]
+      )
+    } else if (action === 'cancel') {
+      updateRes = await query(
+        'SELECT * FROM fn_cancel_request($1, $2)',
+        [requestId, userId]
+      )
+    }
+
     return NextResponse.json({
       success: true,
-      data: { request_id: requestId, status: action === 'accept' ? 'accepted' : 'declined' },
+      data: updateRes?.rows[0] || { request_id: requestId, action },
     })
-  } catch {
-    saveAndClose(db)
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'State transition failed'
+    const status = message.includes('Unauthorized') ? 403 : message.includes('Cannot') || message.includes('status') ? 409 : 400
     return NextResponse.json(
-      { success: false, error: `Failed to ${action} request` },
-      { status: 500 }
+      { success: false, error: message },
+      { status }
     )
   }
 }

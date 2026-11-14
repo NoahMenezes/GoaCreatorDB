@@ -1,9 +1,7 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
-import { initDb } from '@/lib/db'
-import { requireAuth, saveAndClose } from '@/lib/api-auth'
-import crypto from 'crypto'
-
+import { query } from '@/lib/db'
+import { requireAuth } from '@/lib/api-auth'
 
 export async function GET(request: Request) {
   const auth = await requireAuth()
@@ -11,31 +9,36 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url)
   const status = searchParams.get('status')
-  const role = auth.user.role
+  const role = auth.role
+  const userId = auth.user.user_id
 
-  const db = await initDb()
   try {
-    let query = `
-      SELECT cr.*, u.email as creator_email, u2.email as business_email
+    let sql = `
+      SELECT
+        cr.*,
+        b.business_name,
+        c.full_name AS creator_name,
+        ub.email AS business_email,
+        uc.email AS creator_email
       FROM collaboration_requests cr
-      JOIN users u ON cr.creator_id = u.user_id
-      JOIN users u2 ON cr.business_id = u2.user_id
-      WHERE ${role === 'creator' ? 'cr.creator_id = ?' : 'cr.business_id = ?'}
+      JOIN businesses b ON cr.business_id = b.business_id
+      JOIN creators c ON cr.creator_id = c.creator_id
+      JOIN users ub ON b.user_id = ub.user_id
+      JOIN users uc ON c.user_id = uc.user_id
+      WHERE ${role === 'creator' ? 'c.user_id = $1' : 'b.user_id = $1'}
     `
-    const params: unknown[] = [auth.user.user_id]
+    const params: unknown[] = [userId]
 
     if (status && status !== 'all') {
-      query += ' AND cr.status = ?'
       params.push(status)
+      sql += ` AND cr.status = $${params.length}`
     }
 
-    query += ' ORDER BY cr.created_at DESC'
+    sql += ' ORDER BY cr.requested_at DESC'
 
-    const rows = db.query(query).all(params) as unknown as Record<string, unknown>[]
-    saveAndClose(db)
-    return NextResponse.json({ success: true, data: rows })
+    const res = await query(sql, params)
+    return NextResponse.json({ success: true, data: res.rows })
   } catch {
-    saveAndClose(db)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch collaboration requests' },
       { status: 500 }
@@ -47,7 +50,7 @@ export async function POST(request: Request) {
   const auth = await requireAuth()
   if (auth instanceof Response) return auth
 
-  if (auth.user.role !== 'business') {
+  if (auth.role !== 'business') {
     return NextResponse.json(
       { success: false, error: 'Only business accounts can create requests' },
       { status: 403 }
@@ -57,75 +60,65 @@ export async function POST(request: Request) {
   const body = await request.json()
   const {
     creator_id,
-    title,
-    objective,
-    compensation_amount,
-    compensation_type,
-    collaboration_type,
+    collab_type,
+    offered_amount,
+    offer_details,
     deliverables,
-    shoot_date,
+    message,
     deadline,
-    usage_terms,
-    licensing_terms,
   } = body
 
-  if (!creator_id || !title || !objective || !compensation_amount || !compensation_type) {
+  if (!creator_id || !collab_type || offered_amount === undefined || !deadline) {
     return NextResponse.json(
-      { success: false, error: 'Missing required fields' },
+      { success: false, error: 'Missing required fields (creator_id, collab_type, offered_amount, deadline)' },
       { status: 400 }
     )
   }
 
-  const db = await initDb()
   try {
-    const requestId = `req-${crypto.randomUUID().slice(0, 8)}`
-    const now = new Date().toISOString()
-
-    db.query(
-      `INSERT INTO collaboration_requests (request_id, creator_id, business_id, title, objective, compensation_amount, compensation_type, collaboration_type, deliverables, shoot_date, deadline, usage_terms, licensing_terms, status, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      requestId,
-      creator_id,
-      auth.user.user_id,
-      title,
-      objective,
-      compensation_amount,
-      compensation_type,
-      collaboration_type || 'hybrid',
-      JSON.stringify(deliverables || []),
-      shoot_date || null,
-      deadline || null,
-      usage_terms || null,
-      licensing_terms || null,
-      'pending',
-      now,
-      now
+    // Look up business_id for the logged in user
+    const bizRes = await query<{ business_id: number }>(
+      'SELECT business_id FROM businesses WHERE user_id = $1',
+      [auth.user.user_id]
     )
 
-    // Create notification for creator
-    const notifId = `notif-${crypto.randomUUID().slice(0, 8)}`
-    db.query(
-      `INSERT INTO notifications (notification_id, user_id, type, title, message, is_read, link, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      notifId,
-      creator_id,
-      'request_received',
-      'New Collaboration Request',
-      `You have received a new collaboration request: ${title}`,
-      0,
-      `/creator/requests`,
-      now
+    if (bizRes.rows.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Business profile not found for user' },
+        { status: 404 }
+      )
+    }
+
+    const businessId = bizRes.rows[0].business_id
+    const amount = Number(offered_amount) || 0
+    const deliverableStr = typeof deliverables === 'string' ? deliverables : JSON.stringify(deliverables || [])
+
+    const insertRes = await query<{ request_id: number }>(
+      `INSERT INTO collaboration_requests
+       (business_id, creator_id, collab_type, offered_amount, offer_details, deliverables, message, deadline, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending')
+       RETURNING request_id`,
+      [
+        businessId,
+        Number(creator_id),
+        collab_type,
+        amount,
+        offer_details || null,
+        deliverableStr,
+        message || null,
+        deadline,
+      ]
     )
 
-    saveAndClose(db)
-    return NextResponse.json({ success: true, data: { request_id: requestId } })
-  } catch {
-    saveAndClose(db)
+    return NextResponse.json({
+      success: true,
+      data: { request_id: insertRes.rows[0].request_id },
+    })
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Failed to create collaboration request'
     return NextResponse.json(
-      { success: false, error: 'Failed to create collaboration request' },
-      { status: 500 }
+      { success: false, error: errorMsg },
+      { status: 400 }
     )
   }
 }

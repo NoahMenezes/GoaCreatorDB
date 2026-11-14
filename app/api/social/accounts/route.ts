@@ -1,24 +1,30 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
-import { initDb } from '@/lib/db'
-import { requireAuth, saveAndClose } from '@/lib/api-auth'
-import crypto from 'crypto'
+import { query } from '@/lib/db'
+import { requireAuth } from '@/lib/api-auth'
 
 export async function GET() {
   const auth = await requireAuth()
   if (auth instanceof Response) return auth
 
-  const db = await initDb()
+  const userId = Number(auth.user.user_id)
+
   try {
-    const rows = db
-      .query(
-        'SELECT * FROM social_accounts WHERE user_id = ? ORDER BY created_at DESC'
-      )
-      .all(auth.user.user_id) as unknown as { account_id: string }[]
-    saveAndClose(db)
-    return NextResponse.json({ success: true, data: rows })
+    const res = await query(
+      `SELECT
+        sa.*,
+        MAX(cm.recorded_at) AS last_synced_at
+       FROM social_accounts sa
+       JOIN creators c ON sa.creator_id = c.creator_id
+       LEFT JOIN creator_metrics cm ON sa.account_id = cm.account_id
+       WHERE c.user_id = $1
+       GROUP BY sa.account_id
+       ORDER BY sa.account_id DESC`,
+      [userId]
+    )
+
+    return NextResponse.json({ success: true, data: res.rows })
   } catch {
-    saveAndClose(db)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch social accounts' },
       { status: 500 }
@@ -30,45 +36,50 @@ export async function POST(request: Request) {
   const auth = await requireAuth()
   if (auth instanceof Response) return auth
 
+  const userId = Number(auth.user.user_id)
   const body = await request.json()
-  const { platform, platform_user_id, username, profile_picture_url } = body
+  const { platform, handle, username, profile_url } = body
+  const socialHandle = (handle || username || '').trim().replace(/^@/, '')
 
-  if (!platform || !platform_user_id || !username) {
+  if (!platform || !socialHandle) {
     return NextResponse.json(
-      { success: false, error: 'Platform, platform user ID, and username are required' },
+      { success: false, error: 'Platform and handle are required' },
       { status: 400 }
     )
   }
 
-  const db = await initDb()
   try {
-    const accountId = `sa-${crypto.randomUUID().slice(0, 8)}`
-    const now = new Date().toISOString()
-
-    db.query(
-      `INSERT INTO social_accounts (account_id, user_id, platform, platform_user_id, username, profile_picture_url, is_connected, connected_at, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      accountId,
-      auth.user.user_id,
-      platform,
-      platform_user_id,
-      username,
-      profile_picture_url || null,
-      1,
-      now,
-      now,
-      now
+    const crRes = await query<{ creator_id: number }>(
+      'SELECT creator_id FROM creators WHERE user_id = $1',
+      [userId]
     )
 
-    saveAndClose(db)
-    return NextResponse.json({ success: true, data: { account_id: accountId } })
-  } catch (err: unknown) {
-    saveAndClose(db)
-    const message = err instanceof Error ? err.message : ''
-    if (message.includes('UNIQUE')) {
+    if (crRes.rows.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'This social account is already connected' },
+        { success: false, error: 'Creator profile not found for user' },
+        { status: 404 }
+      )
+    }
+
+    const creatorId = crRes.rows[0].creator_id
+    const finalProfileUrl = profile_url || (platform === 'instagram' ? `https://instagram.com/${socialHandle}` : `https://youtube.com/@${socialHandle}`)
+
+    const insertRes = await query<{ account_id: number }>(
+      `INSERT INTO social_accounts (creator_id, platform, handle, profile_url)
+       VALUES ($1, $2, $3, $4)
+       RETURNING account_id`,
+      [creatorId, platform, socialHandle, finalProfileUrl]
+    )
+
+    return NextResponse.json({
+      success: true,
+      data: { account_id: insertRes.rows[0].account_id },
+    })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : ''
+    if (message.includes('unique') || message.includes('UNIQUE')) {
+      return NextResponse.json(
+        { success: false, error: 'This social account or platform is already connected' },
         { status: 409 }
       )
     }
@@ -84,25 +95,29 @@ export async function DELETE(request: Request) {
   if (auth instanceof Response) return auth
 
   const { searchParams } = new URL(request.url)
-  const accountId = searchParams.get('id')
+  const accountId = Number(searchParams.get('id'))
 
   if (!accountId) {
     return NextResponse.json(
-      { success: false, error: 'Account ID is required' },
+      { success: false, error: 'Valid account ID is required' },
       { status: 400 }
     )
   }
 
-  const db = await initDb()
+  const userId = Number(auth.user.user_id)
+
   try {
-    db.query('DELETE FROM social_accounts WHERE account_id = ? AND user_id = ?').run(
-      accountId,
-      auth.user.user_id
+    await query(
+      `DELETE FROM social_accounts sa
+       USING creators c
+       WHERE sa.creator_id = c.creator_id
+         AND sa.account_id = $1
+         AND c.user_id = $2`,
+      [accountId, userId]
     )
-    saveAndClose(db)
+
     return NextResponse.json({ success: true })
   } catch {
-    saveAndClose(db)
     return NextResponse.json(
       { success: false, error: 'Failed to disconnect social account' },
       { status: 500 }

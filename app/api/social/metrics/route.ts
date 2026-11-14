@@ -1,36 +1,61 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
-import { initDb } from '@/lib/db'
-import { requireAuth, saveAndClose } from '@/lib/api-auth'
+import { query } from '@/lib/db'
+import { requireAuth } from '@/lib/api-auth'
 
 export async function GET() {
   const auth = await requireAuth()
   if (auth instanceof Response) return auth
 
-  const db = await initDb()
+  const userId = Number(auth.user.user_id)
+
   try {
-    const accounts = db
-      .query('SELECT * FROM social_accounts WHERE user_id = ?')
-      .all(auth.user.user_id) as unknown as { account_id: string }[]
+    const res = await query(
+      `SELECT
+        sa.*,
+        lm.metric_id,
+        lm.follower_count,
+        lm.avg_likes,
+        lm.avg_views,
+        lm.avg_comments,
+        lm.engagement_rate,
+        lm.audience_goa_pct,
+        lm.data_source,
+        lm.verified_by,
+        lm.recorded_at
+       FROM social_accounts sa
+       JOIN creators c ON sa.creator_id = c.creator_id
+       LEFT JOIN v_creator_latest_metrics lm ON sa.account_id = lm.account_id
+       WHERE c.user_id = $1
+       ORDER BY sa.account_id DESC`,
+      [userId]
+    )
 
-    const result: unknown[] = []
-    for (const account of accounts) {
-      const latestMetric = db
-        .query(
-          'SELECT * FROM social_metrics WHERE account_id = ? ORDER BY recorded_at DESC LIMIT 1'
-        )
-        .get(account.account_id) as unknown as { followers: number } | null
+    const result = res.rows.map((row) => ({
+      account_id: row.account_id,
+      creator_id: row.creator_id,
+      platform: row.platform,
+      handle: row.handle,
+      profile_url: row.profile_url,
+      metrics: row.metric_id
+        ? {
+            metric_id: row.metric_id,
+            followers: row.follower_count,
+            follower_count: row.follower_count,
+            avg_likes: row.avg_likes,
+            avg_views: row.avg_views,
+            avg_comments: row.avg_comments,
+            engagement_rate: row.engagement_rate,
+            audience_goa_pct: row.audience_goa_pct,
+            data_source: row.data_source,
+            verified: row.data_source === 'admin_verified',
+            recorded_at: row.recorded_at,
+          }
+        : null,
+    }))
 
-      result.push({
-        ...account,
-        metrics: latestMetric || null,
-      })
-    }
-
-    saveAndClose(db)
     return NextResponse.json({ success: true, data: result })
   } catch {
-    saveAndClose(db)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch social metrics' },
       { status: 500 }

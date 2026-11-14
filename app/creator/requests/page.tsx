@@ -9,13 +9,16 @@ import { CollaborationRequestRow } from '@/lib/db'
 const statusLabels: Record<string, string> = {
     pending: 'Pending Creator Response',
     accepted: 'Accepted • Shoot Scheduled',
+    rejected: 'Declined / Rejected',
     declined: 'Declined',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
     expired: 'Expired',
 }
 
 export default function CreatorRequestsPage() {
     const [requests, setRequests] = useState<CollaborationRequestRow[]>([])
-    const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'declined' | 'expired'>('all')
+    const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'rejected' | 'declined' | 'expired'>('all')
     const [loading, setLoading] = useState(true)
 
     const loadRequests = useCallback(async () => {
@@ -53,10 +56,11 @@ export default function CreatorRequestsPage() {
         fetchRequests()
     }, [filter])
 
-    const handleAction = async (requestId: string, action: 'accept' | 'decline') => {
+    const handleAction = async (requestId: number | string, action: 'accept' | 'decline' | 'reject') => {
         if (!confirm(`Are you sure you want to ${action} this request?`)) return
         try {
-            const res = await fetch(`/api/requests?id=${requestId}&action=${action}`, {
+            const apiAction = action === 'decline' ? 'reject' : action
+            const res = await fetch(`/api/requests?id=${requestId}&action=${apiAction}`, {
                 method: 'POST',
                 credentials: 'include',
             })
@@ -74,7 +78,7 @@ export default function CreatorRequestsPage() {
         { id: 'all', label: `All Requests (${requests.length})` },
         { id: 'pending', label: `Pending (${requests.filter(r => r.status === 'pending').length})` },
         { id: 'accepted', label: `Accepted (${requests.filter(r => r.status === 'accepted').length})` },
-        { id: 'declined', label: `Declined (${requests.filter(r => r.status === 'declined').length})` },
+        { id: 'rejected', label: `Rejected (${requests.filter(r => r.status === 'rejected').length})` },
     ] as const
 
     const filtered = filter === 'all' ? requests : requests.filter(r => r.status === filter)
@@ -148,14 +152,14 @@ export default function CreatorRequestsPage() {
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <h3 className="text-sm font-bold text-foreground">
-                                                {r.business_email?.split('@')[0] || 'Business'}
+                                                {req.business_email?.split('@')[0] || req.business_name || 'Business'}
                                             </h3>
                                             <span className="text-[10px] text-muted-foreground font-mono">
-                                                {req.request_id}
+                                                #{req.request_id}
                                             </span>
                                         </div>
                                         <div className="text-xs text-muted-foreground">
-                                            {req.title}
+                                            {req.deliverables || req.title || 'Collaboration Details'}
                                         </div>
                                     </div>
                                 </div>
@@ -175,17 +179,17 @@ export default function CreatorRequestsPage() {
 
                             <div className="space-y-2">
                                 <h4 className="text-sm font-bold text-foreground">
-                                    {req.objective}
+                                    {req.deliverables || req.offer_details || req.objective || 'Collaboration Brief'}
                                 </h4>
                                 <div className="flex flex-wrap gap-2 text-xs">
                                     <span className="border border-border bg-muted px-2.5 py-1 rounded-sm text-muted-foreground font-medium">
-                                        Compensation: ₹{req.compensation_amount}
+                                        Offered: ₹{req.offered_amount ?? req.compensation_amount ?? 0}
                                     </span>
                                     <span className="border border-border bg-muted px-2.5 py-1 rounded-sm text-muted-foreground font-medium">
-                                        Type: {req.compensation_type.toUpperCase()}
+                                        Type: {(req.collab_type || req.compensation_type || 'paid').toUpperCase()}
                                     </span>
                                     <span className="border border-border bg-muted px-2.5 py-1 rounded-sm text-muted-foreground font-medium">
-                                        Deliverable: {req.collaboration_type.toUpperCase()}
+                                        Status: {req.status.toUpperCase()}
                                     </span>
                                 </div>
                                 {req.deadline && (

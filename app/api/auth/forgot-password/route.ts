@@ -1,59 +1,53 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
-import { initDb } from '@/lib/db'
-import { saveAndClose } from '@/lib/api-auth'
+import { query } from '@/lib/db'
 import crypto from 'crypto'
 
-
 export async function POST(request: Request) {
-  const body = await request.json()
-  const { email } = body
-
-  if (!email) {
-    return NextResponse.json(
-      { success: false, error: 'Email is required' },
-      { status: 400 }
-    )
-  }
-
-  const db = await initDb()
   try {
-    const user = db
-      .query('SELECT * FROM users WHERE email = ?')
-      .get(email.trim().toLowerCase()) as unknown as { [key: string]: unknown } | null
+    const body = await request.json()
+    const { email } = body
+
+    if (!email) {
+      return NextResponse.json(
+        { success: false, error: 'Email is required' },
+        { status: 400 }
+      )
+    }
+
+    const emailClean = email.trim().toLowerCase()
+    const userRes = await query('SELECT user_id FROM users WHERE email = $1', [emailClean])
 
     // Always return success to prevent email enumeration
-    if (!user) {
-      saveAndClose(db)
+    if (userRes.rows.length === 0) {
       return NextResponse.json({
         success: true,
         message: 'If an account exists, a reset link has been sent.',
       })
     }
 
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString('hex')
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hour
+    const userId = userRes.rows[0].user_id
 
-    db.query(
-      `INSERT INTO sessions (token, user_id, created_at, expires_at)
-       VALUES (?, ?, ?, ?)`
-    ).run(`reset-${resetToken}`, user.user_id, new Date().toISOString(), expiresAt)
+    // Generate raw token and store its SHA-256 hash (never store raw token)
+    const rawToken = crypto.randomBytes(32).toString('hex')
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex')
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // 1-hour expiry
 
-    saveAndClose(db)
+    await query(
+      `INSERT INTO password_reset_tokens (user_id, token_hash, expires_at)
+       VALUES ($1, $2, $3)`,
+      [userId, tokenHash, expiresAt]
+    )
 
-    // In production, send an email with the reset link
-    // For development, the token is returned in the response
     return NextResponse.json({
       success: true,
       message: 'If an account exists, a reset link has been sent.',
       ...(process.env.NODE_ENV === 'development' && {
-        reset_token: resetToken,
-        reset_url: `/auth/reset-password?token=${resetToken}`,
+        reset_token: rawToken,
+        reset_url: `/reset-password?token=${rawToken}`,
       }),
     })
   } catch {
-    saveAndClose(db)
     return NextResponse.json(
       { success: false, error: 'Failed to process reset request' },
       { status: 500 }

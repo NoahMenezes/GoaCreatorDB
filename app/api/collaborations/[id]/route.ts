@@ -1,61 +1,58 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
-import { initDb } from '@/lib/db'
-import { requireAuth, saveAndClose } from '@/lib/api-auth'
+import { query } from '@/lib/db'
+import { requireAuth } from '@/lib/api-auth'
 
-
-export async function GET(request: Request) {
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const auth = await requireAuth()
   if (auth instanceof Response) return auth
 
-  const { searchParams } = new URL(request.url)
-  const collaborationId = searchParams.get('id')
-
-  if (!collaborationId) {
+  const resolvedParams = await params
+  const requestId = Number(resolvedParams.id)
+  if (!requestId) {
     return NextResponse.json(
-      { success: false, error: 'Collaboration ID is required' },
+      { success: false, error: 'Valid collaboration ID is required' },
       { status: 400 }
     )
   }
 
-  const db = await initDb()
   try {
-    const collab = db
-      .query(
-        `SELECT c.*, cr.title as campaign_title, cr.objective, cr.compensation_type,
-                u2.business_name, u2.email as business_email
-         FROM collaborations c
-         JOIN collaboration_requests cr ON c.request_id = cr.request_id
-         JOIN users u2 ON c.business_id = u2.user_id
-         WHERE c.collaboration_id = ? AND c.creator_id = ?`
-      )
-      .get(collaborationId, auth.user.user_id) as unknown as { [key: string]: unknown } | null
+    const res = await query(
+      `SELECT vc.*
+       FROM v_collaborations vc
+       WHERE vc.request_id = $1`,
+      [requestId]
+    )
 
-    if (!collab) {
-      saveAndClose(db)
+    if (res.rows.length === 0) {
       return NextResponse.json(
         { success: false, error: 'Collaboration not found' },
         { status: 404 }
       )
     }
 
-    // Get associated payment
-    const payment = db
-      .query('SELECT * FROM payments WHERE collaboration_id = ?')
-      .get(collaborationId) as unknown as { [key: string]: unknown } | null
+    const collab = res.rows[0]
 
-    // Get reviews
-    const reviews = db
-      .query('SELECT * FROM reviews WHERE collaboration_id = ?')
-      .all(collaborationId) as unknown as Record<string, unknown>[]
+    // Fetch any reviews on this collaboration request
+    const reviewsRes = await query(
+      `SELECT r.*, u.email as reviewer_email
+       FROM reviews r
+       JOIN users u ON r.reviewer_id = u.user_id
+       WHERE r.request_id = $1`,
+      [requestId]
+    )
 
-    saveAndClose(db)
     return NextResponse.json({
       success: true,
-      data: { ...collab, payment, reviews },
+      data: {
+        ...collab,
+        reviews: reviewsRes.rows,
+      },
     })
   } catch {
-    saveAndClose(db)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch collaboration details' },
       { status: 500 }

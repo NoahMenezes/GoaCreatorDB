@@ -1,9 +1,9 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
-import { getDb, closeDb } from '@/lib/db'
+import { query } from '@/lib/db'
 
 export interface CreatorItem {
-  id: string
+  id: number | string
   name: string
   handle: string
   niche: string
@@ -19,68 +19,75 @@ export interface CreatorItem {
 }
 
 export async function GET(request: Request) {
-  const db = await getDb()
   const { searchParams } = new URL(request.url)
   const niche = searchParams.get('niche')
   const location = searchParams.get('location')
 
-  let query = `
-    SELECT profile_id, name, handle, niche, niche_slug, location,
-           followers, rating, base_rate, er, verified, instagram_url, bio
-    FROM creator_profiles
+  let sql = `
+    SELECT
+      c.creator_id,
+      c.full_name,
+      COALESCE(sa.handle, '') AS handle,
+      COALESCE(c.primary_category, 'General') AS primary_category,
+      CONCAT(c.area_name, ', ', c.taluka) AS location_display,
+      c.total_followers,
+      c.avg_rating,
+      c.min_paid_rate,
+      c.avg_engagement_rate,
+      c.is_verified,
+      COALESCE(sa.profile_url, '') AS profile_url,
+      COALESCE(c.bio, '') AS bio
+    FROM v_creator_cards c
+    LEFT JOIN social_accounts sa ON c.creator_id = sa.creator_id AND sa.platform = 'instagram'
   `
-  const params: (string | number)[] = []
+
   const conditions: string[] = []
+  const params: unknown[] = []
 
   if (niche && niche !== 'all') {
-    conditions.push('niche_slug = ? OR niche LIKE ?')
-    params.push(niche, `%${niche}%`)
+    params.push(`%${niche}%`)
+    conditions.push(`c.primary_category ILIKE $${params.length}`)
   }
 
   if (location) {
-    conditions.push('location LIKE ?')
     params.push(`%${location}%`)
+    conditions.push(`(c.area_name ILIKE $${params.length} OR c.taluka ILIKE $${params.length})`)
   }
 
   if (conditions.length > 0) {
-    query += ' WHERE ' + conditions.join(' AND ')
+    sql += ' WHERE ' + conditions.join(' AND ')
   }
 
-  query += ' ORDER BY rating DESC, followers DESC'
+  sql += ' ORDER BY c.avg_rating DESC, c.total_followers DESC'
 
   try {
-    const rows = db.query(query).all(params) as Array<{
-      profile_id: string
-      name: string
-      handle: string
-      niche: string
-      niche_slug: string
-      location: string
-      followers: string
-      rating: number
-      base_rate: string
-      er: string
-      verified: number
-      instagram_url: string
-      bio: string
-    }>
-    closeDb()
+    const res = await query(sql, params)
 
-    const data: CreatorItem[] = rows.map((r) => ({
-      id: r.profile_id,
-      name: r.name,
-      handle: r.handle,
-      niche: r.niche,
-      nicheSlug: r.niche_slug,
-      location: r.location,
-      followers: r.followers,
-      rating: r.rating,
-      baseRate: r.base_rate,
-      er: r.er,
-      verified: r.verified === 1,
-      instagramUrl: r.instagram_url,
-      bio: r.bio,
-    }))
+    const data: CreatorItem[] = res.rows.map((r) => {
+      const followersNum = Number(r.total_followers) || 0
+      const formattedFollowers =
+        followersNum >= 1000000
+          ? `${(followersNum / 1000000).toFixed(1)}M`
+          : followersNum >= 1000
+          ? `${(followersNum / 1000).toFixed(1)}k`
+          : `${followersNum}`
+
+      return {
+        id: r.creator_id,
+        name: r.full_name,
+        handle: r.handle ? (r.handle.startsWith('@') ? r.handle : `@${r.handle}`) : '',
+        niche: r.primary_category,
+        nicheSlug: r.primary_category.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        location: r.location_display,
+        followers: formattedFollowers,
+        rating: Number(r.avg_rating) || 0,
+        baseRate: `₹${Number(r.min_paid_rate) || 0}`,
+        er: `${Number(r.avg_engagement_rate) || 0}%`,
+        verified: Boolean(r.is_verified),
+        instagramUrl: r.profile_url,
+        bio: r.bio,
+      }
+    })
 
     return NextResponse.json({
       success: true,
@@ -88,7 +95,6 @@ export async function GET(request: Request) {
       data,
     })
   } catch {
-    closeDb()
     return NextResponse.json(
       { success: false, error: 'Failed to fetch creators' },
       { status: 500 }

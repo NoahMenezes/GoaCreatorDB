@@ -1,68 +1,130 @@
 export interface UserRecord {
-    user_id: string
-    email: string
-    password_hash: string
-    role: 'admin' | 'business' | 'creator'
-    is_verified: boolean
-    is_active: boolean
-    created_at: string
-    updated_at: string
+  user_id: number
+  email: string
+  password_hash: string
+  role: 'admin' | 'business' | 'creator'
+  is_verified: boolean
+  created_at: string
+  updated_at: string
 }
 
 export interface BusinessRecord {
-    business_id: string
-    user_id: string
-    location_id: string
-    business_name: string
-    industry: string
-    description: string
-    contact_phone: string
-    instagram_handle: string
-    website_url?: string
-    avatar_url?: string
+  business_id: number
+  user_id: number
+  location_id: number
+  business_name: string
+  industry: string | null
+  description: string | null
+  contact_phone: string | null
+  instagram_handle: string | null
 }
 
 export interface CreatorRecord {
-    creator_id: string
-    user_id: string
-    location_id: string
-    full_name: string
-    bio: string
-    accepts_barter: boolean
-    min_paid_rate: number
-    avatar_url?: string
-    created_at: string
+  creator_id: number
+  user_id: number
+  location_id: number
+  full_name: string
+  bio: string | null
+  accepts_barter: boolean
+  min_paid_rate: number
+  created_at: string
 }
 
 export interface LocationRecord {
-    location_id: string
-    area_name: string
-    taluka: string
-    district: 'North Goa' | 'South Goa'
+  location_id: number
+  area_name: string
+  taluka: string
+  district: 'North Goa' | 'South Goa'
 }
 
 export interface CategoryRecord {
-    category_id: string
-    category_name: string
+  category_id: number
+  category_name: string
 }
 
-export const INITIAL_LOCATIONS: LocationRecord[] = [
-    { location_id: 'loc-1', area_name: 'Panjim', taluka: 'Tiswadi', district: 'North Goa' },
-    { location_id: 'loc-2', area_name: 'Calangute', taluka: 'Bardez', district: 'North Goa' },
-    { location_id: 'loc-3', area_name: 'Assagao', taluka: 'Bardez', district: 'North Goa' },
-    { location_id: 'loc-4', area_name: 'Morjim', taluka: 'Pernem', district: 'North Goa' },
-    { location_id: 'loc-5', area_name: 'Vagator', taluka: 'Bardez', district: 'North Goa' },
-    { location_id: 'loc-6', area_name: 'Margao', taluka: 'Salcete', district: 'South Goa' },
-    { location_id: 'loc-7', area_name: 'Vasco da Gama', taluka: 'Mormugao', district: 'South Goa' },
-    { location_id: 'loc-8', area_name: 'Mapusa', taluka: 'Bardez', district: 'North Goa' },
-]
+export interface CreatorCategoryRecord {
+  creator_id: number
+  category_id: number
+  is_primary: boolean
+}
 
-export const INITIAL_CATEGORIES: CategoryRecord[] = [
-    { category_id: 'cat-1', category_name: 'Food & Dining' },
-    { category_id: 'cat-2', category_name: 'Boutique Resorts' },
-    { category_id: 'cat-3', category_name: 'Nightlife & Music' },
-    { category_id: 'cat-4', category_name: 'Travel & Adventure' },
-    { category_id: 'cat-5', category_name: 'Fashion & Lifestyle' },
-    { category_id: 'cat-6', category_name: 'Yoga & Wellness' },
-]
+export interface SocialAccountRecord {
+  account_id: number
+  creator_id: number
+  platform: 'instagram' | 'youtube'
+  handle: string
+  profile_url: string | null
+}
 
+export interface CreatorMetricRecord {
+  metric_id: number
+  account_id: number
+  follower_count: number
+  avg_likes: number | null
+  avg_views: number | null
+  avg_comments: number | null
+  engagement_rate: number | null
+  audience_goa_pct: number | null
+  data_source: 'self_reported' | 'admin_verified'
+  verified_by: number | null
+  recorded_at: string
+}
+
+export interface CollaborationRequestRecord {
+  request_id: number
+  business_id: number
+  creator_id: number
+  collab_type: 'paid' | 'barter' | 'hybrid'
+  offered_amount: number
+  offer_details: string | null
+  deliverables: string | null
+  message: string | null
+  status: 'pending' | 'accepted' | 'rejected' | 'completed' | 'cancelled'
+  requested_at: string
+  responded_at: string | null
+  deadline: string
+}
+
+export interface ReviewRecord {
+  review_id: number
+  request_id: number
+  reviewer_id: number
+  reviewee_id: number
+  rating: number
+  comment: string | null
+  created_at: string
+}
+
+export interface ShortlistRecord {
+  business_id: number
+  creator_id: number
+  note: string | null
+  saved_at: string
+}
+
+export interface SessionRecord {
+  session_id: number
+  token: string
+  user_id: number
+  created_at: string
+  expires_at: string
+}
+
+export interface PasswordResetTokenRecord {
+  token_id: number
+  user_id: number
+  token_hash: string
+  expires_at: string
+  used_at: string | null
+}
+
+export interface AuditLogRecord {
+  log_id: number
+  table_name: string
+  record_id: number
+  action: 'INSERT' | 'UPDATE' | 'DELETE'
+  old_data: Record<string, unknown> | null
+  new_data: Record<string, unknown> | null
+  changed_by: number | null
+  changed_at: string
+}

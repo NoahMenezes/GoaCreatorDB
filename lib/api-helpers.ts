@@ -1,15 +1,7 @@
-import { closeDb, type SqlDatabase } from '@/lib/db'
-import { writeDbFile, saveDbFile } from '@/lib/db-file'
-
-export function saveAndClose(db: SqlDatabase) {
-  try {
-    const data = db.export()
-    const dbPath = saveDbFile()
-    if (dbPath) {
-      writeDbFile(dbPath, data)
-    }
-  } catch {
-    // Ignore write failures
-  }
-  closeDb()
+/**
+ * @deprecated PostgreSQL handles connection pooling and commits automatically.
+ * Kept only for graceful backward-compatibility during call-site refactoring.
+ */
+export function saveAndClose(_db?: unknown): void {
+  // No-op in PostgreSQL data layer
 }

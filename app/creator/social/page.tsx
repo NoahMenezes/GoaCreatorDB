@@ -53,7 +53,7 @@ export default function CreatorSocialPage() {
         }, 1000)
     }
 
-    const handleDisconnect = (id: string) => {
+    const handleDisconnect = (id: number | string) => {
         if (!confirm('Disconnect this social account?')) return
         fetch(`/api/social/accounts?id=${id}`, {
             method: 'DELETE',
@@ -61,8 +61,8 @@ export default function CreatorSocialPage() {
         }).then(() => loadData())
     }
 
-    const handleSync = (accountId: string) => {
-        setConnecting(accountId)
+    const handleSync = (accountId: number | string) => {
+        setConnecting(String(accountId))
         fetch('/api/social/sync', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -76,8 +76,8 @@ export default function CreatorSocialPage() {
         })
     }
 
-    const getLatestMetric = (accountId: string) => {
-        const m = (metrics as unknown as { account_id: string; metrics: { followers: number; engagement_rate: number; avg_likes: number; source: string; verified: number } | null }[]).find((metric) => metric.account_id === accountId)
+    const getLatestMetric = (accountId: number | string) => {
+        const m = (metrics as unknown as { account_id: number | string; metrics: { followers: number; engagement_rate: number; avg_likes: number; source: string; verified: number } | null }[]).find((metric) => String(metric.account_id) === String(accountId))
         return m?.metrics || null
     }
 
@@ -172,11 +172,11 @@ export default function CreatorSocialPage() {
                                         <button
                                             onClick={() => handleSync(connected.account_id)}
                                             className={`w-full flex items-center justify-center gap-2 text-xs font-bold transition-colors rounded-sm border px-3 py-1.5 ${
-                                                connecting === connected.account_id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-muted'
+                                                connecting === String(connected.account_id) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-muted'
                                             }`}
                                         >
                                             <RefreshCw className="size-3.5" />
-                                            <span>{connecting === connected.account_id ? 'Syncing...' : 'Sync Metrics'}</span>
+                                            <span>{connecting === String(connected.account_id) ? 'Syncing...' : 'Sync Metrics'}</span>
                                         </button>
                                     </div>
 
