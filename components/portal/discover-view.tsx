@@ -748,14 +748,20 @@ function DiscoverViewContent() {
 
                                             <div className="p-5 space-y-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="relative size-12 overflow-hidden border-2 border-background shadow-sm shrink-0 rounded-md bg-muted flex items-center justify-center font-bold text-sm text-muted-foreground">
+                                                    <Link
+                                                        href={`/business/creators/${creator.id}`}
+                                                        className="relative size-12 overflow-hidden border-2 border-background shadow-sm shrink-0 rounded-md bg-muted flex items-center justify-center font-bold text-sm text-muted-foreground hover:opacity-90 transition-opacity"
+                                                    >
                                                         {getInitials(creator.name)}
-                                                    </div>
+                                                    </Link>
                                                     <div className="min-w-0 flex-1">
                                                         <div className="flex items-center gap-1">
-                                                            <h3 className="font-bold text-foreground text-sm truncate">
+                                                            <Link
+                                                                href={`/business/creators/${creator.id}`}
+                                                                className="font-bold text-foreground text-sm truncate hover:text-primary hover:underline transition-colors"
+                                                            >
                                                                 {creator.displayName}
-                                                            </h3>
+                                                            </Link>
                                                             {creator.is_verified && (
                                                                 <CheckCircle2 className="size-3.5 fill-primary text-white shrink-0" />
                                                             )}
@@ -828,10 +834,10 @@ function DiscoverViewContent() {
 
                                         <div className="p-5 pt-0 flex items-center gap-2">
                                             <Link
-                                                href={`/business/requests`}
-                                                className="flex-1 border border-border bg-background hover:bg-muted font-medium text-xs py-2.5 text-foreground flex items-center justify-center gap-1.5 transition-colors rounded-sm cursor-pointer"
+                                                href={`/business/creators/${creator.id}`}
+                                                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-xs py-2.5 flex items-center justify-center gap-1.5 transition-colors rounded-sm cursor-pointer shadow-sm"
                                             >
-                                                <span>Book Collaboration</span>
+                                                <span>View Profile &amp; Book</span>
                                                 <span className="text-[11px]">&nearr;</span>
                                             </Link>
 

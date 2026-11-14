@@ -91,7 +91,7 @@ export default function BusinessShortlistPage() {
 
     return (
         <main className="space-y-8">
-            <div className="border border-border bg-card p-6 rounded-sm shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="border border-border bg-card p-6 rounded-none shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                         Shortlisted Goan Creators
@@ -102,12 +102,12 @@ export default function BusinessShortlistPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <span className="border border-border bg-muted px-3 py-1.5 text-xs font-bold text-foreground rounded-sm">
+                    <span className="border border-border bg-muted px-3 py-1.5 text-xs font-bold text-foreground rounded-none">
                         {shortlist.length} Creators Saved
                     </span>
                     <Link
                         href="/business/discover"
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm px-5 py-3 transition-colors rounded-sm shadow-sm"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm px-5 py-3 transition-colors rounded-none shadow-sm"
                     >
                         + Discover More
                     </Link>
@@ -115,25 +115,25 @@ export default function BusinessShortlistPage() {
             </div>
 
             {loading ? (
-                <div className="border border-border bg-card p-12 text-center rounded-sm shadow-sm flex flex-col items-center justify-center space-y-3">
+                <div className="border border-border bg-card p-12 text-center rounded-none shadow-sm flex flex-col items-center justify-center space-y-3">
                     <Loader2 className="size-8 text-primary animate-spin" />
                     <p className="text-sm text-muted-foreground">Loading your shortlisted creators...</p>
                 </div>
             ) : error ? (
-                <div className="border border-destructive/20 bg-destructive/5 p-6 rounded-sm text-center space-y-3">
+                <div className="border border-destructive/20 bg-destructive/5 p-6 rounded-none text-center space-y-3">
                     <AlertCircle className="size-8 text-destructive mx-auto" />
                     <p className="text-sm font-semibold text-destructive">{error}</p>
                     <button
                         type="button"
                         onClick={fetchShortlist}
-                        className="inline-flex items-center gap-2 bg-background border border-border px-4 py-2 text-xs font-bold hover:bg-muted rounded-sm transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-2 bg-background border border-border px-4 py-2 text-xs font-bold hover:bg-muted rounded-none transition-colors cursor-pointer"
                     >
                         <RefreshCw className="size-3.5" />
                         <span>Try Again</span>
                     </button>
                 </div>
             ) : shortlist.length === 0 ? (
-                <div className="border border-border bg-card p-12 text-center rounded-sm shadow-sm space-y-3">
+                <div className="border border-border bg-card p-12 text-center rounded-none shadow-sm space-y-3">
                     <Bookmark className="size-10 text-muted-foreground mx-auto stroke-1" />
                     <h3 className="text-base font-bold text-foreground">No creators shortlisted</h3>
                     <p className="text-xs text-muted-foreground max-w-sm mx-auto">
@@ -141,7 +141,7 @@ export default function BusinessShortlistPage() {
                     </p>
                     <Link
                         href="/business/discover"
-                        className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-xs font-bold rounded-sm hover:bg-primary/90 transition-colors mt-2"
+                        className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-xs font-bold rounded-none hover:bg-primary/90 transition-colors mt-2"
                     >
                         <span>Browse Creators</span>
                     </Link>
@@ -151,16 +151,24 @@ export default function BusinessShortlistPage() {
                     {shortlist.map((cr) => (
                         <div
                             key={cr.creator_id}
-                            className="border border-border bg-card p-5 rounded-sm shadow-sm space-y-4 hover:border-primary/50 transition-colors"
+                            className="border border-border bg-card p-5 rounded-none shadow-sm space-y-4 hover:border-primary/50 transition-colors"
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="size-14 overflow-hidden border border-border shrink-0 rounded-md bg-muted flex items-center justify-center font-bold text-base text-muted-foreground">
+                                    <Link
+                                        href={`/business/creators/${cr.creator_id}`}
+                                        className="size-14 overflow-hidden border border-border shrink-0 rounded-none bg-muted flex items-center justify-center font-bold text-base text-muted-foreground hover:border-primary transition-colors"
+                                    >
                                         {getInitials(cr.full_name)}
-                                    </div>
+                                    </Link>
                                     <div>
                                         <div className="flex items-center gap-1.5">
-                                            <h3 className="text-sm font-bold text-foreground">{cr.full_name}</h3>
+                                            <Link
+                                                href={`/business/creators/${cr.creator_id}`}
+                                                className="text-sm font-bold text-foreground hover:text-primary transition-colors"
+                                            >
+                                                {cr.full_name}
+                                            </Link>
                                             {cr.is_verified && (
                                                 <CheckCircle2 className="size-3.5 fill-primary text-white" />
                                             )}
@@ -180,7 +188,7 @@ export default function BusinessShortlistPage() {
                                     disabled={removingId === cr.creator_id}
                                     onClick={() => handleRemove(cr.creator_id)}
                                     aria-label="Remove from shortlist"
-                                    className="size-8 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-sm transition-colors cursor-pointer disabled:opacity-50"
+                                    className="size-8 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-none transition-colors cursor-pointer disabled:opacity-50"
                                 >
                                     {removingId === cr.creator_id ? (
                                         <Loader2 className="size-4 animate-spin text-primary" />
@@ -213,15 +221,15 @@ export default function BusinessShortlistPage() {
 
                             <div className="flex items-center gap-2 pt-1">
                                 <Link
-                                    href={`/business/discover?q=${encodeURIComponent(cr.full_name)}`}
-                                    className="flex-1 border border-border bg-background hover:bg-muted text-foreground text-center font-bold text-xs py-2 transition-colors rounded-sm"
+                                    href={`/business/creators/${cr.creator_id}`}
+                                    className="flex-1 border border-border bg-background hover:bg-muted text-foreground text-center font-bold text-xs py-2 transition-colors rounded-none"
                                 >
-                                    View in Discover &rarr;
+                                    View Profile &rarr;
                                 </Link>
 
                                 <Link
                                     href={`/business/requests`}
-                                    className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground text-center font-bold text-xs py-2 transition-colors rounded-sm"
+                                    className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground text-center font-bold text-xs py-2 transition-colors rounded-none"
                                 >
                                     Send Collab Request
                                 </Link>

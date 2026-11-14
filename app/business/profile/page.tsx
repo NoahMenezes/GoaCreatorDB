@@ -1,594 +1,899 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
-    Bookmark,
-    CheckCircle2,
-    Compass,
-    ExternalLink,
-    MapPin,
-    Send,
-    Share2,
-    ShieldCheck,
-    Sparkles,
-    Star,
     Store,
-    Utensils,
-    Users,
+    MapPin,
+    Phone,
+    Camera,
+    Building2,
+    FileText,
+    ShieldCheck,
+    CheckCircle2,
+    AlertCircle,
+    Loader2,
+    RefreshCw,
+    Save,
+    RotateCcw,
+    ExternalLink,
+    Mail,
+    Check,
 } from 'lucide-react'
 
-export default function BusinessProfilePage() {
-    const [isShortlisted, setIsShortlisted] = useState(true)
+function InstagramIcon({ className = 'size-4' }: { className?: string }) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+        </svg>
+    )
+}
+
+interface UserData {
+    user_id: number
+    email: string
+    role: string
+    is_verified: boolean
+    created_at?: string
+}
+
+interface BusinessProfile {
+    business_id: number
+    user_id: number
+    business_name: string
+    industry: string
+    description: string | null
+    contact_phone: string | null
+    instagram_handle: string | null
+    location_id: number
+    area_name?: string
+    taluka?: string
+    district?: string
+}
+
+interface LocationOption {
+    location_id: number
+    area_name: string
+    taluka: string
+    district: string
+}
+
+type GroupedLocations = Record<string, Record<string, { location_id: number; area_name: string }[]>>
+
+interface FormErrors {
+    business_name?: string
+    industry?: string
+    contact_phone?: string
+    instagram_handle?: string
+    location_id?: string
+    description?: string
+}
+
+const COMMON_INDUSTRIES = [
+    'Food & Beach Dining',
+    'Hospitality & Luxury Stays',
+    'Nightlife & Sunsets',
+    'Wellness, Yoga & Surf',
+    'Goan Heritage & Culture',
+    'Resort Fashion & Boutiques',
+    'Artisanal Goods & Cafes',
+    'Adventure & Water Sports',
+    'Real Estate & Architecture',
+    'Events & Live Entertainment',
+]
+
+export default function BusinessProfileEditorPage() {
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [saving, setSaving] = useState(false)
+    const [saveSuccess, setSaveSuccess] = useState(false)
+    const [saveError, setSaveError] = useState<string | null>(null)
+
+    // Raw loaded data
+    const [user, setUser] = useState<UserData | null>(null)
+    const [originalProfile, setOriginalProfile] = useState<BusinessProfile | null>(null)
+    const [groupedLocations, setGroupedLocations] = useState<GroupedLocations>({})
+    const [flatLocations, setFlatLocations] = useState<LocationOption[]>([])
+
+    // Controlled Form State
+    const [businessName, setBusinessName] = useState('')
+    const [industry, setIndustry] = useState('')
+    const [customIndustry, setCustomIndustry] = useState('')
+    const [description, setDescription] = useState('')
+    const [contactPhone, setContactPhone] = useState('')
+    const [instagramHandle, setInstagramHandle] = useState('')
+    const [locationId, setLocationId] = useState<number | ''>('')
+
+    // Inline Errors
+    const [errors, setErrors] = useState<FormErrors>({})
+    const [touched, setTouched] = useState<Record<string, boolean>>({})
+
+    const fetchProfileAndLocations = async () => {
+        setLoading(true)
+        setError(null)
+        try {
+            const [profileRes, locRes] = await Promise.all([
+                fetch('/api/profile', { credentials: 'include' }),
+                fetch('/api/locations'),
+            ])
+
+            if (locRes.ok) {
+                const locData = await locRes.json()
+                if (locData.data) {
+                    setGroupedLocations(locData.data)
+                    const flat: LocationOption[] = []
+                    Object.entries(locData.data as GroupedLocations).forEach(([district, talukas]) => {
+                        Object.entries(talukas).forEach(([taluka, areas]) => {
+                            areas.forEach((a) => {
+                                flat.push({
+                                    location_id: a.location_id,
+                                    area_name: a.area_name,
+                                    taluka,
+                                    district,
+                                })
+                            })
+                        })
+                    })
+                    setFlatLocations(flat)
+                }
+            }
+
+            if (!profileRes.ok) {
+                const data = await profileRes.json().catch(() => ({}))
+                throw new Error(data.error || 'Failed to load business profile.')
+            }
+
+            const pData = await profileRes.json()
+            if (pData.success && pData.data) {
+                setUser(pData.data.user || null)
+                const prof: BusinessProfile | null = pData.data.profile || null
+                setOriginalProfile(prof)
+
+                if (prof) {
+                    setBusinessName(prof.business_name || '')
+                    const ind = prof.industry || ''
+                    if (COMMON_INDUSTRIES.includes(ind)) {
+                        setIndustry(ind)
+                        setCustomIndustry('')
+                    } else if (ind) {
+                        setIndustry('Other')
+                        setCustomIndustry(ind)
+                    } else {
+                        setIndustry(COMMON_INDUSTRIES[0])
+                        setCustomIndustry('')
+                    }
+                    setDescription(prof.description || '')
+                    setContactPhone(prof.contact_phone || '')
+                    setInstagramHandle(prof.instagram_handle ? prof.instagram_handle.replace(/^@/, '') : '')
+                    setLocationId(prof.location_id || '')
+                }
+            } else {
+                throw new Error(pData.error || 'Invalid profile response')
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error fetching profile data')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchProfileAndLocations()
+    }, [])
+
+    // Real-time validation
+    const validate = (): boolean => {
+        const nextErrors: FormErrors = {}
+
+        if (!businessName.trim()) {
+            nextErrors.business_name = 'Business brand name is required.'
+        } else if (businessName.trim().length < 2) {
+            nextErrors.business_name = 'Business name must be at least 2 characters.'
+        }
+
+        const effectiveIndustry = industry === 'Other' ? customIndustry.trim() : industry.trim()
+        if (!effectiveIndustry) {
+            nextErrors.industry = 'Please select or specify your primary industry.'
+        }
+
+        if (!locationId || Number(locationId) <= 0) {
+            nextErrors.location_id = 'Please select a primary Goan locality/area.'
+        }
+
+        if (contactPhone.trim()) {
+            // Clean phone characters
+            const cleaned = contactPhone.replace(/[\s\-\(\)\+]/g, '')
+            if (cleaned.length < 8 || !/^\d+$/.test(cleaned)) {
+                nextErrors.contact_phone = 'Please enter a valid phone number (e.g. +91 98221 44556).'
+            }
+        } else {
+            nextErrors.contact_phone = 'Contact phone number is required for booking confirmations.'
+        }
+
+        if (instagramHandle.trim()) {
+            const handleClean = instagramHandle.trim().replace(/^@/, '')
+            if (!/^[a-zA-Z0-9._]{1,30}$/.test(handleClean)) {
+                nextErrors.instagram_handle = 'Valid Instagram handle without spaces (e.g. cafepalmeiragoa).'
+            }
+        }
+
+        if (description.trim() && description.trim().length > 1000) {
+            nextErrors.description = 'Description cannot exceed 1000 characters.'
+        }
+
+        setErrors(nextErrors)
+        return Object.keys(nextErrors).length === 0
+    }
+
+    const markTouched = (field: string) => {
+        setTouched((prev) => ({ ...prev, [field]: true }))
+        validate()
+    }
+
+    useEffect(() => {
+        if (!loading) {
+            validate()
+        }
+    }, [businessName, industry, customIndustry, locationId, contactPhone, instagramHandle, description, loading])
+
+    const handleDiscard = () => {
+        if (!originalProfile) return
+        setBusinessName(originalProfile.business_name || '')
+        const ind = originalProfile.industry || ''
+        if (COMMON_INDUSTRIES.includes(ind)) {
+            setIndustry(ind)
+            setCustomIndustry('')
+        } else if (ind) {
+            setIndustry('Other')
+            setCustomIndustry(ind)
+        } else {
+            setIndustry(COMMON_INDUSTRIES[0])
+            setCustomIndustry('')
+        }
+        setDescription(originalProfile.description || '')
+        setContactPhone(originalProfile.contact_phone || '')
+        setInstagramHandle(originalProfile.instagram_handle ? originalProfile.instagram_handle.replace(/^@/, '') : '')
+        setLocationId(originalProfile.location_id || '')
+        setErrors({})
+        setTouched({})
+        setSaveError(null)
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setTouched({
+            business_name: true,
+            industry: true,
+            contact_phone: true,
+            instagram_handle: true,
+            location_id: true,
+            description: true,
+        })
+
+        if (!validate()) {
+            setSaveError('Please resolve the highlighted validation errors below.')
+            return
+        }
+
+        setSaving(true)
+        setSaveSuccess(false)
+        setSaveError(null)
+
+        const effectiveIndustry = industry === 'Other' ? customIndustry.trim() : industry.trim()
+        const effectiveHandle = instagramHandle.trim()
+            ? `@${instagramHandle.trim().replace(/^@/, '')}`
+            : null
+
+        const payload = {
+            business_name: businessName.trim(),
+            industry: effectiveIndustry,
+            description: description.trim() || null,
+            contact_phone: contactPhone.trim() || null,
+            instagram_handle: effectiveHandle,
+            location_id: Number(locationId),
+        }
+
+        try {
+            const res = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(payload),
+            })
+
+            const data = await res.json()
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Failed to update business profile.')
+            }
+
+            setSaveSuccess(true)
+            // Update original profile
+            const selectedLoc = flatLocations.find((l) => l.location_id === Number(locationId))
+            setOriginalProfile((prev) =>
+                prev
+                    ? {
+                          ...prev,
+                          ...payload,
+                          area_name: selectedLoc?.area_name,
+                          taluka: selectedLoc?.taluka,
+                          district: selectedLoc?.district,
+                      }
+                    : null
+            )
+
+            setTimeout(() => {
+                setSaveSuccess(false)
+            }, 4000)
+        } catch (err) {
+            setSaveError(err instanceof Error ? err.message : 'Error updating business profile.')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    // Selected location details for live preview
+    const selectedLocationObj = flatLocations.find((l) => l.location_id === Number(locationId))
+
+    // Check completeness
+    const completenessSteps = [
+        { label: 'Brand Name', done: Boolean(businessName.trim()) },
+        { label: 'Industry Assigned', done: Boolean(industry && (industry !== 'Other' || customIndustry.trim())) },
+        { label: 'Goan Location Selected', done: Boolean(locationId) },
+        { label: 'Contact Phone Verified', done: Boolean(contactPhone.trim() && !errors.contact_phone) },
+        { label: 'Instagram Handle', done: Boolean(instagramHandle.trim()) },
+        { label: 'Brand Story / Bio', done: Boolean(description.trim()) },
+    ]
+    const completedCount = completenessSteps.filter((s) => s.done).length
+    const completenessPercent = Math.round((completedCount / completenessSteps.length) * 100)
+
+    // LOADING STATE
+    if (loading) {
+        return (
+            <main className="space-y-6">
+                <div className="border border-border bg-card p-6 rounded-none animate-pulse space-y-4">
+                    <div className="h-6 bg-muted w-1/4" />
+                    <div className="h-4 bg-muted w-1/2" />
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 border border-border bg-card p-6 rounded-none animate-pulse space-y-6">
+                        <div className="h-10 bg-muted w-full" />
+                        <div className="h-10 bg-muted w-full" />
+                        <div className="h-24 bg-muted w-full" />
+                    </div>
+                    <div className="border border-border bg-card p-6 rounded-none animate-pulse space-y-4">
+                        <div className="h-40 bg-muted w-full" />
+                    </div>
+                </div>
+            </main>
+        )
+    }
+
+    // ERROR STATE
+    if (error) {
+        return (
+            <main className="space-y-6">
+                <div className="border border-destructive/30 bg-destructive/5 p-8 rounded-none text-center space-y-4">
+                    <AlertCircle className="size-10 text-destructive mx-auto" />
+                    <h2 className="text-lg font-bold text-foreground">Failed to Load Business Profile</h2>
+                    <p className="text-sm text-muted-foreground max-w-md mx-auto">{error}</p>
+                    <button
+                        type="button"
+                        onClick={fetchProfileAndLocations}
+                        className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold text-xs px-4 py-2 rounded-none hover:bg-primary/90 transition-colors cursor-pointer"
+                    >
+                        <RefreshCw className="size-3.5" />
+                        Retry Loading
+                    </button>
+                </div>
+            </main>
+        )
+    }
+
+    // EMPTY STATE (No profile record in DB)
+    if (!originalProfile) {
+        return (
+            <main className="space-y-6">
+                <div className="border border-border bg-card p-10 rounded-none text-center space-y-4 shadow-sm">
+                    <Store className="size-12 text-primary mx-auto" />
+                    <h2 className="text-lg font-bold text-foreground">No Business Profile Registered</h2>
+                    <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                        Your account ({user?.email}) is currently not linked to an active business profile record.
+                    </p>
+                    <Link
+                        href="/business/dashboard"
+                        className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-xs font-bold px-4 py-2 rounded-none hover:bg-primary/90 transition-colors"
+                    >
+                        Return to Dashboard
+                    </Link>
+                </div>
+            </main>
+        )
+    }
 
     return (
         <main className="space-y-8">
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-border">
-                <Link
-                    href="/business/discover"
-                    className="inline-flex items-center gap-2 text-xs font-bold text-primary hover:underline rounded-sm px-2 py-1 hover:bg-primary/5"
-                >
-                    <span>&larr; Back to Discover Goan Creators</span>
-                </Link>
-                <div className="text-xs text-muted-foreground">
-                    Viewing creator profile for <span className="font-bold text-foreground">Sneha Fernandes</span> (Assagao, North Goa)
-                </div>
-            </div>
-
-            {/* Creator Hero / Cover */}
-            <div className="border border-border bg-card overflow-hidden rounded-sm shadow-sm">
-                <div className="relative h-60 sm:h-72 w-full bg-muted overflow-hidden">
-                    <Image
-                        unoptimized
-                        src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=1600&auto=format&fit=crop"
-                        alt="Goa Courtyard Cafe"
-                        width={1600}
-                        height={600}
-                        className="size-full object-cover"
-                    />
-
-                    <div className="absolute top-4 inset-x-4 sm:inset-x-6 flex items-center justify-between z-10">
-                        <div className="inline-flex items-center gap-1.5 bg-background border border-border px-3 py-1 text-xs font-bold text-foreground shadow-sm">
-                            <span className="size-2 bg-primary animate-pulse rounded" />
-                            <span>VERIFIED CREATOR</span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                aria-label="Share creator profile"
-                                onClick={() => navigator.clipboard?.writeText(window.location.href)}
-                                className="size-9 bg-background border border-border text-foreground flex items-center justify-center hover:bg-muted transition-colors rounded-sm cursor-pointer"
-                            >
-                                <Share2 className="size-4" />
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => setIsShortlisted(!isShortlisted)}
-                                className="bg-background border border-border text-foreground font-bold text-xs px-3.5 py-2 flex items-center gap-1.5 hover:bg-muted transition-colors rounded-sm cursor-pointer"
-                            >
-                                <Bookmark className={`size-3.5 ${isShortlisted ? 'fill-primary' : ''}`} />
-                                <span>{isShortlisted ? 'Shortlisted' : 'Bookmark'}</span>
-                            </button>
-
-                            <Link
-                                href="/business/requests"
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs px-4 py-2 flex items-center gap-1.5 transition-colors rounded-sm shadow-sm cursor-pointer"
-                            >
-                                <Send className="size-3.5" />
-                                <span>Send Collab Request</span>
-                            </Link>
-                        </div>
+            {/* Header Breadcrumb & Status */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
+                <div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                        <Link href="/business/dashboard" className="hover:text-primary transition-colors">
+                            Business Console
+                        </Link>
+                        <span>/</span>
+                        <span className="text-foreground font-semibold">Brand Profile Settings</span>
                     </div>
-                </div>
-
-                <div className="p-6 sm:p-8 pt-0 relative">
-                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-14 sm:-mt-16 mb-4">
-                        <div className="relative size-24 sm:size-28 border-4 border-background bg-background shadow-sm overflow-hidden shrink-0 rounded-md">
-                            <Image
-                                unoptimized
-                                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop"
-                                alt="Sneha Fernandes"
-                                width={120}
-                                height={120}
-                                className="size-full object-cover"
-                            />
-                            <div className="absolute bottom-1 right-1 bg-primary text-white p-0.5 border border-background shadow-sm rounded">
-                                <CheckCircle2 className="size-4 fill-primary text-white" />
-                            </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-2">
-                            <span className="inline-flex items-center gap-1 bg-muted border border-border px-3 py-1 text-xs font-semibold text-foreground rounded-sm">
-                                <Utensils className="size-3 text-primary" />
-                                <span>Food & Dining</span>
-                            </span>
-                            <span className="inline-flex items-center gap-1 bg-muted border border-border px-3 py-1 text-xs font-semibold text-foreground rounded-sm">
-                                <Store className="size-3 text-primary" />
-                                <span>Boutique Stays & Heritage</span>
-                            </span>
-                            <span className="inline-flex items-center gap-1 bg-muted border border-border px-3 py-1 text-xs font-semibold text-foreground rounded-sm">
-                                <Compass className="size-3 text-primary" />
-                                <span>Lifestyle & Culture</span>
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <div className="flex flex-wrap items-center gap-3">
-                            <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-                                Sneha Fernandes
-                            </h1>
-                            <span className="text-xs text-muted-foreground font-mono">
-                                @sneha_curates
-                            </span>
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <MapPin className="size-3.5 text-primary" />
-                                <span>Assagao, North Goa</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-xs text-primary font-medium">
-                                <span className="size-2 bg-primary animate-pulse rounded" />
-                                <span>Active 2h ago</span>
-                            </div>
-                            <span className="border border-border bg-muted px-2.5 py-0.5 text-[11px] font-bold text-foreground rounded-sm">
-                                18 Completed Brand Deals
-                            </span>
-                        </div>
-
-                        <p className="text-sm text-muted-foreground max-w-4xl leading-relaxed">
-                            Visual storyteller & food writer documenting Goa&apos;s emerging culinary culture, artisanal cafes, and boutique heritage stays. Featured in <strong className="text-foreground font-semibold">Condé Nast Traveller</strong> & <strong className="text-foreground font-semibold">Nat Geo India</strong>. Specialized in cinematic vertical reels highlighting sustainable Goan hospitality.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Audience Vital Metrics */}
-            <section className="space-y-4">
-                <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Users className="size-4 text-primary" />
-                        <h2 className="text-sm font-bold text-foreground">Audience Vital Metrics</h2>
-                    </div>
-                    <span className="border border-border bg-muted px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest rounded-sm">
-                        REALTIME META API SYNC · OCT 2026
-                    </span>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-                    {[
-                        { label: 'Followers', value: '120.4K', change: '↑ +3.2% this mo', sub: 'Audience size' },
-                        { label: 'Engagement Rate', value: '7.8%', change: '2.4x Industry Avg', sub: 'Industry benchmark' },
-                        { label: 'Avg. Likes', value: '8,920', change: 'per feed post', sub: 'Consistent baseline' },
-                        { label: 'Avg. Reel Views', value: '64.5K', change: 'Video momentum', sub: 'Video momentum' },
-                        { label: 'Avg. Comments', value: '340', change: 'Community affinity', sub: 'Community affinity' },
-                        { label: 'Goa & Travelers', value: '92%', change: '68% Goa / 24% Fly-in', sub: 'Target resonance' },
-                    ].map((metric) => (
-                        <div
-                            key={metric.label}
-                            className="border border-border bg-card p-4 space-y-2 rounded-sm shadow-sm"
-                        >
-                            <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider block">
-                                {metric.label}
+                        <h1 className="text-2xl font-black tracking-tight text-foreground">
+                            {businessName || 'Business Profile'}
+                        </h1>
+                        {user?.is_verified && (
+                            <span className="inline-flex items-center gap-1 bg-primary/10 text-primary border border-primary/20 text-[10px] font-bold px-2 py-0.5 rounded-none uppercase tracking-wide">
+                                <CheckCircle2 className="size-3" />
+                                Verified Business
                             </span>
-                            <div className="text-2xl font-extrabold text-foreground tracking-tight leading-none">
-                                {metric.value}
-                            </div>
-                            <div className="text-[11px] text-primary font-semibold pt-1">
-                                {metric.change}
-                            </div>
-                        </div>
-                    ))}
+                        )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                        Manage your official establishment details, industry focus, and contact channel shown to Goan creators.
+                    </p>
                 </div>
-            </section>
 
-            {/* Audience Growth Chart & Persona */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                <div className="lg:col-span-7 border border-border bg-card p-6 rounded-sm shadow-sm space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-4">
-                        <div>
-                            <h3 className="text-base font-bold text-foreground">Audience Growth & Engagement</h3>
-                            <p className="text-xs text-muted-foreground">
-                                6-Month trajectory with hospitality campaign peaks
+                <div className="flex items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={handleDiscard}
+                        disabled={saving}
+                        className="inline-flex items-center gap-1.5 border border-border bg-background hover:bg-muted text-foreground text-xs font-bold px-3 py-2 rounded-none transition-colors disabled:opacity-50 cursor-pointer"
+                    >
+                        <RotateCcw className="size-3.5" />
+                        Reset
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleSubmit}
+                        disabled={saving}
+                        className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold px-4 py-2 rounded-none transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
+                    >
+                        {saving ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
+                        {saving ? 'Saving...' : 'Save Profile'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Notification Banners */}
+            {saveSuccess && (
+                <div className="border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 p-4 rounded-none flex items-center justify-between gap-3 text-xs font-bold">
+                    <div className="flex items-center gap-2">
+                        <Check className="size-4 shrink-0" />
+                        <span>Business profile saved and published successfully!</span>
+                    </div>
+                    <span className="text-[11px] opacity-75 font-mono">Changes live immediately</span>
+                </div>
+            )}
+
+            {saveError && (
+                <div className="border border-destructive/30 bg-destructive/10 text-destructive p-4 rounded-none flex items-center gap-2 text-xs font-bold">
+                    <AlertCircle className="size-4 shrink-0" />
+                    <span>{saveError}</span>
+                </div>
+            )}
+
+            {/* Main Form & Live Preview Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Form Column (2 Cols) */}
+                <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6">
+                    {/* Establishment Core Details */}
+                    <div className="border border-border bg-card p-6 rounded-none space-y-5 shadow-sm">
+                        <div className="flex items-center gap-2 pb-3 border-b border-border">
+                            <Store className="size-4 text-primary" />
+                            <h2 className="text-sm font-extrabold uppercase tracking-wide text-foreground">
+                                Establishment Details
+                            </h2>
+                        </div>
+
+                        {/* Business Name */}
+                        <div className="space-y-1.5">
+                            <label htmlFor="business_name" className="block text-xs font-bold text-foreground">
+                                Brand / Establishment Name <span className="text-destructive">*</span>
+                            </label>
+                            <input
+                                id="business_name"
+                                type="text"
+                                value={businessName}
+                                onChange={(e) => {
+                                    setBusinessName(e.target.value)
+                                    if (touched.business_name) validate()
+                                }}
+                                onBlur={() => markTouched('business_name')}
+                                placeholder="e.g. Café Palmeira, Gunpowder, Antares"
+                                className={`w-full bg-background border px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 rounded-none transition-colors ${
+                                    touched.business_name && errors.business_name
+                                        ? 'border-destructive focus:ring-destructive'
+                                        : 'border-border focus:border-primary focus:ring-primary'
+                                }`}
+                            />
+                            {touched.business_name && errors.business_name && (
+                                <p className="text-[11px] font-bold text-destructive flex items-center gap-1 mt-1">
+                                    <AlertCircle className="size-3 shrink-0" />
+                                    {errors.business_name}
+                                </p>
+                            )}
+                            <p className="text-[11px] text-muted-foreground">
+                                The official name visible on creator requests and collaboration agreements.
                             </p>
                         </div>
-                        <div className="flex items-center gap-4 text-xs font-semibold">
-                            <div className="flex items-center gap-1.5">
-                                <span className="size-2 bg-primary" />
-                                <span>Followers (k)</span>
+
+                        {/* Industry */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <label htmlFor="industry" className="block text-xs font-bold text-foreground">
+                                    Primary Industry / Sector <span className="text-destructive">*</span>
+                                </label>
+                                <select
+                                    id="industry"
+                                    value={industry}
+                                    onChange={(e) => {
+                                        setIndustry(e.target.value)
+                                        if (touched.industry) validate()
+                                    }}
+                                    onBlur={() => markTouched('industry')}
+                                    className={`w-full bg-background border px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 rounded-none transition-colors ${
+                                        touched.industry && errors.industry
+                                            ? 'border-destructive focus:ring-destructive'
+                                            : 'border-border focus:border-primary focus:ring-primary'
+                                    }`}
+                                >
+                                    <option value="">Select industry category...</option>
+                                    {COMMON_INDUSTRIES.map((ind) => (
+                                        <option key={ind} value={ind}>
+                                            {ind}
+                                        </option>
+                                    ))}
+                                    <option value="Other">Other (Specify below)</option>
+                                </select>
+                                {touched.industry && errors.industry && (
+                                    <p className="text-[11px] font-bold text-destructive flex items-center gap-1 mt-1">
+                                        <AlertCircle className="size-3 shrink-0" />
+                                        {errors.industry}
+                                    </p>
+                                )}
                             </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="size-2 bg-secondary" />
-                                <span>Engagement Rate (%)</span>
+
+                            {/* Custom industry if Other */}
+                            {industry === 'Other' && (
+                                <div className="space-y-1.5">
+                                    <label htmlFor="custom_industry" className="block text-xs font-bold text-foreground">
+                                        Custom Industry Title <span className="text-destructive">*</span>
+                                    </label>
+                                    <input
+                                        id="custom_industry"
+                                        type="text"
+                                        value={customIndustry}
+                                        onChange={(e) => setCustomIndustry(e.target.value)}
+                                        placeholder="e.g. Eco-Farming & Distilling"
+                                        className="w-full bg-background border border-border px-3.5 py-2 text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-none transition-colors"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Goan Location */}
+                            <div className={industry === 'Other' ? 'md:col-span-2 space-y-1.5' : 'space-y-1.5'}>
+                                <label htmlFor="location_id" className="block text-xs font-bold text-foreground">
+                                    Goa Location / Area <span className="text-destructive">*</span>
+                                </label>
+                                <select
+                                    id="location_id"
+                                    value={locationId}
+                                    onChange={(e) => {
+                                        setLocationId(e.target.value ? Number(e.target.value) : '')
+                                        if (touched.location_id) validate()
+                                    }}
+                                    onBlur={() => markTouched('location_id')}
+                                    className={`w-full bg-background border px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 rounded-none transition-colors ${
+                                        touched.location_id && errors.location_id
+                                            ? 'border-destructive focus:ring-destructive'
+                                            : 'border-border focus:border-primary focus:ring-primary'
+                                    }`}
+                                >
+                                    <option value="">Select your Goan area...</option>
+                                    {Object.entries(groupedLocations).map(([district, talukas]) => (
+                                        <optgroup key={district} label={`-- ${district} --`}>
+                                            {Object.entries(talukas).map(([taluka, areas]) =>
+                                                areas.map((a) => (
+                                                    <option key={a.location_id} value={a.location_id}>
+                                                        {a.area_name} ({taluka}, {district})
+                                                    </option>
+                                                ))
+                                            )}
+                                        </optgroup>
+                                    ))}
+                                </select>
+                                {touched.location_id && errors.location_id && (
+                                    <p className="text-[11px] font-bold text-destructive flex items-center gap-1 mt-1">
+                                        <AlertCircle className="size-3 shrink-0" />
+                                        {errors.location_id}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Description / Brand Story */}
+                        <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                                <label htmlFor="description" className="block text-xs font-bold text-foreground">
+                                    Brand Description / Experience Story
+                                </label>
+                                <span className="text-[10px] text-muted-foreground font-mono">
+                                    {description.length}/1000
+                                </span>
+                            </div>
+                            <textarea
+                                id="description"
+                                rows={4}
+                                value={description}
+                                onChange={(e) => {
+                                    setDescription(e.target.value)
+                                    if (touched.description) validate()
+                                }}
+                                onBlur={() => markTouched('description')}
+                                placeholder="Highlight your heritage background, cuisine specialties, boutique amenities, ambiance, and what kind of creator collabs you welcome..."
+                                className={`w-full bg-background border px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 rounded-none transition-colors resize-y ${
+                                    touched.description && errors.description
+                                        ? 'border-destructive focus:ring-destructive'
+                                        : 'border-border focus:border-primary focus:ring-primary'
+                                }`}
+                            />
+                            {touched.description && errors.description && (
+                                <p className="text-[11px] font-bold text-destructive flex items-center gap-1 mt-1">
+                                    <AlertCircle className="size-3 shrink-0" />
+                                    {errors.description}
+                                </p>
+                            )}
+                            <p className="text-[11px] text-muted-foreground">
+                                This summary helps Goan creators evaluate whether your brand matches their aesthetic and audience.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Contact & Social Presence */}
+                    <div className="border border-border bg-card p-6 rounded-none space-y-5 shadow-sm">
+                        <div className="flex items-center gap-2 pb-3 border-b border-border">
+                            <Phone className="size-4 text-primary" />
+                            <h2 className="text-sm font-extrabold uppercase tracking-wide text-foreground">
+                                Direct Contact & Social Links
+                            </h2>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            {/* Contact Phone */}
+                            <div className="space-y-1.5">
+                                <label htmlFor="contact_phone" className="block text-xs font-bold text-foreground">
+                                    Establishment Phone / WhatsApp <span className="text-destructive">*</span>
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                                        <Phone className="size-4" />
+                                    </span>
+                                    <input
+                                        id="contact_phone"
+                                        type="tel"
+                                        value={contactPhone}
+                                        onChange={(e) => {
+                                            setContactPhone(e.target.value)
+                                            if (touched.contact_phone) validate()
+                                        }}
+                                        onBlur={() => markTouched('contact_phone')}
+                                        placeholder="+91 98221 44556"
+                                        className={`w-full bg-background border pl-10 pr-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 rounded-none transition-colors ${
+                                            touched.contact_phone && errors.contact_phone
+                                                ? 'border-destructive focus:ring-destructive'
+                                                : 'border-border focus:border-primary focus:ring-primary'
+                                        }`}
+                                    />
+                                </div>
+                                {touched.contact_phone && errors.contact_phone && (
+                                    <p className="text-[11px] font-bold text-destructive flex items-center gap-1 mt-1">
+                                        <AlertCircle className="size-3 shrink-0" />
+                                        {errors.contact_phone}
+                                    </p>
+                                )}
+                                <p className="text-[11px] text-muted-foreground">
+                                    Used for shoot day logistics and direct coordination with confirmed creators.
+                                </p>
+                            </div>
+
+                            {/* Instagram Handle */}
+                            <div className="space-y-1.5">
+                                <label htmlFor="instagram_handle" className="block text-xs font-bold text-foreground">
+                                    Instagram Handle
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground font-mono font-bold text-xs">
+                                        @
+                                    </span>
+                                    <input
+                                        id="instagram_handle"
+                                        type="text"
+                                        value={instagramHandle}
+                                        onChange={(e) => {
+                                            setInstagramHandle(e.target.value.replace(/^@/, ''))
+                                            if (touched.instagram_handle) validate()
+                                        }}
+                                        onBlur={() => markTouched('instagram_handle')}
+                                        placeholder="cafepalmeiragoa"
+                                        className={`w-full bg-background border pl-8 pr-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 rounded-none transition-colors font-mono ${
+                                            touched.instagram_handle && errors.instagram_handle
+                                                ? 'border-destructive focus:ring-destructive'
+                                                : 'border-border focus:border-primary focus:ring-primary'
+                                        }`}
+                                    />
+                                </div>
+                                {touched.instagram_handle && errors.instagram_handle && (
+                                    <p className="text-[11px] font-bold text-destructive flex items-center gap-1 mt-1">
+                                        <AlertCircle className="size-3 shrink-0" />
+                                        {errors.instagram_handle}
+                                    </p>
+                                )}
+                                <p className="text-[11px] text-muted-foreground">
+                                    Allows creators to tag your business profile in collaborated reels and stories.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Account Email (Read-only) */}
+                        <div className="pt-2 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <Mail className="size-3.5 text-primary" />
+                                <span>Login Email:</span>
+                                <span className="font-mono font-bold text-foreground">{user?.email}</span>
+                            </div>
+                            <span className="text-[11px] text-muted-foreground">
+                                (Managed via authentication account)
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Bottom Action Bar */}
+                    <div className="flex items-center justify-end gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={handleDiscard}
+                            disabled={saving}
+                            className="border border-border bg-background hover:bg-muted text-foreground text-xs font-bold px-4 py-2.5 rounded-none transition-colors disabled:opacity-50 cursor-pointer"
+                        >
+                            Discard Changes
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold px-6 py-2.5 rounded-none transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                        >
+                            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                            {saving ? 'Saving...' : 'Save Profile Changes'}
+                        </button>
+                    </div>
+                </form>
+
+                {/* Sidebar Column (1 Col): Live Preview & Readiness */}
+                <div className="space-y-6">
+                    {/* Live Creator-Facing Preview Card */}
+                    <div className="border border-border bg-card p-6 rounded-none shadow-sm space-y-4">
+                        <div className="flex items-center justify-between pb-3 border-b border-border">
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground">
+                                Creator View Preview
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-[10px] text-primary font-bold">
+                                Live Preview
+                            </span>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="flex items-start justify-between gap-2">
+                                <div>
+                                    <h3 className="text-base font-extrabold text-foreground leading-snug">
+                                        {businessName.trim() || 'Establishment Name'}
+                                    </h3>
+                                    <span className="inline-block bg-primary/10 text-primary border border-primary/20 text-[10px] font-bold px-2 py-0.5 rounded-none uppercase mt-1">
+                                        {industry === 'Other' ? customIndustry.trim() || 'Other' : industry || 'Uncategorized'}
+                                    </span>
+                                </div>
+                                {user?.is_verified && (
+                                    <ShieldCheck className="size-5 text-primary shrink-0" />
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <MapPin className="size-3.5 text-primary shrink-0" />
+                                <span>
+                                    {selectedLocationObj
+                                        ? `${selectedLocationObj.area_name}, ${selectedLocationObj.taluka} (${selectedLocationObj.district})`
+                                        : 'Goa Location'}
+                                </span>
+                            </div>
+
+                            {contactPhone.trim() && (
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                    <Phone className="size-3.5 text-primary shrink-0" />
+                                    <span className="font-mono">{contactPhone.trim()}</span>
+                                </div>
+                            )}
+
+                            {instagramHandle.trim() && (
+                                <div className="flex items-center gap-1.5 text-xs">
+                                    <InstagramIcon className="size-3.5 text-primary shrink-0" />
+                                    <a
+                                        href={`https://instagram.com/${instagramHandle.trim().replace(/^@/, '')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-primary hover:underline font-mono inline-flex items-center gap-1"
+                                    >
+                                        @{instagramHandle.trim().replace(/^@/, '')}
+                                        <ExternalLink className="size-2.5" />
+                                    </a>
+                                </div>
+                            )}
+
+                            <div className="pt-2 border-t border-border">
+                                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">
+                                    {description.trim() ||
+                                        'Provide an establishment description and heritage context to highlight your brand story to creators.'}
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="relative h-56 w-full pt-4">
-                        <svg className="size-full overflow-visible" viewBox="0 0 600 200" preserveAspectRatio="none">
-                            <rect x="360" y="20" width="80" height="150" fill="currentColor" className="text-primary/10" />
-                            <text x="400" y="15" textAnchor="middle" className="text-[10px] font-bold fill-primary">
-                                Monsoon Fest
-                            </text>
+                    {/* Profile Readiness Checklist */}
+                    <div className="border border-border bg-card p-6 rounded-none shadow-sm space-y-4">
+                        <div className="flex items-center justify-between pb-2 border-b border-border">
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground">
+                                Brand Readiness
+                            </span>
+                            <span className="text-xs font-mono font-extrabold text-primary">
+                                {completenessPercent}%
+                            </span>
+                        </div>
 
-                            <line x1="40" y1="30" x2="580" y2="30" stroke="currentColor" className="text-border/40" strokeDasharray="3 3" />
-                            <line x1="40" y1="80" x2="580" y2="80" stroke="currentColor" className="text-border/40" strokeDasharray="3 3" />
-                            <line x1="40" y1="130" x2="580" y2="130" stroke="currentColor" className="text-border/40" strokeDasharray="3 3" />
-                            <line x1="40" y1="170" x2="580" y2="170" stroke="currentColor" className="text-border/80" />
-
-                            <text x="10" y="35" className="text-[10px] fill-[var(--muted-foreground)]">130K</text>
-                            <text x="10" y="85" className="text-[10px] fill-[var(--muted-foreground)]">100K</text>
-                            <text x="10" y="135" className="text-[10px] fill-[var(--muted-foreground)]">70K</text>
-                            <text x="10" y="175" className="text-[10px] fill-[var(--muted-foreground)]">40K</text>
-
-                            <defs>
-                                <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#0C4E40" stopOpacity="0.2" />
-                                    <stop offset="100%" stopColor="#0C4E40" stopOpacity="0" />
-                                </linearGradient>
-                            </defs>
-                            <path
-                                d="M 60 140 C 130 138, 170 125, 230 110 C 290 95, 330 65, 400 45 C 470 35, 520 30, 560 25 L 560 170 L 60 170 Z"
-                                fill="url(#growthGrad)"
+                        {/* Progress Bar */}
+                        <div className="w-full bg-muted h-2 rounded-none overflow-hidden">
+                            <div
+                                className="bg-primary h-full transition-all duration-300"
+                                style={{ width: `${completenessPercent}%` }}
                             />
-                            <path
-                                d="M 60 140 C 130 138, 170 125, 230 110 C 290 95, 330 65, 400 45 C 470 35, 520 30, 560 25"
-                                fill="none"
-                                stroke="#0C4E40"
-                                strokeWidth="3"
-                            />
+                        </div>
 
-                            <path
-                                d="M 60 100 C 140 102, 220 90, 300 75 C 380 60, 460 55, 560 40"
-                                fill="none"
-                                stroke="#167D65"
-                                strokeWidth="2.5"
-                                strokeDasharray="4 2"
-                            />
-
-                            {[
-                                { cx: 60, cy: 140 },
-                                { cx: 160, cy: 125 },
-                                { cx: 260, cy: 100 },
-                                { cx: 400, cy: 45 },
-                                { cx: 480, cy: 32 },
-                                { cx: 560, cy: 25 },
-                            ].map((p, idx) => (
-                                <circle key={idx} cx={p.cx} cy={p.cy} r="4" fill="#0C4E40" stroke="#fff" strokeWidth="2" />
+                        <div className="space-y-2 pt-1 text-xs">
+                            {completenessSteps.map((step, idx) => (
+                                <div key={idx} className="flex items-center justify-between">
+                                    <span className={step.done ? 'text-foreground' : 'text-muted-foreground'}>
+                                        {step.label}
+                                    </span>
+                                    {step.done ? (
+                                        <CheckCircle2 className="size-3.5 text-primary" />
+                                    ) : (
+                                        <span className="size-2 bg-muted-foreground/30 rounded-none inline-block" />
+                                    )}
+                                </div>
                             ))}
-
-                            <text x="60" y="190" textAnchor="middle" className="text-[10px] fill-[var(--muted-foreground)]">May</text>
-                            <text x="160" y="190" textAnchor="middle" className="text-[10px] fill-[var(--muted-foreground)]">Jun</text>
-                            <text x="260" y="190" textAnchor="middle" className="text-[10px] fill-[var(--muted-foreground)]">Jul</text>
-                            <text x="400" y="190" textAnchor="middle" className="text-[10px] font-bold fill-primary">Aug (Peak)</text>
-                            <text x="480" y="190" textAnchor="middle" className="text-[10px] fill-[var(--muted-foreground)]">Sep</text>
-                            <text x="560" y="190" textAnchor="middle" className="text-[10px] font-bold fill-foreground">Oct (Now)</text>
-                        </svg>
-                    </div>
-
-                    <div className="border border-border bg-muted p-3.5 flex items-center justify-between text-xs rounded-sm">
-                        <div className="flex items-center gap-2">
-                            <ShieldCheck className="size-4 text-primary" />
-                            <span className="font-semibold text-foreground">
-                                Consistent Organic Growth
-                            </span>
-                            <span className="text-muted-foreground hidden sm:inline">
-                                • Zero synthetic spikes detected across 180 days audit.
-                            </span>
                         </div>
-                        <span className="font-bold text-primary">+24.8K Q3</span>
-                    </div>
-                </div>
 
-                <div className="lg:col-span-5 border border-border bg-card p-6 rounded-sm shadow-sm space-y-6">
-                    <div className="border-b border-border pb-4">
-                        <h3 className="text-base font-bold text-foreground">Audience Persona</h3>
-                        <p className="text-xs text-muted-foreground">
-                            Demographic split tailored for hospitality marketing
+                        <p className="text-[11px] text-muted-foreground pt-2 border-t border-border leading-normal">
+                            High-completeness business profiles receive up to 3x faster collaboration responses from vetted Goan creators.
                         </p>
                     </div>
 
-                    <div className="space-y-3">
-                        <div className="space-y-1">
-                            <div className="flex items-center justify-between text-xs font-semibold">
-                                <span className="text-foreground">Age 24–35 yrs (Prime Spenders)</span>
-                                <span className="text-primary font-bold">58%</span>
-                            </div>
-                            <div className="h-2 w-full bg-muted overflow-hidden rounded-full">
-                                <div className="h-full bg-primary w-[58%]" />
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <div className="flex items-center justify-between text-xs font-semibold">
-                                <span className="text-foreground">Age 36–45 yrs (Heritage Travellers)</span>
-                                <span className="text-primary font-bold">26%</span>
-                            </div>
-                            <div className="h-2 w-full bg-muted overflow-hidden rounded-full">
-                                <div className="h-full bg-primary w-[26%]" />
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <div className="flex items-center justify-between text-xs font-semibold">
-                                <span className="text-foreground">Age 18–23 yrs</span>
-                                <span className="text-muted-foreground font-bold">16%</span>
-                            </div>
-                            <div className="h-2 w-full bg-muted overflow-hidden rounded-full">
-                                <div className="h-full bg-primary w-[16%]" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="border border-border bg-muted/30 p-3 grid grid-cols-2 divide-x divide-border text-center rounded-sm">
-                        <div>
-                            <div className="text-xs text-muted-foreground font-semibold">Women</div>
-                            <div className="text-lg font-bold text-foreground">62%</div>
-                        </div>
-                        <div>
-                            <div className="text-xs text-muted-foreground font-semibold">Men</div>
-                            <div className="text-lg font-bold text-foreground">38%</div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-2 pt-2 border-t border-border">
-                        <span className="text-xs font-bold text-foreground block">Top Audience Locations</span>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="border border-border p-2 bg-background rounded-sm">
-                                <span className="text-muted-foreground block text-[10px]">Goa State</span>
-                                <span className="font-bold text-foreground">42% (North & South)</span>
-                            </div>
-                            <div className="border border-border p-2 bg-background rounded-sm">
-                                <span className="text-muted-foreground block text-[10px]">Mumbai & Pune</span>
-                                <span className="font-bold text-foreground">26% (Weekend Tourists)</span>
-                            </div>
-                            <div className="border border-border p-2 bg-background rounded-sm">
-                                <span className="text-muted-foreground block text-[10px]">Bengaluru</span>
-                                <span className="font-bold text-foreground">18% (Tech Nomads)</span>
-                            </div>
-                            <div className="border border-border p-2 bg-background rounded-sm">
-                                <span className="text-muted-foreground block text-[10px]">Delhi NCR</span>
-                                <span className="font-bold text-foreground">14% (Seasonal Travelers)</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Connected Socials & Rate Card */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                <div className="lg:col-span-5 space-y-4">
-                    <div className="border border-border bg-card p-5 rounded-sm shadow-sm space-y-3">
-                        <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">
-                            Connected Social Channels
-                        </h3>
-
-                        <a
-                            href="https://instagram.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="border border-border p-3 flex items-center justify-between hover:bg-muted/50 transition-colors rounded-sm group"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="size-9 bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs rounded-sm">
-                                    IG
-                                </div>
-                                <div>
-                                    <div className="text-xs font-bold text-foreground flex items-center gap-1">
-                                        <span>@sneha_curates</span>
-                                        <CheckCircle2 className="size-3 text-primary" />
-                                    </div>
-                                    <div className="text-[11px] text-muted-foreground">
-                                        Instagram • 120,400 Followers
-                                    </div>
-                                </div>
-                            </div>
-                            <ExternalLink className="size-4 text-muted-foreground group-hover:text-foreground" />
-                        </a>
-
-                        <a
-                            href="https://youtube.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="border border-border p-3 flex items-center justify-between hover:bg-muted/50 transition-colors rounded-sm group"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="size-9 bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs rounded-sm">
-                                    YT
-                                </div>
-                                <div>
-                                    <div className="text-xs font-bold text-foreground">
-                                        @snehafernandesgoa
-                                    </div>
-                                    <div className="text-[11px] text-muted-foreground">
-                                        YouTube • 34,200 Subscribers
-                                    </div>
-                                </div>
-                            </div>
-                            <ExternalLink className="size-4 text-muted-foreground group-hover:text-foreground" />
-                        </a>
-                    </div>
-
-                    <div className="border border-border bg-card p-5 rounded-sm shadow-sm space-y-2">
-                        <div className="flex items-center gap-2 text-xs font-bold text-foreground">
-                            <Star className="size-3.5 fill-primary text-primary" />
-                            <span>Editor&apos;s Pick 2024</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground italic leading-relaxed">
-                            &ldquo;Sneha&apos;s slow-living chronicles give travelers authentic Goa without the tourist traps.&rdquo;
-                        </p>
-                        <span className="text-[11px] font-bold text-foreground block">
-                            — Condé Nast Traveller India
-                        </span>
-                    </div>
-
-                    <div className="border border-border bg-card p-5 rounded-sm shadow-sm flex items-center justify-between">
-                        <div>
-                            <div className="text-xs font-bold text-foreground">Coverage Radius</div>
-                            <div className="text-[11px] text-muted-foreground">Assagao, Siolim, Anjuna, Panjim, Salcete</div>
-                        </div>
-                        <span className="bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold px-2 py-1 rounded-sm">
-                            On-site visits available
-                        </span>
-                    </div>
-                </div>
-
-                <div className="lg:col-span-7 border border-border bg-card p-6 rounded-sm shadow-sm space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
-                        <div>
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground block">
-                                RATE CARD & COMMERCIAL TERMS
-                            </span>
-                            <h3 className="text-lg font-extrabold text-foreground tracking-tight">
-                                Collab Pricing & Deliverables
-                            </h3>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-2xl font-black text-primary leading-none">
-                                ₹14,000
-                            </div>
-                            <span className="text-[10px] text-muted-foreground">Base Rate / Dedicated Reel</span>
-                        </div>
-                    </div>
-
-                    <div className="border border-primary/20 bg-primary/5 p-3.5 space-y-1 rounded-sm">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-primary">
-                            <Sparkles className="size-3.5" />
-                            <span>Barter Collaboration Friendly · Selectively Open</span>
+                    {/* Helpful Tips Card */}
+                    <div className="border border-border bg-muted/30 p-5 rounded-none space-y-2">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                            <Building2 className="size-3.5 text-primary" />
+                            <span>Goan Creator Collaborations</span>
                         </div>
                         <p className="text-[11px] text-muted-foreground leading-relaxed">
-                            Sneha accepts curated barter stays (2+ nights in heritage/boutique villas) and seasonal tasting menu experiences for verified culinary brands. Minimum follower baseline or premium property tier required.
+                            Creators browse your location and industry to ensure authentic local storytelling. Keep your phone number current for immediate on-site coordination.
                         </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="border border-border p-3.5 space-y-2 bg-background rounded-sm">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-foreground">Instagram Reel (30–60s)</span>
-                                <span className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded-sm border border-primary/20">
-                                    Base Tier
-                                </span>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground leading-relaxed">
-                                Cinematic 4K grade, trending coastal audio, storytelling voiceover, business co-authorship tag.
-                            </p>
-                        </div>
-
-                        <div className="border border-border p-3.5 space-y-2 bg-background rounded-sm">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-foreground">Photo Carousel (6–10 slides)</span>
-                                <span className="text-[10px] font-bold text-foreground bg-muted px-2 py-0.5 rounded-sm">
-                                    +₹6,000
-                                </span>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground leading-relaxed">
-                                Editorial styling of signature dishes, architecture, ambiance. High-resolution raw exports provided.
-                            </p>
-                        </div>
-
-                        <div className="border border-border p-3.5 space-y-2 bg-background rounded-sm">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-foreground">Story Sequence (3–5x frames)</span>
-                                <span className="text-[10px] font-bold text-foreground bg-muted px-2 py-0.5 rounded-sm">
-                                    +₹4,500
-                                </span>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground leading-relaxed">
-                                Realtime unboxing / dining walkthrough with booking CTA link sticker and location geotag.
-                            </p>
-                        </div>
-
-                        <div className="border border-border p-3.5 space-y-2 bg-background rounded-sm">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-foreground">Full Commercial License</span>
-                                <span className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded-sm border border-primary/20">
-                                    6 Mos Included
-                                </span>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground leading-relaxed">
-                                Perpetual digital rights for business website, Instagram Meta ads, and digital brochures.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-2">
-                        <span className="text-xs text-muted-foreground font-medium">Standard turnaround: 5–7 business days</span>
-                        <Link
-                            href="/business/requests"
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs px-5 py-2.5 cursor-pointer rounded-sm shadow-sm transition-colors"
-                        >
-                            Inquire Availability &rarr;
-                        </Link>
                     </div>
                 </div>
             </div>
-
-            {/* Business Reviews */}
-            <section className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
-                    <div className="flex items-center gap-2">
-                        <Star className="size-4 fill-primary text-primary" />
-                        <h2 className="text-sm font-bold text-foreground">
-                            Business Reviews <span className="text-muted-foreground font-normal">• 18 verified collabs</span>
-                        </h2>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs font-semibold">
-                        <span className="text-primary font-bold">5.0</span>
-                        <span className="text-primary">100% On-Time Delivery</span>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="border border-border bg-card p-5 rounded-sm shadow-sm space-y-3">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="size-9 bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs rounded-sm">
-                                    CB
-                                </div>
-                                <div>
-                                    <h4 className="text-xs font-bold text-foreground">Café Bodega</h4>
-                                    <span className="text-[11px] text-muted-foreground">Altinho, Panjim • Monsoon Menu Campaign</span>
-                                </div>
-                            </div>
-                            <div className="flex text-primary text-xs">★★★★★</div>
-                        </div>
-
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                            &ldquo;Sneha created an incredible reel on our monsoon dessert menu. Resulted in our busiest Sunday brunch of the season. She understood our heritage courtyard lighting perfectly and delivered without disrupting our seated guests.&rdquo;
-                        </p>
-
-                        <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border">
-                            <span className="text-primary font-semibold">Verified Campaign (August 2026)</span>
-                            <span className="font-bold text-foreground">Result: 42K Organic Reach</span>
-                        </div>
-                    </div>
-
-                    <div className="border border-border bg-card p-5 rounded-sm shadow-sm space-y-3">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="size-9 bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs rounded-sm">
-                                    PA
-                                </div>
-                                <div>
-                                    <h4 className="text-xs font-bold text-foreground">The Project Assagao</h4>
-                                    <span className="text-[11px] text-muted-foreground">Assagao, North Goa • Boutique Villa Stay Collab</span>
-                                </div>
-                            </div>
-                            <div className="flex text-primary text-xs">★★★★★</div>
-                        </div>
-
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                            &ldquo;Super professional, timely delivery of raw footage, and highly engaged Goan audience. We gained over 280 direct room inquiries over the weekend following her carousel post. Would definitely book again for our winter festival.&rdquo;
-                        </p>
-
-                        <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border">
-                            <span className="text-primary font-semibold">Verified Campaign (September 2026)</span>
-                            <span className="font-bold text-foreground">Result: 18 Booking Conversions</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
         </main>
     )
 }
