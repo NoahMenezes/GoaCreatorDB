@@ -452,8 +452,18 @@ export interface SessionData {
   businessId?: number
 }
 
+let testSessionToken: string | null = null
+
+export function setTestSessionToken(token: string | null): void {
+  testSessionToken = token
+}
+
+export function getTestSessionToken(): string | null {
+  return testSessionToken
+}
+
 export async function getSession(tokenOverride?: string): Promise<SessionData | null> {
-  let token = tokenOverride
+  let token: string | undefined = tokenOverride || testSessionToken || undefined
   if (!token) {
     try {
       const cookieStore = await cookies()

@@ -4,7 +4,7 @@ import { query } from '@/lib/db'
 import { requireAuth } from '@/lib/api-auth'
 
 export async function GET(request: Request) {
-  const auth = await requireAuth()
+  const auth = await requireAuth(request)
   if (auth instanceof Response) return auth
 
   const { searchParams } = new URL(request.url)
@@ -15,16 +15,27 @@ export async function GET(request: Request) {
   try {
     let sql = `
       SELECT
-        cr.*,
+        cr.request_id,
+        cr.business_id,
+        cr.creator_id,
+        cr.collab_type,
+        cr.offered_amount,
+        cr.offer_details,
+        cr.deliverables,
+        cr.message,
+        cr.status,
+        cr.requested_at,
+        cr.responded_at,
+        cr.deadline,
         b.business_name,
         c.full_name AS creator_name,
-        ub.email AS business_email,
-        uc.email AS creator_email
+        CASE
+          WHEN cr.status IN ('accepted', 'completed') THEN b.contact_phone
+          ELSE NULL
+        END AS contact_phone
       FROM collaboration_requests cr
       JOIN businesses b ON cr.business_id = b.business_id
       JOIN creators c ON cr.creator_id = c.creator_id
-      JOIN users ub ON b.user_id = ub.user_id
-      JOIN users uc ON c.user_id = uc.user_id
       WHERE ${role === 'creator' ? 'c.user_id = $1' : 'b.user_id = $1'}
     `
     const params: unknown[] = [userId]
@@ -47,7 +58,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireAuth()
+  const auth = await requireAuth(request)
   if (auth instanceof Response) return auth
 
   if (auth.role !== 'business') {

@@ -8,9 +8,25 @@ export interface AuthContext {
   businessId?: number
 }
 
-export async function requireAuth(): Promise<AuthContext | Response> {
+export async function requireAuth(reqOrToken?: Request | string): Promise<AuthContext | Response> {
   try {
-    const sessionData = await getSession()
+    let token: string | undefined
+    if (typeof reqOrToken === 'string') {
+      token = reqOrToken
+    } else if (reqOrToken instanceof Request) {
+      const authHeader = reqOrToken.headers.get('Authorization')
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7).trim()
+      } else {
+        const cookieHeader = reqOrToken.headers.get('Cookie') || reqOrToken.headers.get('cookie')
+        if (cookieHeader) {
+          const match = cookieHeader.match(/goa_session=([^;]+)/)
+          if (match) token = match[1]
+        }
+      }
+    }
+
+    const sessionData = await getSession(token)
     if (!sessionData) {
       return new Response(
         JSON.stringify({ success: false, error: 'Authentication required' }),

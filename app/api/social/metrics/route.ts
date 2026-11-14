@@ -3,59 +3,52 @@ import { NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import { requireAuth } from '@/lib/api-auth'
 
-export async function GET() {
+export async function GET(request: Request) {
   const auth = await requireAuth()
   if (auth instanceof Response) return auth
 
   const userId = Number(auth.user.user_id)
+  const { searchParams } = new URL(request.url)
+  const accountId = searchParams.get('account_id') ? Number(searchParams.get('account_id')) : null
 
   try {
-    const res = await query(
-      `SELECT
-        sa.*,
-        lm.metric_id,
-        lm.follower_count,
-        lm.avg_likes,
-        lm.avg_views,
-        lm.avg_comments,
-        lm.engagement_rate,
-        lm.audience_goa_pct,
-        lm.data_source,
-        lm.verified_by,
-        lm.recorded_at
-       FROM social_accounts sa
-       JOIN creators c ON sa.creator_id = c.creator_id
-       LEFT JOIN v_creator_latest_metrics lm ON sa.account_id = lm.account_id
-       WHERE c.user_id = $1
-       ORDER BY sa.account_id DESC`,
-      [userId]
-    )
+    let sql = `
+      SELECT
+        cm.metric_id,
+        cm.account_id,
+        sa.platform,
+        sa.handle,
+        cm.follower_count,
+        cm.avg_likes,
+        cm.avg_views,
+        cm.avg_comments,
+        cm.engagement_rate,
+        cm.audience_goa_pct,
+        cm.data_source,
+        cm.verified_by,
+        cm.recorded_at
+      FROM creator_metrics cm
+      JOIN social_accounts sa ON cm.account_id = sa.account_id
+      JOIN creators c ON sa.creator_id = c.creator_id
+      WHERE c.user_id = $1
+    `
+    const params: unknown[] = [userId]
 
-    const result = res.rows.map((row) => ({
-      account_id: row.account_id,
-      creator_id: row.creator_id,
-      platform: row.platform,
-      handle: row.handle,
-      profile_url: row.profile_url,
-      metrics: row.metric_id
-        ? {
-            metric_id: row.metric_id,
-            followers: row.follower_count,
-            follower_count: row.follower_count,
-            avg_likes: row.avg_likes,
-            avg_views: row.avg_views,
-            avg_comments: row.avg_comments,
-            engagement_rate: row.engagement_rate,
-            audience_goa_pct: row.audience_goa_pct,
-            data_source: row.data_source,
-            verified: row.data_source === 'admin_verified',
-            recorded_at: row.recorded_at,
-          }
-        : null,
-    }))
+    if (accountId) {
+      params.push(accountId)
+      sql += ` AND cm.account_id = $${params.length}`
+    }
 
-    return NextResponse.json({ success: true, data: result })
-  } catch {
+    sql += ' ORDER BY cm.account_id ASC, cm.recorded_at DESC'
+
+    const res = await query(sql, params)
+
+    return NextResponse.json({
+      success: true,
+      data: res.rows,
+    })
+  } catch (err) {
+    console.error('Failed to fetch social metric history:', err)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch social metrics' },
       { status: 500 }

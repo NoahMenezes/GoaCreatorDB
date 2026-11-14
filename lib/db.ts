@@ -8,30 +8,42 @@ const globalForDb = globalThis as unknown as {
   pgPool?: Pool
 }
 
-export const pool: Pool =
-  globalForDb.pgPool ??
-  new Pool({
-    connectionString: DATABASE_URL,
-    max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
-  })
-
-if (process.env.NODE_ENV !== 'production') {
-  globalForDb.pgPool = pool
+export function getPool(): Pool {
+  if (
+    !globalForDb.pgPool ||
+    (globalForDb.pgPool as unknown as { ending: boolean; ended: boolean }).ending ||
+    (globalForDb.pgPool as unknown as { ending: boolean; ended: boolean }).ended
+  ) {
+    globalForDb.pgPool = new Pool({
+      connectionString: DATABASE_URL,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    })
+    isShuttingDown = false
+  }
+  return globalForDb.pgPool
 }
+
+export const pool: Pool = new Proxy({} as Pool, {
+  get(_target, prop) {
+    const activePool = getPool()
+    const value = (activePool as unknown as Record<string, unknown>)[prop as string]
+    if (typeof value === 'function') {
+      return value.bind(activePool)
+    }
+    return value
+  },
+})
 
 // Graceful shutdown handling
 let isShuttingDown = false
 
 export async function closePool(): Promise<void> {
-  if (isShuttingDown) return
-  isShuttingDown = true
   if (globalForDb.pgPool) {
-    await globalForDb.pgPool.end()
+    const p = globalForDb.pgPool
     globalForDb.pgPool = undefined
-  } else {
-    await pool.end()
+    await p.end()
   }
 }
 

@@ -4,10 +4,10 @@ import { query } from '@/lib/db'
 import { requireAuth } from '@/lib/api-auth'
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAuth()
+  const auth = await requireAuth(request)
   if (auth instanceof Response) return auth
 
   const resolvedParams = await params
@@ -59,6 +59,19 @@ export async function GET(
       )
     }
 
+    // Privacy rules:
+    // 1. Business contact_phone is only visible to creator if request is accepted or completed
+    if (userId === row.creator_user_id && row.status !== 'accepted' && row.status !== 'completed') {
+      row.contact_phone = null
+    }
+
+    // 2. Never return another user's email
+    if (userId === row.creator_user_id) {
+      delete row.business_email
+    } else if (userId === row.business_user_id) {
+      delete row.creator_email
+    }
+
     return NextResponse.json({ success: true, data: row })
   } catch {
     return NextResponse.json(
@@ -86,7 +99,7 @@ async function handleAction(
   request: Request,
   paramsPromise: Promise<{ id: string }>
 ) {
-  const auth = await requireAuth()
+  const auth = await requireAuth(request)
   if (auth instanceof Response) return auth
 
   const resolvedParams = await paramsPromise
