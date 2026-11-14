@@ -365,15 +365,28 @@ function LoginContent() {
                                 </div>
                             </div>
 
-                            {/* Footer Sign Up Link */}
-                            <div className="text-center text-xs text-muted-foreground pt-1">
-                                Don&apos;t have an account yet?{' '}
-                                <Link
-                                    href="/register/business"
-                                    className="font-medium text-primary hover:underline"
+                            {/* Footer Sign Up Link & Admin Link */}
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground pt-1">
+                                <div>
+                                    Don&apos;t have an account yet?{' '}
+                                    <Link
+                                        href="/register/business"
+                                        className="font-medium text-primary hover:underline"
+                                    >
+                                        Register &rarr;
+                                    </Link>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEmail('admin@goaconnect.in')
+                                        setPassword('admin123')
+                                        setError(null)
+                                    }}
+                                    className="text-[11px] text-muted-foreground hover:text-primary transition-colors cursor-pointer underline underline-offset-2"
                                 >
-                                    Register as Business or Creator &rarr;
-                                </Link>
+                                    Admin sign in
+                                </button>
                             </div>
                         </div>
 
