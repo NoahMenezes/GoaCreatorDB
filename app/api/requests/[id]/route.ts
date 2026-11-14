@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
-import { query } from '@/lib/db'
+import { query, withTransaction } from '@/lib/db'
 import { requireAuth } from '@/lib/api-auth'
 
 export async function GET(
@@ -12,7 +12,7 @@ export async function GET(
 
   const resolvedParams = await params
   const requestId = Number(resolvedParams.id)
-  if (!requestId) {
+  if (!requestId || isNaN(requestId)) {
     return NextResponse.json(
       { success: false, error: 'Invalid request ID' },
       { status: 400 }
@@ -51,11 +51,11 @@ export async function GET(
     const row = res.rows[0]
     const userId = Number(auth.user.user_id)
 
-    // Authorization: only the business or creator party can view the request
+    // Only the two parties or an admin can view the request; otherwise 404
     if (userId !== row.business_user_id && userId !== row.creator_user_id && auth.role !== 'admin') {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized to view this request' },
-        { status: 403 }
+        { success: false, error: 'Request not found' },
+        { status: 404 }
       )
     }
 
@@ -65,7 +65,7 @@ export async function GET(
       row.contact_phone = null
     }
 
-    // 2. Never return another user's email
+    // 2. Never return another user's email or password hash
     if (userId === row.creator_user_id) {
       delete row.business_email
     } else if (userId === row.business_user_id) {
@@ -73,7 +73,8 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, data: row })
-  } catch {
+  } catch (err) {
+    console.error('Failed to fetch request:', err)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch collaboration request' },
       { status: 500 }
@@ -104,7 +105,7 @@ async function handleAction(
 
   const resolvedParams = await paramsPromise
   const requestId = Number(resolvedParams.id)
-  if (!requestId) {
+  if (!requestId || isNaN(requestId)) {
     return NextResponse.json(
       { success: false, error: 'Invalid request ID' },
       { status: 400 }
@@ -112,15 +113,15 @@ async function handleAction(
   }
 
   const body = await request.json().catch(() => ({}))
-  let action: string = body.action || ''
+  let action: string = (body.action || '').toLowerCase().trim()
 
   // Fallback: URL searchParams action (e.g. ?action=accept)
   if (!action) {
     const url = new URL(request.url)
-    action = url.searchParams.get('action') || ''
+    action = (url.searchParams.get('action') || '').toLowerCase().trim()
   }
 
-  // Remap 'decline' to 'reject' per D3/D14
+  // Remap 'decline' to 'reject'
   if (action === 'decline') {
     action = 'reject'
   }
@@ -132,60 +133,59 @@ async function handleAction(
     )
   }
 
-  try {
-    const userId = Number(auth.user.user_id)
-    let updateRes
+  const userId = Number(auth.user.user_id)
 
-    if (action === 'accept' || action === 'reject') {
-      // Find creator_id for this user
-      const crLookup = await query<{ creator_id: number }>(
-        'SELECT creator_id FROM creators WHERE user_id = $1',
-        [userId]
-      )
-      if (crLookup.rows.length === 0) {
-        return NextResponse.json(
-          { success: false, error: 'Creator profile not found for user' },
-          { status: 403 }
+  try {
+    // Every status change goes through the PL/pgSQL functions inside a transaction
+    const updateRes = await withTransaction(userId, async (client) => {
+      if (action === 'accept' || action === 'reject') {
+        // Creator responds
+        const crLookup = await client.query<{ creator_id: number }>(
+          'SELECT creator_id FROM creators WHERE user_id = $1',
+          [userId]
+        )
+        if (crLookup.rows.length === 0) {
+          throw new Error('Unauthorized: only creators can accept or reject requests')
+        }
+        const creatorId = crLookup.rows[0].creator_id
+        return client.query(
+          'SELECT * FROM fn_respond_to_request($1, $2, $3)',
+          [requestId, creatorId, action]
+        )
+      } else if (action === 'complete') {
+        // Business completes
+        const bizLookup = await client.query<{ business_id: number }>(
+          'SELECT business_id FROM businesses WHERE user_id = $1',
+          [userId]
+        )
+        if (bizLookup.rows.length === 0) {
+          throw new Error('Unauthorized: only businesses can complete requests')
+        }
+        const businessId = bizLookup.rows[0].business_id
+        return client.query(
+          'SELECT * FROM fn_complete_request($1, $2)',
+          [requestId, businessId]
+        )
+      } else if (action === 'cancel') {
+        // Either party can cancel
+        return client.query(
+          'SELECT * FROM fn_cancel_request($1, $2)',
+          [requestId, userId]
         )
       }
-      const creatorId = crLookup.rows[0].creator_id
-      updateRes = await query(
-        'SELECT * FROM fn_respond_to_request($1, $2, $3)',
-        [requestId, creatorId, action]
-      )
-    } else if (action === 'complete') {
-      const bizLookup = await query<{ business_id: number }>(
-        'SELECT business_id FROM businesses WHERE user_id = $1',
-        [userId]
-      )
-      if (bizLookup.rows.length === 0) {
-        return NextResponse.json(
-          { success: false, error: 'Business profile not found for user' },
-          { status: 403 }
-        )
-      }
-      const businessId = bizLookup.rows[0].business_id
-      updateRes = await query(
-        'SELECT * FROM fn_complete_request($1, $2)',
-        [requestId, businessId]
-      )
-    } else if (action === 'cancel') {
-      updateRes = await query(
-        'SELECT * FROM fn_cancel_request($1, $2)',
-        [requestId, userId]
-      )
-    }
+    })
 
     return NextResponse.json({
       success: true,
       data: updateRes?.rows[0] || { request_id: requestId, action },
+      message: `Request successfully updated with action: ${action}`,
     })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'State transition failed'
-    const status = message.includes('Unauthorized') ? 403 : message.includes('Cannot') || message.includes('status') ? 409 : 400
+    // Invalid transitions and state-machine violations return 409
     return NextResponse.json(
       { success: false, error: message },
-      { status }
+      { status: 409 }
     )
   }
 }

@@ -680,16 +680,16 @@ describe('Discovery, Views, Privacy & Ownership API Suite', () => {
       expect(typeof body.data.contact_phone).toBe('string')
     })
 
-    it('Third-party user cannot view collaboration request (403 Forbidden)', async () => {
+    it('Third-party user cannot view collaboration request (404 Not Found)', async () => {
       // Authenticate as second creator, who is NOT a party to testAcceptedRequestId (between Cafe Palmeira and Rahul)
       setTestSessionToken(secondCreatorToken)
 
       const req = new Request(`http://localhost:3000/api/requests/${testAcceptedRequestId}`)
       const res = await getRequestHandler(req, { params: Promise.resolve({ id: String(testAcceptedRequestId) }) })
-      expect(res.status).toBe(403)
+      expect(res.status).toBe(404)
       const body = await res.json()
       expect(body.success).toBe(false)
-      expect(body.error).toContain('Unauthorized to view this request')
+      expect(body.error).toContain('Request not found')
     })
   })
 

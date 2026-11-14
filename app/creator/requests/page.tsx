@@ -60,14 +60,17 @@ export default function CreatorRequestsPage() {
         if (!confirm(`Are you sure you want to ${action} this request?`)) return
         try {
             const apiAction = action === 'decline' ? 'reject' : action
-            const res = await fetch(`/api/requests?id=${requestId}&action=${apiAction}`, {
-                method: 'POST',
+            const res = await fetch(`/api/requests/${requestId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
+                body: JSON.stringify({ action: apiAction }),
             })
             if (res.ok) {
                 loadRequests()
             } else {
-                alert(`Failed to ${action} request`)
+                const data = await res.json().catch(() => ({}))
+                alert(data.error || `Failed to ${action} request`)
             }
         } catch (err) {
             alert(`Error: ${err}`)

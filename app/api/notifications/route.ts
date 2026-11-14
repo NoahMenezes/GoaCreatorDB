@@ -4,8 +4,8 @@ import { query } from '@/lib/db'
 import { requireAuth } from '@/lib/api-auth'
 
 // Computed notifications feed (no notifications table per docs/backend-audit.md §1a & §3)
-export async function GET() {
-  const auth = await requireAuth()
+export async function GET(request: Request) {
+  const auth = await requireAuth(request)
   if (auth instanceof Response) return auth
 
   const userId = Number(auth.user.user_id)
@@ -46,7 +46,7 @@ export async function GET() {
             id: `req-${r.request_id}-pending`,
             type: 'request_received',
             title: 'New Collaboration Request',
-            message: `You received a new proposal from ${r.business_name}`,
+            message: `You received a new collaboration proposal from ${r.business_name}`,
             created_at: r.requested_at,
             link: '/creator/requests',
             is_read: false,
@@ -111,19 +111,32 @@ export async function GET() {
             link: '/business/requests',
             is_read: true,
           })
+        } else if (r.status === 'completed') {
+          notifications.push({
+            id: `biz-req-${r.request_id}-completed`,
+            type: 'collaboration_completed',
+            title: 'Collaboration Completed',
+            message: `Collaboration with ${r.creator_name} is marked as completed`,
+            created_at: r.responded_at || r.requested_at,
+            link: '/business/requests',
+            is_read: true,
+          })
         }
       }
     }
 
-    // 2. Get recent reviews received
+    // 2. Get recent reviews received (no emails selected)
     const reviewsRes = await query(
       `SELECT
         r.review_id,
         r.rating,
         r.created_at,
-        u.email AS reviewer_email
+        b.business_name,
+        c.full_name AS creator_name
        FROM reviews r
-       JOIN users u ON r.reviewer_id = u.user_id
+       JOIN collaboration_requests cr ON r.request_id = cr.request_id
+       JOIN businesses b ON cr.business_id = b.business_id
+       JOIN creators c ON cr.creator_id = c.creator_id
        WHERE r.reviewee_id = $1
        ORDER BY r.created_at DESC
        LIMIT 10`,
@@ -131,11 +144,12 @@ export async function GET() {
     )
 
     for (const rev of reviewsRes.rows) {
+      const counterpart = role === 'business' ? rev.creator_name : rev.business_name
       notifications.push({
         id: `rev-${rev.review_id}`,
         type: 'review_received',
         title: 'New Review Received',
-        message: `You received a ${rev.rating}-star review`,
+        message: `You received a ${rev.rating}-star review from ${counterpart || 'a partner'}`,
         created_at: rev.created_at,
         link: role === 'business' ? '/business/reviews' : '/creator/profile',
         is_read: false,
@@ -147,7 +161,8 @@ export async function GET() {
     )
 
     return NextResponse.json({ success: true, data: notifications })
-  } catch {
+  } catch (err) {
+    console.error('Failed to compute notifications:', err)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch notifications' },
       { status: 500 }
@@ -155,7 +170,11 @@ export async function GET() {
   }
 }
 
+// Harmless no-op endpoints for mark-as-read
 export async function PATCH() {
-  // Notifications are computed on-the-fly; mark-read is an idempotent ack
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ success: true, message: 'Notifications marked as read' })
+}
+
+export async function POST() {
+  return NextResponse.json({ success: true, message: 'Notifications marked as read' })
 }
