@@ -254,6 +254,167 @@ CREATE INDEX IF NOT EXISTS idx_creator_profiles_niche_slug ON creator_profiles(n
 CREATE INDEX IF NOT EXISTS idx_creator_profiles_location ON creator_profiles(location);
 CREATE INDEX IF NOT EXISTS idx_reels_category_slug ON reels(category_slug);
 CREATE INDEX IF NOT EXISTS idx_reels_location ON reels(location);
+
+CREATE TABLE IF NOT EXISTS social_accounts (
+  account_id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  platform TEXT NOT NULL CHECK (platform IN ('instagram', 'youtube')),
+  platform_user_id TEXT NOT NULL,
+  username TEXT NOT NULL,
+  profile_picture_url TEXT,
+  access_token TEXT,
+  refresh_token TEXT,
+  token_expires_at TEXT,
+  is_connected INTEGER NOT NULL DEFAULT 0,
+  connected_at TEXT,
+  last_synced_at TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  UNIQUE (platform, platform_user_id)
+);
+
+CREATE TABLE IF NOT EXISTS social_metrics (
+  metric_id TEXT PRIMARY KEY,
+  account_id TEXT NOT NULL,
+  followers INTEGER NOT NULL DEFAULT 0,
+  following INTEGER NOT NULL DEFAULT 0,
+  posts INTEGER NOT NULL DEFAULT 0,
+  likes INTEGER NOT NULL DEFAULT 0,
+  comments INTEGER NOT NULL DEFAULT 0,
+  shares INTEGER NOT NULL DEFAULT 0,
+  impressions INTEGER NOT NULL DEFAULT 0,
+  reach INTEGER NOT NULL DEFAULT 0,
+  engagement_rate REAL NOT NULL DEFAULT 0,
+  avg_likes REAL NOT NULL DEFAULT 0,
+  avg_comments REAL NOT NULL DEFAULT 0,
+  avg_views REAL NOT NULL DEFAULT 0,
+  source TEXT NOT NULL DEFAULT 'creator_submitted' CHECK (source IN ('official_api', 'creator_submitted', 'verified_audit')),
+  verified INTEGER NOT NULL DEFAULT 0,
+  recorded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (account_id) REFERENCES social_accounts(account_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS metric_snapshots (
+  snapshot_id TEXT PRIMARY KEY,
+  account_id TEXT NOT NULL,
+  followers INTEGER NOT NULL DEFAULT 0,
+  engagement_rate REAL NOT NULL DEFAULT 0,
+  avg_likes REAL NOT NULL DEFAULT 0,
+  avg_comments REAL NOT NULL DEFAULT 0,
+  avg_views REAL NOT NULL DEFAULT 0,
+  recorded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (account_id) REFERENCES social_accounts(account_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS collaboration_requests (
+  request_id TEXT PRIMARY KEY,
+  creator_id TEXT NOT NULL,
+  business_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  objective TEXT NOT NULL,
+  compensation_amount INTEGER NOT NULL,
+  compensation_type TEXT NOT NULL CHECK (compensation_type IN ('paid', 'barter', 'hybrid')),
+  collaboration_type TEXT NOT NULL CHECK (collaboration_type IN ('reel', 'carousel', 'story', 'license', 'hybrid')),
+  deliverables TEXT NOT NULL DEFAULT '[]',
+  shoot_date TEXT,
+  deadline TEXT,
+  usage_terms TEXT,
+  licensing_terms TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'declined', 'expired')),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  responded_at TEXT,
+  FOREIGN KEY (creator_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  FOREIGN KEY (business_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_collab_requests_creator ON collaboration_requests(creator_id);
+CREATE INDEX IF NOT EXISTS idx_collab_requests_business ON collaboration_requests(business_id);
+CREATE INDEX IF NOT EXISTS idx_collab_requests_status ON collaboration_requests(status);
+
+CREATE TABLE IF NOT EXISTS collaborations (
+  collaboration_id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL,
+  creator_id TEXT NOT NULL,
+  business_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'in_production', 'submitted', 'completed', 'cancelled')),
+  campaign_brief TEXT,
+  deliverables TEXT NOT NULL DEFAULT '[]',
+  deadline TEXT,
+  payment_amount INTEGER NOT NULL DEFAULT 0,
+  payment_status TEXT NOT NULL DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid', 'pending', 'paid', 'released', 'refunded')),
+  escrow_locked INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  completed_at TEXT,
+  FOREIGN KEY (request_id) REFERENCES collaboration_requests(request_id) ON DELETE CASCADE,
+  FOREIGN KEY (creator_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  FOREIGN KEY (business_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_collaborations_creator ON collaborations(creator_id);
+CREATE INDEX IF NOT EXISTS idx_collaborations_business ON collaborations(business_id);
+CREATE INDEX IF NOT EXISTS idx_collaborations_status ON collaborations(status);
+
+CREATE TABLE IF NOT EXISTS payments (
+  payment_id TEXT PRIMARY KEY,
+  collaboration_id TEXT NOT NULL,
+  amount INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),
+  escrow_locked INTEGER NOT NULL DEFAULT 0,
+  escrow_released INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (collaboration_id) REFERENCES collaborations(collaboration_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS reviews (
+  review_id TEXT PRIMARY KEY,
+  collaboration_id TEXT NOT NULL,
+  reviewer_id TEXT NOT NULL,
+  reviewee_id TEXT NOT NULL,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  is_verified INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (collaboration_id) REFERENCES collaborations(collaboration_id) ON DELETE CASCADE,
+  FOREIGN KEY (reviewer_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  FOREIGN KEY (reviewee_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  UNIQUE (collaboration_id, reviewer_id)
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+  notification_id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('request_received', 'request_accepted', 'request_declined', 'collaboration_created', 'collaboration_update', 'payment_received', 'review_received', 'system')),
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  is_read INTEGER NOT NULL DEFAULT 0,
+  link TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_unread ON notifications(user_id, is_read);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  log_id TEXT PRIMARY KEY,
+  user_id TEXT,
+  action TEXT NOT NULL,
+  table_name TEXT NOT NULL,
+  record_id TEXT,
+  old_values TEXT,
+  new_values TEXT,
+  ip_address TEXT,
+  user_agent TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
 `
 
 export async function initDb() {
@@ -361,4 +522,123 @@ export type ReelRow = {
   creator_base_rate?: string | null
   creator_er?: string | null
   creator_verified?: number | null
+}
+
+export type SocialAccountRow = {
+  account_id: string
+  user_id: string
+  platform: 'instagram' | 'youtube'
+  platform_user_id: string
+  username: string
+  profile_picture_url?: string
+  access_token?: string
+  refresh_token?: string
+  token_expires_at?: string
+  is_connected: number
+  connected_at?: string
+  last_synced_at?: string
+  created_at: string
+  updated_at: string
+}
+
+export type SocialMetricRow = {
+  metric_id: string
+  account_id: string
+  followers: number
+  following: number
+  posts: number
+  likes: number
+  comments: number
+  shares: number
+  impressions: number
+  reach: number
+  engagement_rate: number
+  avg_likes: number
+  avg_comments: number
+  avg_views: number
+  source: 'official_api' | 'creator_submitted' | 'verified_audit'
+  verified: number
+  recorded_at: string
+}
+
+export type MetricSnapshotRow = {
+  snapshot_id: string
+  account_id: string
+  followers: number
+  engagement_rate: number
+  avg_likes: number
+  avg_comments: number
+  avg_views: number
+  recorded_at: string
+}
+
+export type CollaborationRequestRow = {
+  request_id: string
+  creator_id: string
+  business_id: string
+  title: string
+  objective: string
+  compensation_amount: number
+  compensation_type: 'paid' | 'barter' | 'hybrid'
+  collaboration_type: 'reel' | 'carousel' | 'story' | 'license' | 'hybrid'
+  deliverables: string
+  shoot_date?: string
+  deadline?: string
+  usage_terms?: string
+  licensing_terms?: string
+  status: 'pending' | 'accepted' | 'declined' | 'expired'
+  created_at: string
+  updated_at: string
+  responded_at?: string
+}
+
+export type CollaborationRow = {
+  collaboration_id: string
+  request_id: string
+  creator_id: string
+  business_id: string
+  status: 'pending' | 'accepted' | 'in_production' | 'submitted' | 'completed' | 'cancelled'
+  campaign_brief?: string
+  deliverables: string
+  deadline?: string
+  payment_amount: number
+  payment_status: 'unpaid' | 'pending' | 'paid' | 'released' | 'refunded'
+  escrow_locked: number
+  created_at: string
+  updated_at: string
+  completed_at?: string
+}
+
+export type PaymentRow = {
+  payment_id: string
+  collaboration_id: string
+  amount: number
+  status: 'pending' | 'completed' | 'failed' | 'refunded'
+  escrow_locked: number
+  escrow_released: number
+  created_at: string
+  updated_at: string
+}
+
+export type ReviewRow = {
+  review_id: string
+  collaboration_id: string
+  reviewer_id: string
+  reviewee_id: string
+  rating: number
+  comment?: string
+  is_verified: number
+  created_at: string
+  updated_at: string
+}
+
+export type NotificationRow = {
+  notification_id: string
+  user_id: string
+  type: 'request_received' | 'request_accepted' | 'request_declined' | 'collaboration_created' | 'collaboration_update' | 'payment_received' | 'review_received' | 'system'
+  title: string
+  message: string
+  is_read: number
+  link?: string
+  created_at: string
 }

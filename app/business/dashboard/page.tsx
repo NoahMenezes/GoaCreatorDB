@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
     Bookmark,
@@ -12,14 +12,39 @@ import {
     Store,
     TrendingUp,
     Users,
+    Loader2,
 } from 'lucide-react'
 
 export default function BusinessDashboardPage() {
-    const [savedBookmarks, setSavedBookmarks] = useState<Record<string, boolean>>({
-        'Elena Pinto': true,
-        'Kabir Sawant': true,
-        'Tara Mascarenhas': false,
-    })
+    const [stats, setStats] = useState<Record<string, any>>({})
+    const [requests, setRequests] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [savedBookmarks, setSavedBookmarks] = useState<Record<string, boolean>>({})
+
+    useEffect(() => {
+        loadData()
+    }, [])
+
+    const loadData = async () => {
+        try {
+            const [statsRes, reqRes] = await Promise.all([
+                fetch('/api/dashboard/stats', { credentials: 'include' }),
+                fetch('/api/requests?status=all', { credentials: 'include' }),
+            ])
+            if (statsRes.ok) {
+                const data = await statsRes.json()
+                setStats(data.data || {})
+            }
+            if (reqRes.ok) {
+                const data = await reqRes.json()
+                setRequests(data.data || [])
+            }
+        } catch (err) {
+            console.error('Dashboard load error:', err)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const toggleBookmark = (name: string) => {
         setSavedBookmarks((prev) => ({ ...prev, [name]: !prev[name] }))
@@ -28,81 +53,63 @@ export default function BusinessDashboardPage() {
     const statCards = [
         {
             title: 'Active Collaborations',
-            value: '2 Ongoing',
-            sub: '1 in review, 1 shooting this weekend',
+            value: `${stats.accepted_collaborations || 0} Ongoing`,
+            sub: 'Accepted collaborations awaiting production',
             icon: Rocket,
         },
         {
             title: 'Total Creators Booked',
-            value: '18 Deals',
-            sub: '100% on-time milestone delivery',
+            value: `${stats.completed_campaigns || 0} Deals`,
+            sub: 'Completed campaigns',
             icon: Users,
         },
         {
             title: 'Escrow Funds Secured',
-            value: '₹42,000',
+            value: `₹${(stats.total_earnings || 0).toLocaleString()}`,
             sub: 'Protected until deliverables verified',
             icon: ShieldCheck,
         },
         {
             title: 'Avg Campaign Engagement',
-            value: '8.4%',
-            sub: '3.1x higher than baseline',
+            value: `${stats.average_rating || 0} / 5`,
+            sub: 'Average creator rating',
             icon: TrendingUp,
         },
     ]
 
-    const collabRows = [
-        {
-            name: 'Sneha Fernandes',
-            handle: '@sneha_.tastesgoa',
-            desc: 'Monsoon Weekend Tasting Menu & Heritage Sourdough Reel',
-            type: 'Hybrid · ₹14,000 + Brunch',
-            status: 'ACCEPTED',
-            date: 'Shoot: Oct 28, 2026',
-        },
-        {
-            name: 'Rahul Naik',
-            handle: '@rahul_eats_goa',
-            desc: 'Traditional Goan Poee Sliders & Taverna Story Sequence',
-            type: 'Paid · ₹6,500',
-            status: 'PENDING',
-            date: 'Responded: 4h ago',
-        },
-        {
-            name: 'Alisha D\'Cruz',
-            handle: '@alishacafecrawls',
-            desc: 'Morning Artisanal Cold Brew & Courtyard Walkthrough',
-            type: 'Hybrid · ₹5,500 + Pastry',
-            status: 'COMPLETED',
-            date: 'Completed Oct 15 · 54K Views',
-        },
-    ]
+    const collabRows = requests.map((req) => ({
+        name: req.business_email?.split('@')[0] || 'Business',
+        handle: `@${req.business_email?.split('@')[0] || 'biz'}`,
+        desc: req.objective,
+        type: `${req.compensation_type.charAt(0).toUpperCase() + req.compensation_type.slice(1)} · ₹${req.compensation_amount}`,
+        status: req.status.toUpperCase(),
+        date: req.deadline ? `Deadline: ${req.deadline}` : 'No deadline',
+    }))
 
     const recommendations = [
         {
-            name: 'Elena Pinto',
+            name: 'Sneha Fernandes',
             location: 'Assagao, North Goa',
             tags: ['Food & Dining', 'Monsoon Stays'],
-            reach: '85K',
-            engagement: '6.8%',
-            baseRate: '₹9,500 / collab',
-        },
-        {
-            name: 'Kabir Sawant',
-            location: 'Calangute, North Goa',
-            tags: ['Café Culture', 'Cocktails'],
             reach: '120K',
-            engagement: '7.4%',
-            baseRate: '₹14,000 / collab',
+            engagement: '7.8%',
+            baseRate: '₹8,000 / collab',
         },
         {
-            name: 'Tara Mascarenhas',
-            location: 'Anjuna, North Goa',
+            name: 'Rahul Naik',
+            location: 'Panjim, North Goa',
+            tags: ['Café Culture', 'Cocktails'],
+            reach: '85K',
+            engagement: '9.2%',
+            baseRate: '₹6,500 / collab',
+        },
+        {
+            name: 'Alisha D\'Cruz',
+            location: 'Fontainhas, North Goa',
             tags: ['Food Photography', 'Artisan Bakery'],
-            reach: '54K',
-            engagement: '8.2%',
-            baseRate: '₹7,000 / collab',
+            reach: '68K',
+            engagement: '8.4%',
+            baseRate: '₹5,500 / collab',
         },
     ]
 
@@ -189,53 +196,59 @@ export default function BusinessDashboardPage() {
                 </div>
 
                 <div className="space-y-3">
-                    {collabRows.map((row) => (
-                        <div
-                            key={row.name}
-                            className="border border-border p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-primary/50 transition-colors bg-background"
-                        >
-                            <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                                <div className="size-10 shrink-0 rounded-sm bg-primary text-primary-foreground flex items-center justify-center text-white font-bold text-xs border border-primary/20">
-                                    {row.name.split(' ').map((n) => n[0]).join('')}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="text-sm font-bold text-foreground truncate">
-                                            {row.name}
-                                        </h3>
-                                        <span className="text-xs text-muted-foreground font-mono">
-                                            {row.handle}
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground truncate">
-                                        {row.desc}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-3 self-start md:self-auto shrink-0">
-                                <span className="text-xs text-muted-foreground font-medium">
-                                    {row.type}
-                                </span>
-
-                                <span className="text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider border border-primary/20 text-primary bg-primary/5">
-                                    {row.status}
-                                </span>
-
-                                <span className="text-xs text-muted-foreground">
-                                    {row.date}
-                                </span>
-
-                                <Link
-                                    href="/business/profile"
-                                    className="border border-border bg-background hover:bg-muted text-foreground text-xs font-bold px-3 py-1.5 transition-colors flex items-center gap-1 rounded-sm"
-                                >
-                                    <span>View Profile</span>
-                                    <ExternalLink className="size-3" />
-                                </Link>
-                            </div>
+                    {collabRows.length === 0 ? (
+                        <div className="border border-border bg-muted/30 p-8 rounded-sm text-center">
+                            <p className="text-sm text-muted-foreground">No active collaborations.</p>
                         </div>
-                    ))}
+                    ) : (
+                        collabRows.map((row) => (
+                            <div
+                                key={row.name}
+                                className="border border-border p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-primary/50 transition-colors bg-background"
+                            >
+                                <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                                    <div className="size-10 shrink-0 rounded-sm bg-primary text-primary-foreground flex items-center justify-center text-white font-bold text-xs border border-primary/20">
+                                        {row.name.split(' ').map((n: string) => n[0]).join('')}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-sm font-bold text-foreground truncate">
+                                                {row.name}
+                                            </h3>
+                                            <span className="text-xs text-muted-foreground font-mono">
+                                                {row.handle}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground truncate">
+                                            {row.desc}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-3 self-start md:self-auto shrink-0">
+                                    <span className="text-xs text-muted-foreground font-medium">
+                                        {row.type}
+                                    </span>
+
+                                    <span className="text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider border border-primary/20 text-primary bg-primary/5">
+                                        {row.status}
+                                    </span>
+
+                                    <span className="text-xs text-muted-foreground">
+                                        {row.date}
+                                    </span>
+
+                                    <Link
+                                        href="/business/profile"
+                                        className="border border-border bg-background hover:bg-muted text-foreground text-xs font-bold px-3 py-1.5 transition-colors flex items-center gap-1 rounded-sm"
+                                    >
+                                        <span>View Profile</span>
+                                        <ExternalLink className="size-3" />
+                                    </Link>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </section>
 

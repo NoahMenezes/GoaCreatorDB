@@ -1,3 +1,6 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -6,76 +9,93 @@ import {
     Share2,
     ShieldCheck,
     Star,
+    TrendingUp,
+    Users,
+    Rocket,
+    ChevronRight,
+    ExternalLink,
+    Send,
+    Bell,
 } from 'lucide-react'
 
 const statCards = [
     {
         title: 'New Requests',
-        value: '3',
-        badge: '+2 this week',
+        value: '--',
+        badge: '0 this week',
         sub: 'Action required within 48h',
+        icon: Calendar,
         iconColor: 'text-primary',
     },
     {
         title: 'Accepted Collabs',
-        value: '5',
-        badge: '2 in production',
+        value: '--',
+        badge: '0 in production',
         sub: 'Scheduled for upcoming shoots',
+        icon: ShieldCheck,
         iconColor: 'text-primary',
     },
     {
         title: 'Completed Campaigns',
-        value: '18',
-        badge: '100% on-time',
+        value: '--',
+        badge: '0 on-time',
         sub: 'Since joining GoaConnect',
+        icon: Star,
         iconColor: 'text-primary',
     },
     {
         title: 'Average Rating',
-        value: '5.0',
-        badge: 'Top Rated',
-        sub: '16 verified venue reviews',
+        value: '--',
+        badge: 'Not yet rated',
+        sub: 'Verified venue reviews',
+        icon: TrendingUp,
         iconColor: 'text-primary',
     },
 ]
 
-const recentRequests = [
-    {
-        id: 'req-1',
-        business: 'Café Palmeira',
-        location: 'Calangute • Boutique Bistro',
-        image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=400&auto=format&fit=crop',
-        offer: '₹10,000 + 4-Course Brunch Tasting',
-        deliverables: ['1x Reel', '2x Stories'],
-        status: 'Pending Response',
-        statusColor: 'bg-muted border border-border text-muted-foreground',
-        deadline: 'Nov 18, 2024',
-    },
-    {
-        id: 'req-2',
-        business: 'The Project Assagao',
-        location: 'Assagao • Concept Store & Lifestyle',
-        image: 'https://images.unsplash.com/photo-1445019980590-050d113bca01?q=80&w=400&auto=format&fit=crop',
-        offer: '₹14,000 (Paid Collab)',
-        deliverables: ['1x Dedicated Reel'],
-        status: 'Pending Response',
-        statusColor: 'bg-muted border border-border text-muted-foreground',
-        deadline: 'Nov 24, 2024',
-    },
-    {
-        id: 'req-3',
-        business: 'Title Culinary Bar',
-        location: 'Small Vagator • Sunset Dining',
-        image: 'https://images.unsplash.com/photo-1559339352-12d053aa8a79?q=80&w=400&auto=format&fit=crop',
-        offer: 'Barter Sunset Tasting (₹6,500 value)',
-        deliverables: ['2x Story Sequences'],
-        status: 'New Offer',
-        statusColor: 'bg-primary/10 border border-primary/20 text-primary',
-        deadline: 'Nov 30, 2024',
-    },
-]
-
 export default function CreatorDashboardPage() {
+    const [stats, setStats] = useState<Record<string, any>>({})
+    const [requests, setRequests] = useState<any[]>([])
+    const [user, setUser] = useState<any>(null)
+    const [profile, setProfile] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+    const [availability, setAvailability] = useState(false)
+    const [profileCompleteness, setProfileCompleteness] = useState(0)
+
+    useEffect(() => {
+        let cancelled = false
+        const fetchData = async () => {
+            try {
+                const [statsRes, requestsRes, profileRes] = await Promise.all([
+                    fetch('/api/dashboard/stats', { credentials: 'include' }),
+                    fetch('/api/requests?status=pending', { credentials: 'include' }),
+                    fetch('/api/profile', { credentials: 'include' }),
+                ])
+
+                if (statsRes.ok) {
+                    const statsData = await statsRes.json()
+                    setStats(statsData.data || {})
+                }
+                if (requestsRes.ok) {
+                    const reqData = await requestsRes.json()
+                    setRequests(reqData.data || [])
+                }
+                if (profileRes.ok) {
+                    const profileData = await profileRes.json()
+                    setUser(profileData.data?.user || null)
+                    setProfile(profileData.data?.profile || null)
+                    setProfileCompleteness(profileData.data?.completeness || 0)
+                }
+            } catch (err) {
+                console.error('Dashboard load error:', err)
+            } finally {
+                if (!cancelled) setLoading(false)
+            }
+        }
+        fetchData()
+        return () => { cancelled = true }
+    }, [])
+
     return (
         <main className="space-y-10">
             {/* 1. HEADER BANNER */}
@@ -84,29 +104,34 @@ export default function CreatorDashboardPage() {
                     <div className="flex items-center gap-2">
                         <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wider">
                             <MapPin className="size-3" />
-                            <span>Assagao, Goa</span>
+                            {profile?.location ? (
+                                <span>{String(profile.location_id || '')}</span>
+                            ) : (
+                                <span>Assagao, Goa</span>
+                            )}
                         </span>
                         <span className="inline-flex items-center gap-1 rounded-md bg-muted border border-border px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                             COASTAL LIFESTYLE CREATOR
                         </span>
                     </div>
                     <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-                        Welcome back, Sneha
+                        Welcome back, {user?.email?.split('@')[0] || 'Creator'}
                     </h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        You have 3 incoming partnership requests from North Goa businesses awaiting response.
+                        You have {stats.new_requests || 0} incoming partnership request{stats.new_requests !== 1 ? 's' : ''} from businesses awaiting response.
                     </p>
                 </div>
 
                 <div className="flex items-end gap-3">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-foreground">Open for Nov/Dec</span>
+                        <span className="text-sm font-medium text-foreground">Open for Collabs</span>
                         <button
                             type="button"
-                            className="relative w-10 h-5 rounded-full bg-muted transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
+                            className={`relative w-10 h-5 rounded-full transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer ${availability ? 'bg-primary' : 'bg-muted'}`}
+                            onClick={() => setAvailability(!availability)}
                             aria-label="Availability toggle"
                         >
-                            <span className="absolute left-1 top-1 w-3 h-3 bg-background rounded-full transition-transform duration-200 translate-x-5" />
+                            <span className={`absolute left-1 top-1 w-3 h-3 bg-background rounded-full transition-transform duration-200 ${availability ? 'translate-x-5' : ''}`} />
                         </button>
                     </div>
 
@@ -117,6 +142,14 @@ export default function CreatorDashboardPage() {
                         <Share2 className="size-4" />
                         <span>Share Media Kit</span>
                     </Link>
+
+                    <button
+                        type="button"
+                        className="size-9 border border-border bg-background flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm cursor-pointer transition-colors"
+                        aria-label="Notifications"
+                    >
+                        <Bell className="size-4" />
+                    </button>
                 </div>
             </div>
 
@@ -129,29 +162,36 @@ export default function CreatorDashboardPage() {
                     <div className="space-y-0.5">
                         <div className="text-sm font-bold text-foreground">Profile Completeness</div>
                         <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                            85% Complete
+                            {profileCompleteness}% Complete
                         </div>
                     </div>
                 </div>
 
                 <div className="w-full sm:w-3/4 h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full" style={{ width: '85%' }} />
+                    <div className="h-full bg-primary rounded-full" style={{ width: `${profileCompleteness}%` }} />
                 </div>
 
-                <Link
-                    href="/creator/profile"
-                    className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
-                >
-                    <span>Update Now</span>
-                    <span className="size-3">→</span>
-                </Link>
+                {profileCompleteness < 100 && (
+                    <Link
+                        href="/creator/profile"
+                        className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                    >
+                        <span>Update Profile</span>
+                        <span className="size-3">→</span>
+                    </Link>
+                )}
             </div>
 
             {/* 3. STAT CARDS */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {statCards.map((card) => {
-                    const Icon =
-                        card.title === 'New Requests' ? Calendar : card.title === 'Average Rating' ? Star : Calendar
+                    const Icon = card.icon
+                    let value = '--'
+                    if (card.title === 'New Requests') value = stats.new_requests || 0
+                    if (card.title === 'Accepted Collabs') value = stats.accepted_collaborations || 0
+                    if (card.title === 'Completed Campaigns') value = stats.completed_campaigns || 0
+                    if (card.title === 'Average Rating') value = stats.average_rating || 0
+
                     return (
                         <div
                             key={card.title}
@@ -166,7 +206,7 @@ export default function CreatorDashboardPage() {
                                 </span>
                             </div>
                             <div className="text-2xl sm:text-3xl font-black text-foreground mt-3 tracking-tight">
-                                {card.value}
+                                {value}
                             </div>
                             <div className="text-[10px] font-bold text-foreground uppercase tracking-wider mt-1">
                                 {card.title}
@@ -189,249 +229,190 @@ export default function CreatorDashboardPage() {
                                 Collaborations pending your review and acceptance
                             </p>
                         </div>
-                        <button
-                            type="button"
-                            className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/90 underline decoration-primary/30"
-                        >
-                            Filter
-                            <Calendar className="size-3.5" />
-                        </button>
+                        {requests.length > 0 && (
+                            <Link
+                                href="/creator/requests"
+                                className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/90 underline decoration-primary/30"
+                            >
+                                View All
+                                <ChevronRight className="size-3.5" />
+                            </Link>
+                        )}
                     </div>
 
                     <div className="space-y-4">
-                        {recentRequests.map((req) => (
-                            <div
-                                key={req.id}
-                                className="border border-border bg-card p-5 rounded-sm shadow-sm"
-                            >
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3 flex-1">
-                                        <Image
-                                            src={req.image}
-                                            alt={req.business}
-                                            width={56}
-                                            height={56}
-                                            className="size-12 rounded-md object-cover border border-border/60"
-                                        />
-                                        <div className="space-y-0.5">
-                                            <div className="flex items-center gap-1">
-                                                <h3 className="text-sm font-bold text-foreground truncate">
-                                                    {req.business}
-                                                </h3>
-                                                <span className="text-[10px] font-bold text-primary">
-                                                    ✓ Verified
-                                                </span>
+                        {requests.length === 0 ? (
+                            <div className="border border-border bg-muted/30 p-8 rounded-sm text-center">
+                                <p className="text-sm text-muted-foreground">No pending requests at the moment.</p>
+                            </div>
+                        ) : (
+                            requests.slice(0, 3).map((req) => (
+                                <div
+                                    key={req.request_id}
+                                    className="border border-border bg-card p-5 rounded-sm shadow-sm"
+                                >
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div className="flex items-center gap-3 flex-1">
+                                            <div className="size-12 overflow-hidden border border-border shrink-0 relative rounded-md">
+                                                <Image
+                                                    src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=200&auto=format&fit=crop"
+                                                    alt={req.business_email || 'Business'}
+                                                    width={56}
+                                                    height={56}
+                                                    className="size-full object-cover"
+                                                />
                                             </div>
-                                            <p className="text-[10px] text-muted-foreground">
-                                                {req.location}
-                                            </p>
-                                            <div className="flex items-center gap-2 mt-1.5">
-                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-bold ${req.statusColor}`}>
-                                                    {req.status}
-                                                </span>
-                                                <div className="flex gap-0.5">
-                                                    {req.deliverables.map((d, i) => (
-                                                        <span
-                                                            key={i}
-                                                            className="px-2 py-0.5 rounded-md border border-border/60 text-[9px] text-muted-foreground font-medium bg-muted/50"
-                                                        >
-                                                            {d}
-                                                        </span>
-                                                    ))}
+                                            <div className="space-y-0.5">
+                                                <div className="flex items-center gap-1">
+                                                    <h3 className="text-sm font-bold text-foreground truncate">
+                                                        {req.business_email?.split('@')[0] || 'Business'}
+                                                    </h3>
+                                                </div>
+                                                <p className="text-[10px] text-muted-foreground">
+                                                    {req.title}
+                                                </p>
+                                                <div className="flex items-center gap-2 mt-1.5">
+                                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-bold ${req.compensation_type === 'paid' ? 'bg-primary/10 border-primary/20 text-primary' : 'border-border text-muted-foreground bg-background'}`}>
+                                                        {req.compensation_type.toUpperCase()}
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        ₹{req.compensation_amount}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:w-auto">
-                                        <div className="text-right sm:text-left hidden sm:block">
-                                            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
-                                                Deadline
+                                        <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:w-auto">
+                                            <div className="text-right sm:text-left hidden sm:block">
+                                                <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
+                                                    Deadline
+                                                </div>
+                                                <div className="text-xs font-medium text-foreground">
+                                                    {req.deadline || 'No deadline set'}
+                                                </div>
                                             </div>
-                                            <div className="text-xs font-medium text-foreground">
-                                                {req.deadline}
+                                            <div className="flex gap-2">
+                                                <Link
+                                                    href="/creator/requests"
+                                                    className="border border-border bg-background text-foreground text-xs font-bold px-4 py-2.5 rounded-sm transition-colors hover:bg-muted"
+                                                >
+                                                    View Details
+                                                </Link>
+                                                <button
+                                                    onClick={() => {
+                                                        fetch(`/api/requests?id=${req.request_id}&action=accept`, {
+                                                            method: 'POST',
+                                                            credentials: 'include',
+                                                        }).then(() => window.location.reload())
+                                                    }}
+                                                    className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold px-4 py-2.5 rounded-sm transition-colors shadow-sm"
+                                                >
+                                                    Accept
+                                                </button>
                                             </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Link
-                                                href="/creator/requests"
-                                                className="border border-border bg-background text-foreground text-xs font-bold px-4 py-2.5 rounded-sm transition-colors hover:bg-muted"
-                                            >
-                                                View Details
-                                            </Link>
-                                            <button
-                                                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold px-4 py-2.5 rounded-sm transition-colors shadow-sm"
-                                            >
-                                                Accept
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="flex items-center justify-center gap-1 mt-6">
-                        <button
-                            type="button"
-                            className="size-8 border border-border bg-background text-foreground text-xs font-bold rounded-sm hover:bg-muted cursor-pointer"
-                        >
-                            <span className="size-3">←</span>
-                        </button>
-                        <div className="size-8 border border-border bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground rounded-sm">
-                            7 / 19
-                        </div>
-                        <button
-                            type="button"
-                            className="size-8 border border-border bg-background text-foreground text-xs font-bold rounded-sm hover:bg-muted cursor-pointer"
-                        >
-                            <span className="size-3">→</span>
-                        </button>
+                            ))
+                        )}
                     </div>
                 </div>
 
-                {/* RIGHT: Audience Metrics Sidebar */}
+                {/* RIGHT: Dashboard panels */}
                 <div className="lg:col-span-4 space-y-6">
+                    {/* Audience Growth */}
                     <div className="border border-border bg-card p-5 rounded-sm shadow-sm">
                         <div className="flex items-center justify-between mb-5">
                             <div className="space-y-0.5">
-                                <h3 className="text-sm font-bold text-foreground">Growth & Trajectory</h3>
+                                <h3 className="text-sm font-bold text-foreground">Audience Growth</h3>
                                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                                    Audience Metrics
+                                    Follower trajectory
                                 </p>
                             </div>
                             <div className="text-right">
-                                <div className="text-xl font-black text-primary">120.4k</div>
-                                <div className="text-[10px] text-muted-foreground font-bold">+11.5% 6mo</div>
+                                <div className="text-xl font-black text-primary">--</div>
+                                <div className="text-[10px] text-muted-foreground font-bold">--</div>
                             </div>
                         </div>
-
                         <div className="h-32 relative">
-                            <svg
-                                className="w-full h-full text-primary"
-                                viewBox="0 0 600 200"
-                                preserveAspectRatio="none"
-                            >
+                            <svg className="w-full h-full text-primary" viewBox="0 0 600 200" preserveAspectRatio="none">
                                 <defs>
-                                    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                                    <linearGradient id="gradDash" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="0%" stopColor="#0C4E40" stopOpacity="0.2" />
                                         <stop offset="100%" stopColor="#0C4E40" stopOpacity="0" />
                                     </linearGradient>
                                 </defs>
-                                <path
-                                    d="M 40 140 Q 120 100, 200 130 T 360 90 T 520 70 T 580 40"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                />
-                                <path
-                                    d="M 40 140 Q 120 100, 200 130 T 360 90 T 520 70 T 580 40 L 580 170 L 40 170 Z"
-                                    fill="url(#grad)"
-                                />
+                                <path d="M 40 140 Q 120 100, 200 130 T 360 90 T 520 70 T 580 40" fill="none" stroke="currentColor" strokeWidth="2" />
+                                <path d="M 40 140 Q 120 100, 200 130 T 360 90 T 520 70 T 580 40 L 580 170 L 40 170 Z" fill="url(#gradDash)" />
                                 {[40, 160, 280, 400, 520, 580].map((x, i) => (
                                     <circle key={i} cx={x} cy={[140, 100, 130, 90, 70, 40][i]} r="3" fill="#0C4E40" />
                                 ))}
                                 <line x1="40" y1="170" x2="580" y2="170" stroke="var(--border)" strokeWidth="1" />
-                                <text x="40" y="185" className="text-[9px] fill-[var(--muted-foreground)]" textAnchor="middle">
-                                    Oct
-                                </text>
-                                <text x="200" y="185" className="text-[9px] fill-[var(--muted-foreground)]" textAnchor="middle">
-                                    Nov
-                                </text>
-                                <text x="520" y="185" className="text-[9px] fill-[var(--muted-foreground)]" textAnchor="middle">
-                                    Dec
-                                </text>
                             </svg>
                         </div>
                     </div>
 
+                    {/* Engagement & Origin */}
                     <div className="border border-border bg-card p-5 rounded-sm shadow-sm grid grid-cols-2 gap-4">
-                        <div>
-                            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">
-                                Engagement Rate
-                            </div>
-                            <div className="text-xl font-bold text-primary">7.8%</div>
-                            <div className="text-[10px] text-muted-foreground font-bold mt-1">2.4x Goa avg</div>
+                        <div className="border-r border-border pr-4">
+                            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Engagement Rate</div>
+                            <div className="text-xl font-bold text-primary">--%</div>
+                            <div className="text-[10px] text-muted-foreground font-bold mt-1">Connect Instagram</div>
                         </div>
-                        <div className="border-l border-border pl-4">
-                            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">
-                                Audience Origin
-                            </div>
+                        <div>
+                            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Audience Origin</div>
                             <div className="text-sm font-bold text-foreground">Goa & Mumbai</div>
                         </div>
                     </div>
 
+                    {/* Earnings */}
                     <div className="border border-border bg-card p-5 rounded-sm shadow-sm">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
                             <div>
                                 <h3 className="text-sm font-bold text-foreground">Monthly Earnings</h3>
-                                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
-                                    November 2024
-                                </span>
+                                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">November 2026</span>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div className="p-3 bg-muted/50 rounded-sm border border-border/60">
-                                <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">
-                                    Cleared Earnings
-                                </div>
-                                <div className="text-lg font-black text-primary">₹48,000</div>
-                                <div className="text-[10px] text-muted-foreground mt-1">Transferred to HDFC</div>
+                                <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Cleared Earnings</div>
+                                <div className="text-lg font-black text-primary">₹{(stats.total_earnings || 0).toLocaleString()}</div>
+                                <div className="text-[10px] text-muted-foreground mt-1">Transferred to bank</div>
                             </div>
                             <div className="p-3 bg-muted/50 rounded-sm border border-border/60">
-                                <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">
-                                    In Escrow Pipeline
-                                </div>
-                                <div className="text-lg font-black text-primary">₹24,000</div>
-                                <div className="text-[10px] text-muted-foreground mt-1">3 Active contracts</div>
+                                <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Pending Payments</div>
+                                <div className="text-lg font-black text-primary">₹{(stats.pending_payments || 0).toLocaleString()}</div>
+                                <div className="text-[10px] text-muted-foreground mt-1">In escrow pipeline</div>
                             </div>
                         </div>
                     </div>
 
+                    {/* Shoot Schedule */}
                     <div className="border border-border bg-card p-5 rounded-sm shadow-sm">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
                             <div>
-                                <h3 className="text-sm font-bold text-foreground">Shoot Schedule</h3>
-                                <Link
-                                    href="/creator/schedule"
-                                    className="text-[10px] font-bold text-primary hover:underline"
-                                >
-                                    View Calendar
-                                </Link>
+                                <h3 className="text-sm font-bold text-foreground">Upcoming Shoots</h3>
+                                <Link href="/creator/collaborations" className="text-[10px] font-bold text-primary hover:underline">View All</Link>
                             </div>
                         </div>
                         <div className="space-y-3">
-                            {[{
-                                date: 'NOV 12',
-                                title: 'Fontainhas Heritage Wall',
-                                sub: 'Maison 9 Boutique Stay • Architecture Reel',
-                                time: '07:30 AM',
-                            }, {
-                                date: 'NOV 15',
-                                title: 'Anjuna Flea Market Lawn',
-                                sub: 'Curated Pop-up Stories • Golden hour coverage',
-                                time: '04:00 PM',
-                            }].map((shoot) => (
-                                <div
-                                    key={shoot.date}
-                                    className="flex items-center gap-3 p-3 bg-muted/50 rounded-sm border border-border/60"
-                                >
-                                    <div className="flex flex-col items-center gap-0.5">
-                                        <span className="text-[10px] font-black text-primary">{shoot.date.split(' ')[0]}</span>
-                                        <span className="text-[9px] font-bold text-muted-foreground">{shoot.date.split(' ')[1]}</span>
-                                    </div>
+                            {requests.length > 0 ? requests.slice(0, 2).map((req) => (
+                                <div key={req.request_id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-sm border border-border/60">
                                     <div className="flex-1">
-                                        <div className="text-sm font-bold text-foreground">{shoot.title}</div>
-                                        <div className="text-[10px] text-muted-foreground">{shoot.sub}</div>
+                                        <div className="text-sm font-bold text-foreground">{req.title}</div>
+                                        <div className="text-[10px] text-muted-foreground">{req.compensation_type.toUpperCase()} • ₹{req.compensation_amount}</div>
                                     </div>
                                     <div className="text-right">
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-border text-[9px] font-bold text-foreground">
-                                            {shoot.time}
+                                            {req.deadline || 'TBD'}
                                         </span>
-                                        <span className="size-4 text-muted-foreground">→</span>
                                     </div>
                                 </div>
-                            ))}
+                            )) : (
+                                <div className="text-center py-4 text-xs text-muted-foreground">
+                                    No upcoming shoots scheduled.
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

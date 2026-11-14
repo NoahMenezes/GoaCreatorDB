@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -14,6 +14,7 @@ import {
     User as UserIcon,
     ShieldCheck as ShieldCheckIcon,
     Link2,
+    Loader2,
 } from 'lucide-react'
 
 const regions = [
@@ -71,6 +72,67 @@ export default function CreatorProfilePage() {
     const [selectedNiches, setSelectedNiches] = useState(
         new Set(niches.filter((n) => n.selected).map((n) => n.id)),
     )
+    const [loading, setLoading] = useState(true)
+    const [saving, setSaving] = useState(false)
+    const [profileData, setProfileData] = useState<any>(null)
+
+    useEffect(() => {
+        fetchProfile()
+    }, [])
+
+    const fetchProfile = async () => {
+        try {
+            const res = await fetch('/api/profile', { credentials: 'include' })
+            if (res.ok) {
+                const data = await res.json()
+                setProfileData(data.data || null)
+                const profile = data.data?.profile
+                if (profile) {
+                    setBarter(profile.accepts_barter === 1)
+                    setMinFloor(String(profile.min_paid_rate || 8000))
+                    setReelRate(String(profile.min_paid_rate || 14000))
+                }
+            }
+        } catch (err) {
+            console.error('Profile fetch error:', err)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setSaving(true)
+        try {
+            const res = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    full_name: document.querySelector('input[defaultValue="Sneha Fernandes"]')?.getAttribute('value') || 'Sneha Fernandes',
+                    bio: '',
+                    accepts_barter: barter,
+                    min_paid_rate: parseInt(minFloor, 10) || 8000,
+                    location_id: '',
+                }),
+                credentials: 'include',
+            })
+            if (res.ok) {
+                alert('Profile saved successfully.')
+                fetchProfile()
+            } else {
+                alert('Failed to save profile.')
+            }
+        } catch (err) {
+            alert('Error saving profile.')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    const handleDiscard = (e: React.FormEvent) => {
+        e.preventDefault()
+        fetchProfile()
+    }
 
     const toggleRegion = (id: string) => {
         setSelectedRegions((prev) => {
@@ -405,16 +467,24 @@ export default function CreatorProfilePage() {
 
                         <div className="flex flex-col sm:flex-row gap-3 mt-4">
                             <button
-                                onClick={() => {}}
+                                onClick={handleDiscard}
                                 className="flex-1 border border-border bg-background text-muted-foreground text-xs font-bold px-4 py-3 rounded-sm transition-colors hover:bg-muted cursor-pointer"
                             >
                                 Discard
                             </button>
                             <button
-                                onClick={() => {}}
+                                onClick={handleSave}
+                                disabled={saving}
                                 className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold px-4 py-3 rounded-sm shadow-sm transition-colors cursor-pointer"
                             >
-                                Save Changes
+                                {saving ? (
+                                    <>
+                                        <Loader2 className="size-4 animate-spin mr-2" />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    'Save Changes'
+                                )}
                             </button>
                         </div>
                     </section>

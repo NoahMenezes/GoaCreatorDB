@@ -1,36 +1,35 @@
-# Goa Creator
+# GoaConnect — Creator Hub
 
 > **The Premier Platform for Creators, Luxury Stays & Brands in Goa.**
 
-Goa Creator is a full-stack web platform built for storytellers, filmmakers, lifestyle creators, boutique villas, and brands operating in Goa. Discover brand partnerships, gain access to secret shoot locations across North & South Goa, and monetize your creative lifestyle in paradise.
+GoaConnect is a full-stack creator collaboration platform connecting storytellers, filmmakers, lifestyle creators, boutique villas, and hospitality brands in Goa. Discover brand partnerships, gain access to verified shoot locations across North & South Goa, and monetize your creative lifestyle.
 
 ---
 
 ## Features
 
-- **Curated Shoot Locations**: Discover pre-vetted private Portuguese heritage villas in Fontainhas, Assagao boutique stays, and cliffside sunset viewpoints with verified filming permits.
-- **Direct Brand Partnerships**: Connect creators directly with luxury resorts, beach clubs, and lifestyle brands without intermediary agencies.
-- **Collaboration Requests**: Businesses can send collaboration requests to creators with deliverables and pricing.
-- **Creator Portfolios**: Creators maintain public profiles with rates, deliverables, and verified reviews.
-- **Animated Theme Toggling**: Seamless dark and light mode switching powered by Magic UI's View Transitions API.
-- **Next.js 16 & React 19 Architecture**: Partial Prerendering (PPR), Turbopack compilation, and React Server Component caching for ultra-fast performance.
+- **Creator Dashboard**: Overview of requests, collaborations, earnings, and audience metrics
+- **Creator Profile Management**: Edit public profile, commercial terms, deliverables, and availability
+- **Social Accounts & Metrics**: Connect Instagram/YouTube, sync audience metrics (creator-submitted or verified via official API)
+- **Collaboration Requests**: Receive, accept, or decline collaboration requests from businesses
+- **Collaboration Management**: Track accepted collaborations through their lifecycle (pending → accepted → in production → submitted → completed)
+- **Reviews & History**: Submit and receive verified reviews for completed collaborations
+- **Business Account Foundation**: Business registration, profile, campaign creation, and request tracking
+- **Authentication**: Session-based auth with bcrypt password hashing, 7-day sessions, Remember Me, forgot password
+- **Role-Based Access Control**: Creator and business experiences with isolated data and permissions
 
 ---
 
 ## Tech Stack
 
-- **Framework**: [Next.js 16](https://nextjs.org) (App Router, PPR, RSC Cache)
-- **Library**: [React 19](https://react.dev)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com) with `@tailwindcss/turbopack`
-- **UI & Components**:
-  - [Tailark Dusk](https://tailark.com) landing page architecture
-  - [Magic UI](https://magicui.design) Animated Theme Toggler
-  - [Base UI](https://base-ui.com) & [Shadcn UI](https://ui.shadcn.com) primitives
-  - [Lucide React](https://lucide.dev) icons
-- **Runtime & Package Manager**: [Bun](https://bun.sh)
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Library**: React 19
+- **Styling**: Tailwind CSS v4
+- **UI**: Base UI, Shadcn primitives, Lucide icons, Magic UI theme toggler
+- **Runtime**: Bun 1.4.0
 - **Language**: TypeScript 5 (Strict mode)
-- **Database**: SQLite (via [sql.js](https://sql.js.org/)) with migration from JSON
-- **Authentication**: Session-based with bcrypt password hashing
+- **Database**: SQLite via sql.js (WASM), with migrations from JSON
+- **Authentication**: Session-based with bcrypt (12 salt rounds), httpOnly cookies
 
 ---
 
@@ -42,81 +41,167 @@ Ensure you have [Bun](https://bun.sh) installed (recommended: `bun@1.4.0` or hig
 
 ### Installation
 
-Clone the repository and install dependencies:
-
 ```bash
-git clone https://github.com/NoahMenezes/GoaCreatorDB.git
-cd GoaCreatorDB
+git clone <repository-url>
+cd goa-creator
 bun install
 ```
 
 ### Environment Setup
 
-Copy `.env.example` to `.env` and configure:
-
 ```bash
 cp .env.example .env
 ```
 
-Required environment variables:
-
-| Variable | Purpose | Required |
-|----------|---------|----------|
-| `DATABASE_URL` | SQLite database path (optional, defaults to `.data/goa-creator.db`) | No |
-| `AUTH_SECRET` | Secret for session signing | Yes (production) |
-| `NEXT_PUBLIC_APP_URL` | Application base URL | Yes (production) |
-| `NODE_ENV` | Environment (`development` or `production`) | No |
-
 ### Database Setup
 
-The application uses SQLite for persistent storage. On first run, existing data from `.data/db.json` is automatically migrated to SQLite.
-
-To initialize the database:
+Run the migration and seed scripts:
 
 ```bash
 bun run scripts/migrate.ts
 bun run scripts/seed.ts
 ```
 
-The migration script preserves existing JSON data as `.data/db.json.bak`.
+The migration script preserves existing JSON data as `.data/db.json.bak`. The seed script creates demo accounts with valid password hashes.
 
 ### Development Server
-
-Start the Turbopack development server:
 
 ```bash
 bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Production Build
-
-Create an optimized static / PPR production build:
 
 ```bash
 bun run build
 bun run start
 ```
 
-### Linting
+---
 
-Run ESLint strict checks:
+## Demo Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| Business | `palmeira@goaconnect.in` | `business123` |
+| Creator | `rahul@goaconnect.in` | `creator123` |
+
+Demo accounts are created by the seed script with bcrypt password hashes.
+
+---
+
+## Available Scripts
+
+| Script | Description |
+|--------|-------------|
+| `bun run dev` | Start Turbopack dev server |
+| `bun run build` | Production build |
+| `bun run start` | Start production server |
+| `bun run lint` | Run ESLint |
+| `bun run test:unit` | Unit tests |
+| `bun run test:api` | API integration tests |
+| `bun run test:e2e` | Playwright end-to-end tests |
+| `bun run test` | All tests |
+
+---
+
+## Database Schema
+
+The application uses SQLite with the following tables:
+
+- **users** — Platform users (creator, business, admin roles)
+- **locations** — Goa locations (area, taluka, district)
+- **categories** — Business/creator categories
+- **businesses** — Business profiles
+- **creators** — Creator profiles
+- **sessions** — Authentication sessions
+- **creator_profiles** — Public creator showcase profiles
+- **reels** — Creator reels/showcase content
+- **social_accounts** — Connected social media accounts
+- **social_metrics** — Audience metrics snapshots
+- **metric_snapshots** — Historical metric data
+- **collaboration_requests** — Collaboration requests from businesses
+- **collaborations** — Accepted collaborations
+- **payments** — Payment and escrow records
+- **reviews** — Verified reviews for completed collaborations
+- **notifications** — User notifications
+- **audit_logs** — Audit trail for sensitive operations
+
+---
+
+## API Endpoints
+
+### Authentication
+- `POST /api/auth/register` — Register a new user
+- `POST /api/auth/login` — Login and create session
+- `POST /api/auth/logout` — Logout and invalidate session
+- `GET /api/auth/me` — Get current session user
+- `POST /api/auth/forgot-password` — Request password reset
+- `POST /api/auth/reset-password` — Reset password with token
+
+### Creator Hub
+- `GET /api/dashboard/stats` — Dashboard statistics
+- `GET /api/profile` — Get creator profile
+- `PUT /api/profile` — Update creator profile
+- `GET /api/social/accounts` — List connected social accounts
+- `POST /api/social/accounts` — Connect a social account
+- `DELETE /api/social/accounts?id=<id>` — Disconnect a social account
+- `GET /api/social/metrics` — Get social metrics
+- `POST /api/social/sync` — Sync metrics (creator-submitted)
+- `GET /api/requests` — List collaboration requests
+- `POST /api/requests` — Create a collaboration request (business only)
+- `POST /api/requests?id=<id>&action=accept\|decline` — Accept or decline a request
+- `GET /api/collaborations` — List collaborations
+- `GET /api/collaborations?id=<id>` — Get collaboration details
+- `GET /api/reviews` — List reviews
+- `POST /api/reviews` — Submit a review
+- `GET /api/notifications` — List notifications
+- `PATCH /api/notifications` — Mark notification as read
+
+### Public
+- `GET /api/creators` — List creators (filter by niche/location)
+- `GET /api/reels` — List reels (filter by category/location/search)
+
+---
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DATABASE_URL` | SQLite database path (defaults to `.data/goa-creator.db`) | No |
+| `AUTH_SECRET` | Secret for session signing | Yes (production) |
+| `NEXT_PUBLIC_APP_URL` | Application base URL | Yes (production) |
+| `NODE_ENV` | Environment (`development` or `production`) | No |
+
+---
+
+## External Integrations
+
+### Social Media OAuth
+Social account connections support Instagram and YouTube. Without OAuth credentials, metrics are creator-submitted and clearly labelled as unverified. To enable verified API sync:
+
+1. Configure Meta/Facebook OAuth credentials for Instagram
+2. Configure Google OAuth credentials for YouTube
+3. Add credentials to environment variables
+
+### Password Reset
+Forgot password generates a reset token. In production, configure email delivery to send the reset link to users.
+
+---
+
+## Testing
 
 ```bash
-bun run lint
-```
-
-### Testing
-
-Run the test suite:
-
-```bash
-# Unit tests
+# Unit tests (password hashing, validation)
 bun run test:unit
 
-# API integration tests
+# API integration tests (registration, login)
 bun run test:api
+
+# End-to-end tests (Playwright)
+bun run test:e2e
 
 # All tests
 bun run test
@@ -124,74 +209,20 @@ bun run test
 
 ---
 
-## Project Structure
+## Security
 
-```
-GoaCreatorDB/
-├── app/
-│   ├── api/
-│   │   ├── auth/     # Login, logout, me, register
-│   │   ├── creators/ # Creator discovery API
-│   │   └── reels/    # Reels showcase API
-│   ├── business/     # Business portal routes
-│   ├── creator/      # Creator portal routes
-│   ├── login/        # Sign-in page
-│   ├── register/     # Registration pages
-│   ├── join/         # Role selection
-│   ├── dashboard/    # Dashboard redirect
-│   ├── portal/       # Portal redirect
-│   ├── layout.tsx    # Root layout
-│   └── page.tsx      # Landing page
-├── components/       # React components
-├── lib/
-│   ├── db.ts         # SQLite database layer
-│   ├── auth.ts       # Authentication (bcrypt + sessions)
-│   ├── showcase-data.ts # Showcase creator/reel data
-│   ├── types.ts      # TypeScript interfaces
-│   └── utils.ts      # Utility functions
-├── scripts/
-│   ├── migrate.ts    # JSON to SQLite migration
-│   └── seed.ts       # Showcase data seeding
-├── tests/
-│   ├── unit/         # Unit tests
-│   └── api/          # API integration tests
-├── types/            # Bun module type declarations
-├── .data/            # SQLite database file
-├── .env.example      # Environment variable template
-├── next.config.ts    # Next.js configuration
-├── package.json      # Dependencies & scripts
-├── tsconfig.json     # TypeScript configuration
-└── eslint.config.mjs # ESLint configuration
-```
+- Passwords hashed with bcrypt (12 salt rounds)
+- Session tokens in httpOnly, secure cookies (7-day expiry)
+- Role-based authorization on all API endpoints
+- Server-side ownership checks for all data access
+- SQL injection prevention via parameterized queries
+- Audit logging for sensitive operations
+- No secrets in client-side bundles
 
----
-
-## Authentication
-
-The application uses session-based authentication with secure HTTP-only cookies:
-
-- Passwords are hashed with bcrypt (12 salt rounds)
-- Session tokens are stored in `goa_session` cookie (httpOnly, secure in production)
-- Sessions expire after 7 days
-- Protected routes enforce server-side authorization
-
-Demo credentials (for development):
-- Business: `palmeira@goaconnect.in` / `business123`
-- Creator: `rahul@goaconnect.in` / `creator123`
-
----
-
-## Production Readiness
-
-- Persistent SQLite database (no dependency on local JSON storage)
-- Secure authentication with bcrypt and secure cookies
-- API authorization enforcement
-- Environment variable configuration
-- Unit and API integration tests
-- Migration path from JSON to SQLite
+See `SECURITY.md` for details.
 
 ---
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. No copyright holder is asserted — contributors retain rights to their contributions.
