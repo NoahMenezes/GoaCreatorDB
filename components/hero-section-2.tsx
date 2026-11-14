@@ -1,10 +1,40 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Search, UserPlus } from 'lucide-react'
 import Image from 'next/image'
 
 export default function HeroSection() {
+    const [stats, setStats] = useState({
+        creators: 120,
+        businesses: 40,
+        completed_collaborations: 110,
+        platform_avg_rating: 4.4,
+    })
+
+    useEffect(() => {
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/stats/public')
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data.data) {
+                        setStats({
+                            creators: Number(data.data.creators) || 120,
+                            businesses: Number(data.data.businesses) || 40,
+                            completed_collaborations: Number(data.data.completed_collaborations) || 110,
+                            platform_avg_rating: Number(data.data.platform_avg_rating) || 4.4,
+                        })
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load trust metrics:', err)
+            }
+        }
+        loadStats()
+    }, [])
+
     return (
         <>
             <section id="hero" className="relative overflow-hidden">
@@ -25,15 +55,15 @@ export default function HeroSection() {
 
                     <div className="flex flex-wrap items-center justify-center gap-3">
                         <Link
-                            href="#creators"
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-sm px-5 py-2.5 text-sm shadow-sm transition-colors cursor-pointer"
+                            href="/business/discover"
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-sm px-5 py-2.5 text-sm shadow-sm transition-colors cursor-pointer flex items-center"
                         >
                             <Search className="size-4 mr-1.5" />
                             <span>Find Creators</span>
                         </Link>
                         <Link
                             href="/join?role=creator"
-                            className="border border-border bg-background hover:bg-muted font-medium rounded-sm px-5 py-2.5 text-sm transition-colors cursor-pointer text-foreground"
+                            className="border border-border bg-background hover:bg-muted font-medium rounded-sm px-5 py-2.5 text-sm transition-colors cursor-pointer text-foreground flex items-center"
                         >
                             <UserPlus className="size-4 mr-1.5" />
                             <span>Join as Creator</span>
@@ -60,17 +90,17 @@ export default function HeroSection() {
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 divide-y sm:divide-y-0 sm:divide-x divide-border">
                         <div className="flex items-center gap-3 py-2 sm:py-4">
                             <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0 font-bold text-[11px]">
-                                450+
+                                {stats.creators}+
                             </span>
                             <div className="text-left">
                                 <div className="text-sm font-bold text-foreground">Vetted Goa Creators</div>
-                                <div className="text-[10px] text-muted-foreground">North & South Goa</div>
+                                <div className="text-[10px] text-muted-foreground">North &amp; South Goa</div>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-3 py-2 sm:py-4">
                             <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0 font-bold text-[11px]">
-                                1,200+
+                                {stats.completed_collaborations}+
                             </span>
                             <div className="text-left">
                                 <div className="text-sm font-bold text-foreground">Collabs Done</div>
@@ -80,7 +110,7 @@ export default function HeroSection() {
 
                         <div className="flex items-center gap-3 py-2 sm:py-4">
                             <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0 font-bold text-[11px]">
-                                4.9 / 5
+                                {Number(stats.platform_avg_rating).toFixed(1)} / 5
                             </span>
                             <div className="text-left">
                                 <div className="text-sm font-bold text-foreground">Average Rating</div>
@@ -90,11 +120,11 @@ export default function HeroSection() {
 
                         <div className="flex items-center gap-3 py-2 sm:py-4">
                             <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center shrink-0 font-bold text-[11px]">
-                                100%
+                                {stats.businesses}+
                             </span>
                             <div className="text-left">
-                                <div className="text-sm font-bold text-foreground">Escrow Protection</div>
-                                <div className="text-[10px] text-muted-foreground">Secure milestone payouts</div>
+                                <div className="text-sm font-bold text-foreground">Hospitality Brands</div>
+                                <div className="text-[10px] text-muted-foreground">Goa partner venues</div>
                             </div>
                         </div>
                     </div>

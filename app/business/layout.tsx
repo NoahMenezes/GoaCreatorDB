@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -30,9 +30,35 @@ export default function BusinessLayout({
     const [campaignBrief, setCampaignBrief] = useState(
         'Monsoon Weekend Tasting Menu & Heritage Sourdough Walkthrough for Café Palmeira'
     )
+    const [selectedCreatorId, setSelectedCreatorId] = useState<number | ''>('')
+    const [availableCreators, setAvailableCreators] = useState<{ id: number; name: string }[]>([])
     const [requestSuccess, setRequestSuccess] = useState(false)
+    const [requestSubmitting, setRequestSubmitting] = useState(false)
+    const [requestError, setRequestError] = useState<string | null>(null)
     const [searchQuery, setSearchQuery] = useState('')
     const [locationFilter, setLocationFilter] = useState('All Goa / North & South')
+
+    useEffect(() => {
+        async function fetchModalCreators() {
+            try {
+                const res = await fetch('/api/creators?limit=20')
+                if (res.ok) {
+                    const data = await res.json()
+                    if (Array.isArray(data.data) && data.data.length > 0) {
+                        const list = data.data.map((c: { id: number; creator_id: number; full_name: string; name: string }) => ({
+                            id: Number(c.creator_id || c.id),
+                            name: c.full_name || c.name || 'Creator',
+                        }))
+                        setAvailableCreators(list)
+                        setSelectedCreatorId(list[0].id)
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load creators for modal:', err)
+            }
+        }
+        fetchModalCreators()
+    }, [])
 
     const baseRate = 14000
     const addonPrices: Record<string, number> = {
@@ -53,13 +79,59 @@ export default function BusinessLayout({
         )
     }
 
-    const handleSendRequest = (e: React.FormEvent) => {
+    const handleSendRequest = async (e: React.FormEvent) => {
         e.preventDefault()
-        setRequestSuccess(true)
-        setTimeout(() => {
-            setIsCollabModalOpen(false)
-            setRequestSuccess(false)
-        }, 1800)
+        if (!selectedCreatorId) {
+            setRequestError('Please select a creator to receive the proposal')
+            return
+        }
+
+        setRequestSubmitting(true)
+        setRequestError(null)
+
+        const selectedDeliverablesText = selectedAddons
+            .map((id) => {
+                if (id === 'reel') return '1 Dedicated Instagram Reel (30–60s)'
+                if (id === 'carousel') return 'Photo Carousel (6–10 slides)'
+                if (id === 'stories') return 'Story Sequence (3–5x frames)'
+                if (id === 'license') return 'Full Commercial License (6 Mos)'
+                return id
+            })
+            .join(', ')
+
+        const futureDeadline = new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]
+
+        try {
+            const res = await fetch('/api/requests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    creator_id: Number(selectedCreatorId),
+                    collab_type: 'paid',
+                    offered_amount: calculatedTotal,
+                    offer_details: campaignBrief,
+                    deliverables: selectedDeliverablesText,
+                    deadline: futureDeadline,
+                    message: `Booking request from Café Palmeira: ${campaignBrief}`,
+                }),
+            })
+
+            const data = await res.json()
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Failed to submit collaboration request')
+            }
+
+            setRequestSuccess(true)
+            setTimeout(() => {
+                setIsCollabModalOpen(false)
+                setRequestSuccess(false)
+            }, 2000)
+        } catch (err) {
+            setRequestError(err instanceof Error ? err.message : 'Error sending request')
+        } finally {
+            setRequestSubmitting(false)
+        }
     }
 
     const navItems = [
@@ -247,11 +319,34 @@ export default function BusinessLayout({
                                     Request Sent
                                 </h3>
                                 <p className="text-xs text-muted-foreground">
-                                    ₹{calculatedTotal.toLocaleString()} held in escrow pending acceptance.
+                                    ₹{calculatedTotal.toLocaleString()} offer submitted pending creator response.
                                 </p>
                             </div>
                         ) : (
                             <form onSubmit={handleSendRequest} className="space-y-4">
+                                {requestError && (
+                                    <div className="p-3 border border-destructive/20 bg-destructive/5 text-destructive text-xs font-semibold rounded-sm">
+                                        {requestError}
+                                    </div>
+                                )}
+
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-foreground">
+                                        Select Creator
+                                    </label>
+                                    <select
+                                        value={selectedCreatorId}
+                                        onChange={(e) => setSelectedCreatorId(Number(e.target.value))}
+                                        className="w-full border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                                    >
+                                        {availableCreators.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold text-foreground">
                                         Campaign Title &amp; Objectives
@@ -323,10 +418,11 @@ export default function BusinessLayout({
 
                                 <button
                                     type="submit"
-                                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-11 text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                                    disabled={requestSubmitting}
+                                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-11 text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50"
                                 >
                                     <ShieldCheck className="size-4" />
-                                    <span>Lock Deal &amp; Submit Request</span>
+                                    <span>{requestSubmitting ? 'Submitting Request...' : 'Lock Deal & Submit Request'}</span>
                                 </button>
                             </form>
                         )}

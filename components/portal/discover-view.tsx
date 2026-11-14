@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useTransition, Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import {
     Bookmark,
     Check,
@@ -23,10 +24,14 @@ import {
     Utensils,
     Waves,
     Wine,
+    Loader2,
+    AlertCircle,
+    RefreshCw,
 } from 'lucide-react'
 
 export interface CreatorItem {
-    id: string
+    id: number | string
+    creator_id: number
     name: string
     displayName: string
     handle: string
@@ -48,251 +53,298 @@ export interface CreatorItem {
     collabBadge: 'BARTER FRIENDLY' | 'PAID ONLY'
     collabType: 'hybrid' | 'paid' | 'barter'
     category: string
-    district: 'North Goa' | 'South Goa'
+    district: string
+    is_verified?: boolean
+    accepts_barter?: boolean
 }
 
-export const DISCOVER_CREATORS: CreatorItem[] = [
-    {
-        id: 'cr-sneha',
-        name: 'Sneha Fernandes',
-        displayName: 'Sneha Fern...',
-        handle: '@sneha.tastesgoa',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
-        coverImage: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=900&auto=format&fit=crop',
-        tag: 'FOOD & DINING',
-        tagType: 'food',
-        views: '45K avg views',
-        highlightBadge: 'REEL SPECIALIST',
-        location: 'Assagao',
-        nicheBadge: 'Boutique Stays',
-        followers: '120K',
-        followersNum: 120000,
-        engagementRate: '7.8%',
-        engagementNum: 7.8,
-        reviewsCount: 38,
-        startingRate: '₹8,000 / reel',
-        startingRateNum: 8000,
-        collabBadge: 'BARTER FRIENDLY',
-        collabType: 'hybrid',
-        category: 'Food & Dining',
-        district: 'North Goa',
-    },
-    {
-        id: 'cr-rahul',
-        name: 'Rahul Naik',
-        displayName: 'Rahul Naik',
-        handle: '@rahul_eats_goa',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop',
-        coverImage: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=900&auto=format&fit=crop',
-        tag: 'HERITAGE DINING',
-        tagType: 'heritage',
-        views: '62K avg views',
-        highlightBadge: 'TOP RATED',
-        location: 'Panjim & Miramar',
-        nicheBadge: 'Local Seafood',
-        followers: '85K',
-        followersNum: 85000,
-        engagementRate: '9.2%',
-        engagementNum: 9.2,
-        reviewsCount: 52,
-        startingRate: '₹6,500 / reel',
-        startingRateNum: 6500,
-        collabBadge: 'PAID ONLY',
-        collabType: 'paid',
-        category: 'Food & Dining',
-        district: 'North Goa',
-    },
-    {
-        id: 'cr-rohan',
-        name: 'Rohan D\'Souza',
-        displayName: 'Rohan D\'So...',
-        handle: '@rohan.cocktailchronicles',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop',
-        coverImage: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=900&auto=format&fit=crop',
-        tag: 'COCKTAILS & VIBE',
-        tagType: 'cocktail',
-        views: '88K avg views',
-        highlightBadge: 'VIRAL MAKER',
-        location: 'Anjuna & Vagator',
-        nicheBadge: 'Nightlife',
-        followers: '195K',
-        followersNum: 195000,
-        engagementRate: '6.5%',
-        engagementNum: 6.5,
-        reviewsCount: 64,
-        startingRate: '₹14,000 / reel',
-        startingRateNum: 14000,
-        collabBadge: 'BARTER FRIENDLY',
-        collabType: 'hybrid',
-        category: 'Nightlife & Music',
-        district: 'North Goa',
-    },
-    {
-        id: 'cr-alisha',
-        name: 'Alisha D\'Cruz',
-        displayName: 'Alisha D\'Cr...',
-        handle: '@alishacafecrawls',
-        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop',
-        coverImage: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=900&auto=format&fit=crop',
-        tag: 'CAFES & BAKERY',
-        tagType: 'cafe',
-        views: '54K avg views',
-        highlightBadge: 'RISING STAR',
-        location: 'Fontainhas',
-        nicheBadge: 'Coffee Culture',
-        followers: '68K',
-        followersNum: 68000,
-        engagementRate: '8.4%',
-        engagementNum: 8.4,
-        reviewsCount: 29,
-        startingRate: '₹5,500 / reel',
-        startingRateNum: 5500,
-        collabBadge: 'BARTER FRIENDLY',
-        collabType: 'hybrid',
-        category: 'Food & Dining',
-        district: 'North Goa',
-    },
-    {
-        id: 'cr-keith',
-        name: 'Keith Sequeira',
-        displayName: 'Keith Seque...',
-        handle: '@chefkeith_goa',
-        avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=400&auto=format&fit=crop',
-        coverImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=900&auto=format&fit=crop',
-        tag: 'LIVE FIRE & BBQ',
-        tagType: 'bbq',
-        views: '72K avg views',
-        highlightBadge: 'CHEF INFLUENCER',
-        location: 'Morjim',
-        nicheBadge: 'Gourmet Dining',
-        followers: '142K',
-        followersNum: 142000,
-        engagementRate: '7.1%',
-        engagementNum: 7.1,
-        reviewsCount: 41,
-        startingRate: '₹11,000 / reel',
-        startingRateNum: 11000,
-        collabBadge: 'BARTER FRIENDLY',
-        collabType: 'hybrid',
-        category: 'Food & Dining',
-        district: 'North Goa',
-    },
-    {
-        id: 'cr-tanya',
-        name: 'Tanya Rebelo',
-        displayName: 'Tanya Rebe...',
-        handle: '@tanya_southgoanotes',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop',
-        coverImage: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=900&auto=format&fit=crop',
-        tag: 'STAYS & DINING',
-        tagType: 'stay',
-        views: '39K avg views',
-        highlightBadge: 'SOUTH GOA PRO',
-        location: 'Palolem & Agonda',
-        nicheBadge: 'Slow Travel',
-        followers: '52K',
-        followersNum: 52000,
-        engagementRate: '9.8%',
-        engagementNum: 9.8,
-        reviewsCount: 22,
-        startingRate: '₹6,000 / reel',
-        startingRateNum: 6000,
-        collabBadge: 'BARTER FRIENDLY',
-        collabType: 'hybrid',
-        category: 'Travel & Stays',
-        district: 'South Goa',
-    },
-]
-
 export function DiscoverView() {
-    const [verifiedOnly, setVerifiedOnly] = useState(true)
-    const [selectedCategories, setSelectedCategories] = useState<string[]>(['Food & Dining'])
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center p-12">
+                <Loader2 className="size-8 text-primary animate-spin" />
+            </div>
+        }>
+            <DiscoverViewContent />
+        </Suspense>
+    )
+}
+
+function DiscoverViewContent() {
+    const searchParams = useSearchParams()
+    const queryParam = searchParams.get('q') || ''
+
+    const [verifiedOnly, setVerifiedOnly] = useState(false)
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([])
     const [northGoaOpen, setNorthGoaOpen] = useState(true)
     const [southGoaOpen, setSouthGoaOpen] = useState(false)
-    const [selectedLocations, setSelectedLocations] = useState<string[]>([
-        'Assagao',
-        'Panjim & Miramar',
-    ])
-    const [minEngagement, setMinEngagement] = useState<number>(5)
-    const [collabModel, setCollabModel] = useState<string>('Hybrid')
-    const [sortBy, setSortBy] = useState<string>('Highest Engagement')
+    const [selectedLocations, setSelectedLocations] = useState<string[]>([])
+    const [minEngagement, setMinEngagement] = useState<number>(0)
+    const [collabModel, setCollabModel] = useState<string>('All Types')
+    const [sortBy, setSortBy] = useState<string>('Most Followers')
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-    const [shortlistedIds, setShortlistedIds] = useState<string[]>([
-        'cr-sneha',
-        'cr-rohan',
-        'cr-alisha',
-        'cr-keith',
-    ])
-    const [likedIds, setLikedIds] = useState<string[]>(['cr-sneha'])
+    const [shortlistedIds, setShortlistedIds] = useState<number[]>([])
+    const [likedIds, setLikedIds] = useState<number[]>([])
     const [currentPage, setCurrentPage] = useState<number>(1)
+    const [searchQuery, setSearchQuery] = useState(queryParam)
 
-    const categories = [
-        'Food & Dining',
-        'Travel & Stays',
-        'Nightlife & Music',
-        'Fashion & Lifestyle',
-        'Fitness & Surf',
-        'Culture & Heritage',
-    ]
+    const [creators, setCreators] = useState<CreatorItem[]>([])
+    const [totalCount, setTotalCount] = useState<number>(0)
+    const [totalPages, setTotalPages] = useState<number>(1)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
-    const northLocations = [
+    const [categories, setCategories] = useState<string[]>([
+        'Food & Beach Dining',
+        'Travel & Villas',
+        'Nightlife & Sunsets',
+        'Resort Fashion',
+        'Wellness & Surf',
+        'Goan Heritage',
+    ])
+
+    const [northLocations, setNorthLocations] = useState<string[]>([
         'Assagao',
-        'Panjim & Miramar',
-        'Anjuna & Vagator',
-        'Calangute & Candolim',
-    ]
+        'Panjim',
+        'Anjuna',
+        'Calangute',
+        'Vagator',
+        'Candolim',
+        'Siolim',
+    ])
 
-    const southLocations = [
-        'Palolem & Agonda',
-        'Margao & Salcete',
-        'Benaulim & Colva',
-    ]
+    const [southLocations, setSouthLocations] = useState<string[]>([
+        'Palolem',
+        'Margao',
+        'Benaulim',
+        'Colva',
+        'Agonda',
+        'Cavelossim',
+    ])
+
+    const [, startTransition] = useTransition()
+
+    // 1. Fetch Categories and Locations
+    useEffect(() => {
+        async function fetchTaxonomy() {
+            try {
+                const [catRes, locRes, shortRes] = await Promise.all([
+                    fetch('/api/categories'),
+                    fetch('/api/locations'),
+                    fetch('/api/shortlist', { credentials: 'include' }),
+                ])
+
+                if (catRes.ok) {
+                    const cData = await catRes.json()
+                    if (cData.data && Array.isArray(cData.data)) {
+                        setCategories(cData.data.map((c: { category_name: string }) => c.category_name))
+                    }
+                }
+
+                if (locRes.ok) {
+                    const lData = await locRes.json()
+                    if (lData.data) {
+                        const north = lData.data['North Goa'] || {}
+                        const south = lData.data['South Goa'] || {}
+
+                        const northAreas: string[] = []
+                        Object.values(north).forEach((arr) => {
+                            if (Array.isArray(arr)) {
+                                arr.forEach((item: { area_name: string }) => northAreas.push(item.area_name))
+                            }
+                        })
+
+                        const southAreas: string[] = []
+                        Object.values(south).forEach((arr) => {
+                            if (Array.isArray(arr)) {
+                                arr.forEach((item: { area_name: string }) => southAreas.push(item.area_name))
+                            }
+                        })
+
+                        if (northAreas.length > 0) setNorthLocations(northAreas.slice(0, 10))
+                        if (southAreas.length > 0) setSouthLocations(southAreas.slice(0, 10))
+                    }
+                }
+
+                if (shortRes.ok) {
+                    const sData = await shortRes.json()
+                    if (Array.isArray(sData.data)) {
+                        setShortlistedIds(sData.data.map((item: { creator_id: number }) => item.creator_id))
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load taxonomy:', err)
+            }
+        }
+        fetchTaxonomy()
+    }, [])
+
+    // 2. Fetch Creators based on active filters
+    const fetchCreators = async () => {
+        setLoading(true)
+        setError(null)
+        try {
+            const params = new URLSearchParams()
+            params.set('page', String(currentPage))
+            params.set('limit', '9')
+
+            if (searchQuery.trim()) params.set('q', searchQuery.trim())
+            if (verifiedOnly) params.set('verifiedOnly', 'true')
+            if (minEngagement > 0) params.set('minEngagement', String(minEngagement))
+
+            selectedCategories.forEach((cat) => params.append('category[]', cat))
+            selectedLocations.forEach((loc) => params.append('taluka[]', loc))
+
+            if (collabModel === 'Paid Only') params.set('collabType', 'paid')
+            else if (collabModel === 'Barter / Stay') params.set('collabType', 'barter')
+            else if (collabModel === 'Hybrid') params.set('collabType', 'hybrid')
+
+            if (sortBy === 'Highest Engagement') params.set('sort', 'engagement')
+            else if (sortBy === 'Most Followers') params.set('sort', 'followers')
+            else if (sortBy === 'Lowest Rate') params.set('sort', 'recent')
+            else if (sortBy === 'Top Rated') params.set('sort', 'rating')
+
+            const res = await fetch(`/api/creators?${params.toString()}`)
+            const data = await res.json()
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Failed to fetch creators')
+            }
+
+            const rawList: Record<string, unknown>[] = data.data || []
+            const parsed: CreatorItem[] = rawList.map((r) => {
+                const cid = Number(r.creator_id || r.id)
+                const followersNum = Number(r.total_followers) || 0
+                const engagementNum = Number(r.avg_engagement_rate) || 0
+                const baseRateNum = Number(r.min_paid_rate) || 5000
+                const acceptsBarter = Boolean(r.accepts_barter)
+                const isVerified = Boolean(r.is_verified)
+                const primaryCat = String(r.niche || 'Food & Beach Dining')
+
+                let tagType: CreatorItem['tagType'] = 'food'
+                if (primaryCat.toLowerCase().includes('cocktail') || primaryCat.toLowerCase().includes('nightlife')) tagType = 'cocktail'
+                else if (primaryCat.toLowerCase().includes('heritage')) tagType = 'heritage'
+                else if (primaryCat.toLowerCase().includes('travel') || primaryCat.toLowerCase().includes('villa')) tagType = 'stay'
+                else if (primaryCat.toLowerCase().includes('surf') || primaryCat.toLowerCase().includes('wellness')) tagType = 'bbq'
+                else if (primaryCat.toLowerCase().includes('cafe')) tagType = 'cafe'
+
+                const mockCovers = [
+                    'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=900&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=900&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=900&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=900&auto=format&fit=crop',
+                ]
+
+                return {
+                    id: cid,
+                    creator_id: cid,
+                    name: String(r.full_name || 'Creator'),
+                    displayName: String(r.full_name || 'Creator'),
+                    handle: String(r.handle || `@creator_${cid}`),
+                    avatar: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop`,
+                    coverImage: mockCovers[cid % mockCovers.length],
+                    tag: primaryCat.toUpperCase(),
+                    tagType,
+                    views: `${Math.round(followersNum * 0.4 / 1000)}K avg views`,
+                    highlightBadge: isVerified ? 'ADMIN VERIFIED' : 'ACTIVE CREATOR',
+                    location: r.area_name ? `${r.area_name}, ${r.taluka || 'Goa'}` : 'Goa',
+                    nicheBadge: primaryCat,
+                    followers: String(r.followers || `${Math.round(followersNum / 1000)}K`),
+                    followersNum,
+                    engagementRate: `${engagementNum.toFixed(1)}%`,
+                    engagementNum,
+                    reviewsCount: Number(r.review_count) || 0,
+                    startingRate: `₹${baseRateNum.toLocaleString()} / collab`,
+                    startingRateNum: baseRateNum,
+                    collabBadge: acceptsBarter ? 'BARTER FRIENDLY' : 'PAID ONLY',
+                    collabType: acceptsBarter ? 'hybrid' : 'paid',
+                    category: primaryCat,
+                    district: String(r.district || 'North Goa'),
+                    is_verified: isVerified,
+                    accepts_barter: acceptsBarter,
+                }
+            })
+
+            setCreators(parsed)
+            setTotalCount(data.pagination?.total || parsed.length)
+            setTotalPages(data.pagination?.totalPages || 1)
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch creators')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchCreators()
+    }, [currentPage, verifiedOnly, minEngagement, collabModel, sortBy, selectedCategories, selectedLocations, searchQuery])
 
     const toggleCategory = (cat: string) => {
+        setCurrentPage(1)
         setSelectedCategories((prev) =>
             prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
         )
     }
 
     const toggleLocation = (loc: string) => {
+        setCurrentPage(1)
         setSelectedLocations((prev) =>
             prev.includes(loc) ? prev.filter((l) => l !== loc) : [...prev, loc]
         )
     }
 
-    const toggleShortlist = (id: string) => {
+    const toggleShortlist = async (creatorId: number) => {
+        const isSaved = shortlistedIds.includes(creatorId)
         setShortlistedIds((prev) =>
-            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+            isSaved ? prev.filter((id) => id !== creatorId) : [...prev, creatorId]
         )
+
+        try {
+            if (isSaved) {
+                await fetch(`/api/shortlist/${creatorId}`, { method: 'DELETE' })
+            } else {
+                await fetch('/api/shortlist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ creator_id: creatorId }),
+                })
+            }
+        } catch (err) {
+            console.error('Failed to update shortlist:', err)
+            // Revert
+            setShortlistedIds((prev) =>
+                isSaved ? [...prev, creatorId] : prev.filter((id) => id !== creatorId)
+            )
+        }
     }
 
-    const toggleLiked = (id: string) => {
+    const toggleLiked = (creatorId: number) => {
         setLikedIds((prev) =>
-            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+            prev.includes(creatorId) ? prev.filter((i) => i !== creatorId) : [...prev, creatorId]
         )
     }
 
     const handleResetAll = () => {
-        setVerifiedOnly(true)
-        setSelectedCategories(['Food & Dining'])
-        setSelectedLocations(['Assagao', 'Panjim & Miramar'])
-        setMinEngagement(5)
-        setCollabModel('Hybrid')
-        setSortBy('Highest Engagement')
+        startTransition(() => {
+            setVerifiedOnly(false)
+            setSelectedCategories([])
+            setSelectedLocations([])
+            setMinEngagement(0)
+            setCollabModel('All Types')
+            setSortBy('Most Followers')
+            setSearchQuery('')
+            setCurrentPage(1)
+        })
     }
 
-    const filteredCreators = DISCOVER_CREATORS.filter((c) => {
-        if (minEngagement && c.engagementNum < minEngagement) {
-            return false
-        }
-        return true
-    }).sort((a, b) => {
-        if (sortBy === 'Highest Engagement') return b.engagementNum - a.engagementNum
-        if (sortBy === 'Most Followers') return b.followersNum - a.followersNum
-        if (sortBy === 'Lowest Rate') return a.startingRateNum - b.startingRateNum
-        if (sortBy === 'Top Rated') return b.reviewsCount - a.reviewsCount
-        return 0
-    })
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map((n) => n[0])
+            .slice(0, 2)
+            .join('')
+            .toUpperCase()
+    }
 
     const getTagIcon = (type: CreatorItem['tagType']) => {
         switch (type) {
@@ -338,7 +390,10 @@ export function DiscoverView() {
                         </div>
                         <button
                             type="button"
-                            onClick={() => setVerifiedOnly(!verifiedOnly)}
+                            onClick={() => {
+                                setCurrentPage(1)
+                                setVerifiedOnly(!verifiedOnly)
+                            }}
                             aria-label="Toggle Verified Only"
                             className={`w-11 h-6 flex items-center p-1 cursor-pointer transition-colors duration-150 rounded-full border ${
                                 verifiedOnly ? 'bg-primary border-primary' : 'bg-background border-border'
@@ -384,7 +439,7 @@ export function DiscoverView() {
                 </div>
 
                 <div className="space-y-3 mb-6 border-t border-border pt-4">
-                    <span className="text-xs font-bold text-foreground block">Location / Taluka</span>
+                    <span className="text-xs font-bold text-foreground block">Location / Area</span>
 
                     <div className="space-y-2">
                         <button
@@ -464,42 +519,25 @@ export function DiscoverView() {
                 </div>
 
                 <div className="space-y-2.5 mb-6 border-t border-border pt-4">
-                    <div className="flex items-center justify-between text-xs mb-2">
-                        <span className="font-bold text-foreground">Followers</span>
-                        <span className="font-bold text-primary">10K — 250K+</span>
-                    </div>
-
-                    <div className="relative pt-3 pb-1">
-                        <div className="h-1.5 w-full bg-muted relative rounded-full overflow-hidden">
-                            <div className="absolute left-[8%] right-[5%] h-full bg-primary" />
-                            <div className="absolute left-[8%] -top-1.5 size-4 bg-white border-2 border-primary shadow-none cursor-pointer rounded-full" />
-                            <div className="absolute right-[5%] -top-1.5 size-4 bg-white border-2 border-primary shadow-none cursor-pointer rounded-full" />
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                        <span>10K (Micro)</span>
-                        <span>250K+ (Macro)</span>
-                    </div>
-                </div>
-
-                <div className="space-y-2.5 mb-6 border-t border-border pt-4">
                     <span className="text-xs font-bold text-foreground block">Min. Engagement Rate</span>
                     <div className="grid grid-cols-3 gap-2">
-                        {[3, 5, 7].map((rate) => {
+                        {[0, 3, 5, 7].map((rate) => {
                             const isSelected = minEngagement === rate
                             return (
                                 <button
                                     key={rate}
                                     type="button"
-                                    onClick={() => setMinEngagement(rate)}
+                                    onClick={() => {
+                                        setCurrentPage(1)
+                                        setMinEngagement(rate)
+                                    }}
                                     className={`py-2 text-xs font-bold transition-colors cursor-pointer rounded-sm border ${
                                         isSelected
                                             ? 'bg-primary text-primary-foreground border-primary'
                                             : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-primary/50'
                                     }`}
                                 >
-                                    {rate}%
+                                    {rate === 0 ? 'Any' : `${rate}%`}
                                 </button>
                             )
                         })}
@@ -520,7 +558,10 @@ export function DiscoverView() {
                                         type="radio"
                                         name="collabModel"
                                         checked={checked}
-                                        onChange={() => setCollabModel(model)}
+                                        onChange={() => {
+                                            setCurrentPage(1)
+                                            setCollabModel(model)
+                                        }}
                                         className="size-3.5 text-primary focus:ring-primary cursor-pointer rounded-sm"
                                     />
                                     <span className={checked ? 'font-semibold text-foreground' : ''}>
@@ -534,11 +575,11 @@ export function DiscoverView() {
                     <div className="mt-4">
                         <button
                             type="button"
-                            onClick={() => {}}
+                            onClick={fetchCreators}
                             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-11 text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors rounded-sm shadow-sm"
                         >
                             <SlidersHorizontal className="size-3.5" />
-                            <span>Apply Filters ({filteredCreators.length * 4})</span>
+                            <span>Apply Filters ({totalCount})</span>
                         </button>
                     </div>
                 </div>
@@ -552,11 +593,11 @@ export function DiscoverView() {
                                 Discover Goan Creators
                             </h1>
                             <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wider">
-                                450+ VERIFIED
+                                {totalCount} CREATORS
                             </span>
                         </div>
                         <p className="text-xs sm:text-sm text-muted-foreground">
-                            Showing <span className="font-semibold text-foreground">{filteredCreators.length} creators</span> specializing in coastal gastronomy, cafe crawls, and dining culture.
+                            Showing <span className="font-semibold text-foreground">{creators.length} creators</span> specializing in coastal gastronomy, cafe crawls, and dining culture.
                         </p>
                     </div>
 
@@ -566,12 +607,15 @@ export function DiscoverView() {
                             <div className="relative">
                                 <select
                                     value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
+                                    onChange={(e) => {
+                                        setCurrentPage(1)
+                                        setSortBy(e.target.value)
+                                    }}
                                     className="border border-border bg-background rounded-sm px-3 py-1.5 text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                 >
-                                    <option value="Highest Engagement">Highest Engagement</option>
                                     <option value="Most Followers">Most Followers</option>
-                                    <option value="Lowest Rate">Lowest Rate</option>
+                                    <option value="Highest Engagement">Highest Engagement</option>
+                                    <option value="Lowest Rate">Recent</option>
                                     <option value="Top Rated">Top Rated</option>
                                 </select>
                             </div>
@@ -606,218 +650,253 @@ export function DiscoverView() {
                     </div>
                 </div>
 
-                <div
-                    className={
-                        viewMode === 'grid'
-                            ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'
-                            : 'space-y-4'
-                    }
-                >
-                    {filteredCreators.map((creator) => {
-                        const isShortlisted = shortlistedIds.includes(creator.id)
-                        const isLiked = likedIds.includes(creator.id)
+                {loading ? (
+                    <div className="border border-border bg-card p-16 text-center rounded-sm shadow-sm flex flex-col items-center justify-center space-y-3">
+                        <Loader2 className="size-8 text-primary animate-spin" />
+                        <p className="text-sm text-muted-foreground">Discovering Goan creators...</p>
+                    </div>
+                ) : error ? (
+                    <div className="border border-destructive/20 bg-destructive/5 p-8 rounded-sm text-center space-y-3">
+                        <AlertCircle className="size-8 text-destructive mx-auto" />
+                        <p className="text-sm font-semibold text-destructive">{error}</p>
+                        <button
+                            type="button"
+                            onClick={fetchCreators}
+                            className="inline-flex items-center gap-2 bg-background border border-border px-4 py-2 text-xs font-bold hover:bg-muted rounded-sm transition-colors cursor-pointer"
+                        >
+                            <RefreshCw className="size-3.5" />
+                            <span>Try Again</span>
+                        </button>
+                    </div>
+                ) : creators.length === 0 ? (
+                    <div className="border border-border bg-card p-16 text-center rounded-sm shadow-sm space-y-3">
+                        <Compass className="size-10 text-muted-foreground mx-auto stroke-1" />
+                        <h3 className="text-base font-bold text-foreground">No creators found</h3>
+                        <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                            No creators matched your current filter combinations. Try resetting filters or widening your search criteria.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={handleResetAll}
+                            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-xs font-bold rounded-sm hover:bg-primary/90 transition-colors mt-2"
+                        >
+                            <RefreshCw className="size-3.5" />
+                            <span>Reset Filters</span>
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <div
+                            className={
+                                viewMode === 'grid'
+                                    ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'
+                                    : 'space-y-4'
+                            }
+                        >
+                            {creators.map((creator) => {
+                                const isShortlisted = shortlistedIds.includes(Number(creator.id))
+                                const isLiked = likedIds.includes(Number(creator.id))
 
-                        return (
-                            <div
-                                key={creator.id}
-                                className="border border-border bg-card overflow-hidden rounded-sm shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
-                            >
-                                <div>
-                                    <div className="relative h-44 sm:h-48 w-full overflow-hidden">
-                                        <Image
-                                            unoptimized
-                                            src={creator.coverImage}
-                                            alt={creator.name}
-                                            width={600}
-                                            height={400}
-                                            className="size-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                        />
+                                return (
+                                    <div
+                                        key={creator.id}
+                                        className="border border-border bg-card overflow-hidden rounded-sm shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+                                    >
+                                        <div>
+                                            <div className="relative h-44 sm:h-48 w-full overflow-hidden">
+                                                <Image
+                                                    unoptimized
+                                                    src={creator.coverImage}
+                                                    alt={creator.name}
+                                                    width={600}
+                                                    height={400}
+                                                    className="size-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                />
 
-                                        <div className="absolute top-3 inset-x-3 flex items-center justify-between z-10">
-                                            <span className="inline-flex items-center gap-1.5 bg-background border border-border px-3 py-1 text-[10px] font-bold text-foreground uppercase tracking-wider rounded-sm shadow-sm">
-                                                {getTagIcon(creator.tagType)}
-                                                <span>{creator.tag}</span>
-                                            </span>
+                                                <div className="absolute top-3 inset-x-3 flex items-center justify-between z-10">
+                                                    <span className="inline-flex items-center gap-1.5 bg-background border border-border px-3 py-1 text-[10px] font-bold text-foreground uppercase tracking-wider rounded-sm shadow-sm">
+                                                        {getTagIcon(creator.tagType)}
+                                                        <span>{creator.tag}</span>
+                                                    </span>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => toggleLiked(Number(creator.id))}
+                                                        aria-label="Favorite creator"
+                                                        className={`size-8 flex items-center justify-center transition-colors cursor-pointer rounded-sm ${
+                                                            isLiked
+                                                                ? 'bg-primary text-primary-foreground'
+                                                                : 'bg-background border border-border text-muted-foreground hover:text-primary hover:bg-primary/5'
+                                                        }`}
+                                                    >
+                                                        <Heart className={`size-4 ${isLiked ? 'fill-white' : ''}`} />
+                                                    </button>
+                                                </div>
+
+                                                <div className="absolute bottom-3 inset-x-3 flex items-center justify-between text-white text-[11px] font-semibold z-10">
+                                                    <div className="flex items-center gap-1.5 bg-black/60 px-2.5 py-1 rounded-sm">
+                                                        <Play className="size-3 fill-white text-white" />
+                                                        <span>{creator.views}</span>
+                                                    </div>
+
+                                                    <span className="bg-black/60 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-sm">
+                                                        {creator.highlightBadge}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="p-5 space-y-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="relative size-12 overflow-hidden border-2 border-background shadow-sm shrink-0 rounded-md bg-muted flex items-center justify-center font-bold text-sm text-muted-foreground">
+                                                        {getInitials(creator.name)}
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="flex items-center gap-1">
+                                                            <h3 className="font-bold text-foreground text-sm truncate">
+                                                                {creator.displayName}
+                                                            </h3>
+                                                            {creator.is_verified && (
+                                                                <CheckCircle2 className="size-3.5 fill-primary text-white shrink-0" />
+                                                            )}
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground truncate font-mono">
+                                                            {creator.handle}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center justify-between text-xs pt-1">
+                                                    <div className="flex items-center gap-1 text-muted-foreground truncate">
+                                                        <MapPin className="size-3.5 text-primary shrink-0" />
+                                                        <span className="truncate">{creator.location}</span>
+                                                    </div>
+                                                    <span className="bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold rounded-sm">
+                                                        {creator.nicheBadge}
+                                                    </span>
+                                                </div>
+
+                                                <div className="grid grid-cols-3 gap-2 py-3 border-y border-border text-center">
+                                                    <div>
+                                                        <div className="text-base font-extrabold text-foreground leading-tight">
+                                                            {creator.followers}
+                                                        </div>
+                                                        <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider mt-0.5">
+                                                            Followers
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-base font-extrabold text-primary leading-tight">
+                                                            {creator.engagementRate}
+                                                        </div>
+                                                        <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider mt-0.5">
+                                                            Eng. Rate
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-base font-extrabold text-foreground leading-tight">
+                                                            {creator.reviewsCount}
+                                                        </div>
+                                                        <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider mt-0.5">
+                                                            Reviews
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center justify-between pt-1">
+                                                    <div>
+                                                        <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
+                                                            Starting Rate
+                                                        </div>
+                                                        <div className="text-xs font-bold text-foreground">
+                                                            {creator.startingRate}
+                                                        </div>
+                                                    </div>
+
+                                                    <span
+                                                        className={`text-[10px] font-bold px-2 py-0.5 border uppercase tracking-wider rounded-sm ${
+                                                            creator.collabBadge === 'BARTER FRIENDLY'
+                                                                ? 'bg-primary/10 text-primary border-primary'
+                                                                : 'bg-muted border-border text-muted-foreground'
+                                                        }`}
+                                                    >
+                                                        {creator.collabBadge}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-5 pt-0 flex items-center gap-2">
+                                            <Link
+                                                href={`/business/requests`}
+                                                className="flex-1 border border-border bg-background hover:bg-muted font-medium text-xs py-2.5 text-foreground flex items-center justify-center gap-1.5 transition-colors rounded-sm cursor-pointer"
+                                            >
+                                                <span>Book Collaboration</span>
+                                                <span className="text-[11px]">&nearr;</span>
+                                            </Link>
 
                                             <button
                                                 type="button"
-                                                onClick={() => toggleLiked(creator.id)}
-                                                aria-label="Favorite creator"
-                                                className={`size-8 flex items-center justify-center transition-colors cursor-pointer rounded-sm ${
-                                                    isLiked
-                                                        ? 'bg-primary text-primary-foreground'
-                                                        : 'bg-background border border-border text-muted-foreground hover:text-primary hover:bg-primary/5'
+                                                onClick={() => toggleShortlist(Number(creator.id))}
+                                                aria-label={isShortlisted ? 'Remove from shortlist' : 'Shortlist creator'}
+                                                className={`size-10 border flex items-center justify-center cursor-pointer transition-colors shrink-0 rounded-sm ${
+                                                    isShortlisted
+                                                        ? 'bg-primary text-primary-foreground border-primary'
+                                                        : 'border-border bg-background hover:bg-muted text-muted-foreground hover:text-primary hover:border-primary/50'
                                                 }`}
                                             >
-                                                <Heart className={`size-4 ${isLiked ? 'fill-white' : ''}`} />
+                                                <Bookmark className={`size-4 ${isShortlisted ? 'fill-white' : ''}`} />
                                             </button>
                                         </div>
-
-                                        <div className="absolute bottom-3 inset-x-3 flex items-center justify-between text-white text-[11px] font-semibold z-10">
-                                            <div className="flex items-center gap-1.5 bg-black/60 px-2.5 py-1 rounded-sm">
-                                                <Play className="size-3 fill-white text-white" />
-                                                <span>{creator.views}</span>
-                                            </div>
-
-                                            <span className="bg-black/60 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-sm">
-                                                {creator.highlightBadge}
-                                            </span>
-                                        </div>
                                     </div>
+                                )
+                            })}
+                        </div>
 
-                                    <div className="p-5 space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="relative size-12 overflow-hidden border-2 border-background shadow-sm shrink-0 rounded-md">
-                                                <Image
-                                                    unoptimized
-                                                    src={creator.avatar}
-                                                    alt={creator.name}
-                                                    width={100}
-                                                    height={100}
-                                                    className="size-full object-cover"
-                                                />
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-center gap-1">
-                                                    <h3 className="font-bold text-foreground text-sm truncate">
-                                                        {creator.displayName}
-                                                    </h3>
-                                                    <CheckCircle2 className="size-3.5 fill-primary text-white shrink-0" />
-                                                </div>
-                                                <div className="text-xs text-muted-foreground truncate">
-                                                    {creator.handle}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center justify-between text-xs pt-1">
-                                            <div className="flex items-center gap-1 text-muted-foreground truncate">
-                                                <MapPin className="size-3.5 text-primary shrink-0" />
-                                                <span className="truncate">{creator.location}</span>
-                                            </div>
-                                            <span className="bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold rounded-sm">
-                                                {creator.nicheBadge}
-                                            </span>
-                                        </div>
-
-                                        <div className="grid grid-cols-3 gap-2 py-3 border-y border-border text-center">
-                                            <div>
-                                                <div className="text-base font-extrabold text-foreground leading-tight">
-                                                    {creator.followers}
-                                                </div>
-                                                <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider mt-0.5">
-                                                    Followers
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div className="text-base font-extrabold text-primary leading-tight">
-                                                    {creator.engagementRate}
-                                                </div>
-                                                <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider mt-0.5">
-                                                    Eng. Rate
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div className="text-base font-extrabold text-foreground leading-tight">
-                                                    {creator.reviewsCount}
-                                                </div>
-                                                <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider mt-0.5">
-                                                    Reviews
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center justify-between pt-1">
-                                            <div>
-                                                <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
-                                                    Starting Rate
-                                                </div>
-                                                <div className="text-xs font-bold text-foreground">
-                                                    {creator.startingRate}
-                                                </div>
-                                            </div>
-
-                                            <span
-                                                className={`text-[10px] font-bold px-2 py-0.5 border uppercase tracking-wider rounded-sm ${
-                                                    creator.collabBadge === 'BARTER FRIENDLY'
-                                                        ? 'bg-primary/10 text-primary border-primary'
-                                                        : 'bg-muted border-border text-muted-foreground'
-                                                }`}
-                                            >
-                                                {creator.collabBadge}
-                                            </span>
-                                        </div>
-                                    </div>
+                        {totalPages > 1 && (
+                            <div className="border border-border bg-card p-4 sm:p-5 rounded-sm shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-muted-foreground">
+                                <div>
+                                    Showing page <span className="font-semibold text-foreground">{currentPage}</span> of{' '}
+                                    <span className="font-semibold text-foreground">{totalPages}</span> ({totalCount} total creators)
                                 </div>
 
-                                <div className="p-5 pt-0 flex items-center gap-2">
-                                    <Link
-                                        href="/business/profile"
-                                        className="flex-1 border border-border bg-background hover:bg-muted font-medium text-xs py-2.5 text-foreground flex items-center justify-center gap-1.5 transition-colors rounded-sm cursor-pointer"
+                                <div className="flex items-center gap-1.5 self-center sm:self-auto">
+                                    <button
+                                        type="button"
+                                        disabled={currentPage <= 1}
+                                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                        className="px-3 py-1.5 border border-border bg-background hover:bg-muted disabled:opacity-50 text-foreground font-semibold cursor-pointer rounded-sm"
                                     >
-                                        <span>View Profile</span>
-                                        <span className="text-[11px]">&nearr;</span>
-                                    </Link>
+                                        &lt; Prev
+                                    </button>
+
+                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => i + 1).map((page) => (
+                                        <button
+                                            key={page}
+                                            type="button"
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`size-8 font-bold text-xs flex items-center justify-center cursor-pointer transition-colors rounded-sm ${
+                                                currentPage === page
+                                                    ? 'bg-primary text-primary-foreground'
+                                                    : 'border border-border bg-background hover:bg-muted text-foreground'
+                                            }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
 
                                     <button
                                         type="button"
-                                        onClick={() => toggleShortlist(creator.id)}
-                                        aria-label={isShortlisted ? 'Remove from shortlist' : 'Shortlist creator'}
-                                        className={`size-10 border flex items-center justify-center cursor-pointer transition-colors shrink-0 rounded-sm ${
-                                            isShortlisted
-                                                ? 'bg-primary text-primary-foreground border-primary'
-                                                : 'border-border bg-background hover:bg-muted text-muted-foreground hover:text-primary hover:border-primary/50'
-                                        }`}
+                                        disabled={currentPage >= totalPages}
+                                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                        className="px-3 py-1.5 border border-border bg-background hover:bg-muted disabled:opacity-50 text-foreground font-semibold cursor-pointer rounded-sm"
                                     >
-                                        <Bookmark className={`size-4 ${isShortlisted ? 'fill-white' : ''}`} />
+                                        Next &gt;
                                     </button>
                                 </div>
                             </div>
-                        )
-                    })}
-                </div>
-
-                <div className="border border-border bg-card p-4 sm:p-5 rounded-sm shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-muted-foreground">
-                    <div>
-                        Showing <span className="font-semibold text-foreground">1 – {Math.min(6, filteredCreators.length)}</span> of{' '}
-                        <span className="font-semibold text-foreground">{filteredCreators.length} creators</span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 self-center sm:self-auto">
-                        <button
-                            type="button"
-                            disabled={currentPage === 1}
-                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                            className="px-3 py-1.5 border border-border bg-background hover:bg-muted disabled:opacity-50 text-foreground font-semibold cursor-pointer rounded-sm"
-                        >
-                            &lt; Prev
-                        </button>
-
-                        {[1, 2, 3, 4].map((page) => (
-                            <button
-                                key={page}
-                                type="button"
-                                onClick={() => setCurrentPage(page)}
-                                className={`size-8 font-bold text-xs flex items-center justify-center cursor-pointer transition-colors rounded-sm ${
-                                    currentPage === page
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'border border-border bg-background hover:bg-muted text-foreground'
-                                }`}
-                            >
-                                {page}
-                            </button>
-                        ))}
-
-                        <button
-                            type="button"
-                            disabled={currentPage === 4}
-                            onClick={() => setCurrentPage((p) => Math.min(4, p + 1))}
-                            className="px-3 py-1.5 border border-border bg-background hover:bg-muted disabled:opacity-50 text-foreground font-semibold cursor-pointer rounded-sm"
-                        >
-                            Next &gt;
-                        </button>
-                    </div>
-                </div>
+                        )}
+                    </>
+                )}
             </main>
         </div>
     )

@@ -83,6 +83,7 @@ export async function GET(request: Request) {
         b.business_name,
         b.industry AS business_industry,
         c.full_name AS creator_name,
+        (SELECT handle FROM social_accounts sa WHERE sa.creator_id = c.creator_id LIMIT 1) AS creator_handle,
         CASE
           WHEN cr.status IN ('accepted', 'completed') THEN b.contact_phone
           ELSE NULL
