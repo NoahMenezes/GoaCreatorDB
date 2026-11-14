@@ -50,7 +50,9 @@ function LoginContent() {
         fetch('/api/auth/me')
             .then((r) => r.json())
             .then((data) => {
-                if (data.authenticated && data.user?.role === 'business') {
+                if (data.authenticated && data.user?.role === 'admin') {
+                    router.push('/admin')
+                } else if (data.authenticated && data.user?.role === 'business') {
                     router.push('/business/dashboard')
                 } else if (data.authenticated && data.user?.role === 'creator') {
                     router.push('/creator/dashboard')
@@ -86,7 +88,9 @@ function LoginContent() {
             setSuccessBanner(`Signed in as ${data.user.role.toUpperCase()}! Opening GoaConnect...`)
 
             // Navigate to the correct dashboard based on role
-            if (data.user.role === 'business' || loginEmail.toLowerCase().includes('palmeira')) {
+            if (data.user.role === 'admin' || loginEmail.toLowerCase().includes('admin')) {
+                router.push('/admin')
+            } else if (data.user.role === 'business' || loginEmail.toLowerCase().includes('palmeira')) {
                 router.push('/business/dashboard')
             } else if (data.user.role === 'creator' || loginEmail.toLowerCase().includes('rahul')) {
                 router.push('/creator/dashboard')
@@ -331,20 +335,32 @@ function LoginContent() {
                                 <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1.5 text-center">
                                     Quick Test Credentials
                                 </div>
-                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="grid grid-cols-3 gap-2 text-xs">
                                     <button
                                         type="button"
                                         onClick={() => fillDemo('palmeira@goaconnect.in', 'business123', 'business')}
-                                        className="rounded-sm border border-border bg-background p-1.5 text-center text-[10px] font-semibold hover:border-primary cursor-pointer"
+                                        className="rounded-sm border border-border bg-background p-1.5 text-center text-[10px] font-semibold hover:border-primary cursor-pointer truncate"
                                     >
                                         Business (Palmeira)
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => fillDemo('rahul@goaconnect.in', 'creator123', 'creator')}
-                                        className="rounded-sm border border-border bg-background p-1.5 text-center text-[10px] font-semibold hover:border-primary cursor-pointer"
+                                        className="rounded-sm border border-border bg-background p-1.5 text-center text-[10px] font-semibold hover:border-primary cursor-pointer truncate"
                                     >
-                                        Creator (Rahul Naik)
+                                        Creator (Rahul)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setEmail('admin@goaconnect.in')
+                                            setPassword('admin123')
+                                            setError(null)
+                                            handleLogin(undefined, 'admin@goaconnect.in', 'admin123')
+                                        }}
+                                        className="rounded-sm border border-border bg-background p-1.5 text-center text-[10px] font-semibold hover:border-primary cursor-pointer truncate text-primary"
+                                    >
+                                        Admin (Demo)
                                     </button>
                                 </div>
                             </div>

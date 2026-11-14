@@ -39,6 +39,10 @@ export async function POST(request: Request) {
       [userId, tokenHash, expiresAt]
     )
 
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[PASSWORD RESET LINK]: http://localhost:3000/reset-password?token=${rawToken}`)
+    }
+
     return NextResponse.json({
       success: true,
       message: 'If an account exists, a reset link has been sent.',
