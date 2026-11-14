@@ -134,3 +134,4 @@
      *(Runs 176 tests across unit, API, and PL/pgSQL database constraints — 100% passing in <15s).*
   3. **Production Security:** Mention that Content Security Policy (CSP), `X-Content-Type-Options: nosniff`, `Referrer-Policy`, and frame ancestor protections are active, `AUTH_SECRET` is required in production, and login endpoints are strictly rate-limited.
   4. **Conclusion:** *"GoaConnect delivers a modern, resilient, and enterprise-grade creator economy infrastructure purpose-built for Goa's hospitality ecosystem."*
+
