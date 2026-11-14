@@ -1,0 +1,449 @@
+# ==============================================================================
+# GoaConnect — Comprehensive REST Client API Collection
+# Format: RFC 7230 / VS Code REST Client / JetBrains HTTP Client
+# Base URL: http://localhost:3000
+# ==============================================================================
+
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+# ==============================================================================
+# 1. AUTHENTICATION & IDENTITY
+# ==============================================================================
+
+### 1.1 Business Login (Demo Account)
+# @name loginBusiness
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "palmeira@goaconnect.in",
+  "password": "business123"
+}
+
+### 1.2 Creator Login (Demo Account)
+# @name loginCreator
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "rahul@goaconnect.in",
+  "password": "creator123"
+}
+
+### 1.3 Administrator Login (Demo Account)
+# @name loginAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@goaconnect.in",
+  "password": "admin123"
+}
+
+### 1.4 Get Current User Session & Profile
+# Returns user details, role, and role-specific profile (creator_id or business_id)
+GET {{baseUrl}}/api/auth/me
+
+### 1.5 Register New Business Account
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "newbeachshack@goaconnect.in",
+  "password": "SecurePassword123!",
+  "role": "business",
+  "business_name": "Curlies Beach Lounge",
+  "industry": "Hospitality & Dining",
+  "description": "Iconic beach lounge and music venue overlooking South Anjuna beach.",
+  "location_id": 1,
+  "contact_phone": "+91 98221 44556",
+  "instagram_handle": "@curliesgoa"
+}
+
+### 1.6 Register New Creator Account
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "newcreator@goaconnect.in",
+  "password": "SecurePassword123!",
+  "role": "creator",
+  "full_name": "Aarav Deshmukh",
+  "bio": "Cinematographer capturing sunset surf culture and luxury stays across Goa.",
+  "location_id": 3,
+  "accepts_barter": true,
+  "min_paid_rate": 8000,
+  "categories": [
+    { "category_id": 1, "is_primary": true },
+    { "category_id": 4, "is_primary": false }
+  ],
+  "social_accounts": [
+    {
+      "platform": "instagram",
+      "handle": "@aaravcreates",
+      "profile_url": "https://instagram.com/aaravcreates"
+    }
+  ]
+}
+
+### 1.7 Forgot Password (Request Reset Token)
+# Logs generated token to console/audit log for testing
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: {{contentType}}
+
+{
+  "email": "rahul@goaconnect.in"
+}
+
+### 1.8 Reset Password (Consumes Token)
+POST {{baseUrl}}/api/auth/reset-password
+Content-Type: {{contentType}}
+
+{
+  "token": "REPLACE_WITH_GENERATED_HEX_TOKEN",
+  "password": "BrandNewPassword123!"
+}
+
+### 1.9 Logout (Destroys Server Session)
+POST {{baseUrl}}/api/auth/logout
+
+# ==============================================================================
+# 2. PUBLIC EXPLORATION & TAXONOMY (NO AUTH REQUIRED)
+# ==============================================================================
+
+### 2.1 Public Trust Metrics & Platform KPIs
+GET {{baseUrl}}/api/stats/public
+
+### 2.2 Complete Platform Taxonomy (Categories + Locations Tree)
+GET {{baseUrl}}/api/taxonomy
+
+### 2.3 Category List
+GET {{baseUrl}}/api/categories
+
+### 2.4 Locations Hierarchy (Grouped by District & Taluka)
+GET {{baseUrl}}/api/locations
+
+### 2.5 Creator Directory (Fuzzy Trigram Search & Multi-Filter)
+GET {{baseUrl}}/api/creators?q=Rahul&district=North+Goa&collabType=hybrid&sort=followers&page=1&limit=10
+
+### 2.6 Featured Creators (Top-Rated Verified Roster)
+GET {{baseUrl}}/api/creators/featured
+
+### 2.7 Creator Public Profile Detail
+# Includes profile info, categories, social channels, metric history, and reviews
+GET {{baseUrl}}/api/creators/1
+
+### 2.8 Featured Content & Reel Portfolio Feed
+GET {{baseUrl}}/api/reels
+
+# ==============================================================================
+# 3. PROFILE & DASHBOARD (AUTHENTICATED)
+# ==============================================================================
+
+### 3.1 Get Authenticated User Profile
+GET {{baseUrl}}/api/profile
+
+### 3.2 Update Business Profile (Role: business)
+PUT {{baseUrl}}/api/profile
+Content-Type: {{contentType}}
+
+{
+  "business_name": "Café Palmeira Heritage",
+  "industry": "Fine Dining & Hospitality",
+  "description": "Refined Portuguese-Goan fusion dining nestled within century-old banyan trees in Calangute.",
+  "contact_phone": "+91 98221 00223",
+  "instagram_handle": "@palmeiragoa",
+  "location_id": 2
+}
+
+### 3.3 Update Creator Profile (Role: creator)
+PUT {{baseUrl}}/api/profile
+Content-Type: {{contentType}}
+
+{
+  "full_name": "Rahul Naik",
+  "bio": "Culinary storyteller exploring authentic Goan kitchens, heritage spices, and seaside shacks.",
+  "accepts_barter": true,
+  "min_paid_rate": 6000,
+  "location_id": 2,
+  "categories": [
+    { "category_id": 1, "is_primary": true },
+    { "category_id": 5, "is_primary": false }
+  ]
+}
+
+### 3.4 Dashboard Stats & Velocity KPIs
+GET {{baseUrl}}/api/dashboard/stats
+
+### 3.5 Real-Time Notifications Feed
+GET {{baseUrl}}/api/notifications
+
+### 3.6 Mark Notifications as Read
+PATCH {{baseUrl}}/api/notifications
+Content-Type: {{contentType}}
+
+{
+  "all": true
+}
+
+# ==============================================================================
+# 4. SOCIAL ACCOUNTS & METRIC SYNCHRONIZATION
+# ==============================================================================
+
+### 4.1 List Connected Social Channels (Creator)
+GET {{baseUrl}}/api/social/accounts
+
+### 4.2 Connect New Social Channel (Role: creator)
+POST {{baseUrl}}/api/social/accounts
+Content-Type: {{contentType}}
+
+{
+  "platform": "instagram",
+  "handle": "@goan_food_walks",
+  "profile_url": "https://instagram.com/goan_food_walks"
+}
+
+### 4.3 Disconnect Social Channel (Role: creator)
+DELETE {{baseUrl}}/api/social/accounts?id=1
+
+### 4.4 Historical Engagement Metrics Time-Series
+GET {{baseUrl}}/api/social/metrics?account_id=1
+
+### 4.5 Sync / Record Metric Snapshot (Role: creator)
+POST {{baseUrl}}/api/social/sync
+Content-Type: {{contentType}}
+
+{
+  "account_id": 1,
+  "follower_count": 52500,
+  "avg_views": 38000,
+  "avg_likes": 4200,
+  "avg_comments": 280,
+  "engagement_rate": 0.085,
+  "audience_goa_pct": 0.42
+}
+
+# ==============================================================================
+# 5. BUSINESS SHORTLISTS (ROLE: BUSINESS)
+# ==============================================================================
+
+### 5.1 Fetch Shortlisted Creators
+GET {{baseUrl}}/api/shortlist
+
+### 5.2 Add / Update Creator on Shortlist (Method 1: POST Body)
+POST {{baseUrl}}/api/shortlist
+Content-Type: {{contentType}}
+
+{
+  "creator_id": 1,
+  "note": "Top candidate for summer seafood festival campaign."
+}
+
+### 5.3 Add / Update Creator on Shortlist (Method 2: Path Parameter)
+PUT {{baseUrl}}/api/shortlist/2
+Content-Type: {{contentType}}
+
+{
+  "note": "Great portfolio for sunset dinner reel coverage."
+}
+
+### 5.4 Remove Creator from Shortlist
+DELETE {{baseUrl}}/api/shortlist/1
+
+# ==============================================================================
+# 6. COLLABORATION REQUESTS & LIFECYCLE STATE MACHINE
+# ==============================================================================
+
+### 6.1 Create Collaboration Request (Role: business)
+POST {{baseUrl}}/api/requests
+Content-Type: {{contentType}}
+
+{
+  "creator_id": 1,
+  "collab_type": "hybrid",
+  "offered_amount": 15000,
+  "deliverables": "1 Dedicated Instagram Reel (60s), 3 High-Res Story Frames with Location Tag",
+  "message": "Hi Rahul, we would love to host you for our new monsoon seafood tasting menu.",
+  "deadline": "2026-12-31"
+}
+
+### 6.2 List Collaboration Requests (Role-Scoped & Paginated)
+GET {{baseUrl}}/api/requests?status=pending&page=1&limit=10
+
+### 6.3 Get Request Detail by ID
+GET {{baseUrl}}/api/requests/1
+
+### 6.4 Creator Action: Accept Request (pending -> accepted)
+# Triggers fn_accept_collaboration() and creates audit log
+PATCH {{baseUrl}}/api/requests/1
+Content-Type: {{contentType}}
+
+{
+  "action": "accept"
+}
+
+### 6.5 Business Action: Complete Request (accepted -> completed)
+# Triggers fn_complete_collaboration() and unlocks review eligibility
+PATCH {{baseUrl}}/api/requests/1
+Content-Type: {{contentType}}
+
+{
+  "action": "complete"
+}
+
+### 6.6 Counterpart Action: Cancel Request (pending|accepted -> cancelled)
+PATCH {{baseUrl}}/api/requests/1
+Content-Type: {{contentType}}
+
+{
+  "action": "cancel"
+}
+
+### 6.7 Creator Action: Decline / Reject Request (pending -> rejected)
+PATCH {{baseUrl}}/api/requests/1
+Content-Type: {{contentType}}
+
+{
+  "action": "reject"
+}
+
+### 6.8 View Active & Completed Collaborations (from v_collaborations)
+GET {{baseUrl}}/api/collaborations?status=completed
+
+### 6.9 Single Collaboration Details
+GET {{baseUrl}}/api/collaborations/1
+
+# ==============================================================================
+# 7. VERIFIED REVIEWS & RATINGS
+# ==============================================================================
+
+### 7.1 Fetch Public Reviews for Creator
+GET {{baseUrl}}/api/reviews?creator_id=1
+
+### 7.2 Fetch Authenticated User's Reviews (Received & Given)
+GET {{baseUrl}}/api/reviews?filter=received
+
+### 7.3 Submit Verified Review (Post-Completion)
+# Requires request to be in 'completed' status; verifies reviewer was party to the deal
+POST {{baseUrl}}/api/reviews
+Content-Type: {{contentType}}
+
+{
+  "request_id": 1,
+  "rating": 5,
+  "comment": "Exceptional deliverables! Rahul showcased our heritage dishes with wonderful storytelling."
+}
+
+# ==============================================================================
+# 8. ADMIN OPERATIONS & GOVERNANCE (ROLE: ADMIN ONLY)
+# ==============================================================================
+
+### 8.1 Admin Executive Dashboard KPIs
+# Aggregated metrics from v_admin_kpis, v_taluka_stats, and audit log
+GET {{baseUrl}}/api/admin/dashboard
+
+### 8.2 Verification Queue: Unverified Accounts (with fn_trust_score & Risk Tier)
+GET {{baseUrl}}/api/admin/verifications?type=accounts
+
+### 8.3 Verification Queue: Self-Reported Metrics Snapshots
+GET {{baseUrl}}/api/admin/verifications?type=metrics
+
+### 8.4 Admin Action: Approve User Account Verification
+POST {{baseUrl}}/api/admin/verifications
+Content-Type: {{contentType}}
+
+{
+  "type": "accounts",
+  "id": 5,
+  "action": "approve"
+}
+
+### 8.5 Admin Action: Reject / Flag User Account
+# Leaves is_verified=false and records reviewer notes in audit_log
+POST {{baseUrl}}/api/admin/verifications
+Content-Type: {{contentType}}
+
+{
+  "type": "accounts",
+  "id": 5,
+  "action": "reject",
+  "note": "Instagram profile does not match business registration address."
+}
+
+### 8.6 Admin Action: Approve Self-Reported Metrics
+# Sets data_source = 'admin_verified' and verified_by = admin user_id
+POST {{baseUrl}}/api/admin/verifications
+Content-Type: {{contentType}}
+
+{
+  "type": "metrics",
+  "id": 10,
+  "action": "approve"
+}
+
+### 8.7 Admin User Roster (Search, Role Filter, Verification Status)
+GET {{baseUrl}}/api/admin/users?role=creator&verified=false&page=1&limit=20
+
+### 8.8 Admin Toggle Verification Status
+PATCH {{baseUrl}}/api/admin/users/5
+Content-Type: {{contentType}}
+
+{
+  "is_verified": true
+}
+
+### 8.9 Admin Delete User Account (Enforces Safeguards: Cannot Delete Last Admin)
+DELETE {{baseUrl}}/api/admin/users/999
+
+### 8.10 Admin Category Management: List Categories
+GET {{baseUrl}}/api/admin/categories
+
+### 8.11 Admin Category Management: Create Category
+POST {{baseUrl}}/api/admin/categories
+Content-Type: {{contentType}}
+
+{
+  "category_name": "Sustainable Travel & Eco-Villas"
+}
+
+### 8.12 Admin Category Management: Update Category
+PUT {{baseUrl}}/api/admin/categories/1
+Content-Type: {{contentType}}
+
+{
+  "category_name": "Culinary, Cafes & Fine Dining"
+}
+
+### 8.13 Admin Category Management: Delete Category (Protected by Foreign Keys)
+DELETE {{baseUrl}}/api/admin/categories/999
+
+### 8.14 Admin Location Management: List All Locations
+GET {{baseUrl}}/api/admin/locations
+
+### 8.15 Admin Location Management: Create Location
+POST {{baseUrl}}/api/admin/locations
+Content-Type: {{contentType}}
+
+{
+  "area_name": "Agonda Beach",
+  "taluka": "Canacona",
+  "district": "South Goa"
+}
+
+### 8.16 Admin Location Management: Update Location
+PUT {{baseUrl}}/api/admin/locations/1
+Content-Type: {{contentType}}
+
+{
+  "area_name": "Anjuna South Cliffs",
+  "taluka": "Bardez",
+  "district": "North Goa"
+}
+
+### 8.17 Admin Location Management: Delete Location (Protected by Foreign Keys)
+DELETE {{baseUrl}}/api/admin/locations/999
+
+### 8.18 Admin Comprehensive Analytical Report
+GET {{baseUrl}}/api/admin/reports?from=2026-01-01&to=2026-12-31&format=json
+
