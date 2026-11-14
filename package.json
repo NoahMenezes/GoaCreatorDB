@@ -12,9 +12,10 @@
     "db:test": "bun run scripts/db-test.ts",
     "db:seed": "bun run scripts/seed.ts",
     "test:unit": "bun test tests/unit/",
-    "test:api": "bun test tests/api/",
+    "test:api": "DATABASE_URL=postgresql://goacreator:goacreator_secret_password@localhost:5433/goa_test bun run scripts/setup-test-db.ts && DATABASE_URL=postgresql://goacreator:goacreator_secret_password@localhost:5433/goa_test bun test tests/api/",
+    "test:db": "bun run scripts/db-test.ts",
     "test:e2e": "playwright test",
-    "test": "bun test tests/"
+    "test": "bun run test:unit && bun run test:api && bun run test:db"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/turbopack": "^4",
     "@types/bcrypt": "^6.0.0",
     "@types/node": "^20",

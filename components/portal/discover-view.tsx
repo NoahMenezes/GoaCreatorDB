@@ -700,6 +700,7 @@ function DiscoverViewContent() {
                                 return (
                                     <div
                                         key={creator.id}
+                                        data-creator-card
                                         className="border border-border bg-card overflow-hidden rounded-sm shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
                                     >
                                         <div>

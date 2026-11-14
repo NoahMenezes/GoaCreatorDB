@@ -23,7 +23,7 @@ export async function GET(
   const userId = Number(auth.user.user_id)
 
   try {
-    let sql = `
+    const sql = `
       SELECT vc.*, ub.user_id AS business_user_id, uc.user_id AS creator_user_id
       FROM v_collaborations vc
       JOIN businesses b ON vc.business_id = b.business_id

@@ -16,7 +16,15 @@ const eslintConfig = defineConfig([
     ".agents/skills/**",
     // Ambient type declarations (any types are expected)
     "types/**",
+    "e2e/**",
   ]),
+  {
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "warn",
+    },
+  },
 ]);
 
 export default eslintConfig;

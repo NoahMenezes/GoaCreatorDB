@@ -2,12 +2,16 @@ import fs from 'fs'
 import path from 'path'
 import { Client } from 'pg'
 
-const DATABASE_URL =
-  process.env.DATABASE_URL ||
-  'postgresql://goacreator:goacreator_secret_password@localhost:5433/goacreatordb'
+function getDatabaseUrl(): string {
+  return (
+    process.env.DATABASE_URL ||
+    'postgresql://goacreator:goacreator_secret_password@localhost:5433/goacreatordb'
+  )
+}
 
 export async function runMigrations() {
-  const client = new Client({ connectionString: DATABASE_URL })
+  const dbUrl = getDatabaseUrl()
+  const client = new Client({ connectionString: dbUrl })
   await client.connect()
 
   try {

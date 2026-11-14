@@ -2,13 +2,17 @@ import fs from 'fs'
 import path from 'path'
 import { Client } from 'pg'
 
-const DATABASE_URL =
-  process.env.DATABASE_URL ||
-  'postgresql://goacreator:goacreator_secret_password@localhost:5433/goacreatordb'
+function getDatabaseUrl(): string {
+  return (
+    process.env.DATABASE_URL ||
+    'postgresql://goacreator:goacreator_secret_password@localhost:5433/goacreatordb'
+  )
+}
 
 export async function runTests() {
-  console.log('Starting GoaCreatorDB Test Suite...\n')
-  const client = new Client({ connectionString: DATABASE_URL })
+  const dbUrl = getDatabaseUrl()
+  console.log(`Starting GoaCreatorDB Test Suite on ${dbUrl}...\n`)
+  const client = new Client({ connectionString: dbUrl })
   await client.connect()
 
   let totalTests = 0

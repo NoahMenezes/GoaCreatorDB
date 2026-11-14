@@ -1,21 +1,35 @@
 import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg'
 
-const DATABASE_URL =
-  process.env.DATABASE_URL ||
-  'postgresql://goacreator:goacreator_secret_password@localhost:5433/goacreatordb'
+export function getDatabaseUrl(): string {
+  return (
+    process.env.DATABASE_URL ||
+    'postgresql://goacreator:goacreator_secret_password@localhost:5433/goacreatordb'
+  )
+}
 
 const globalForDb = globalThis as unknown as {
   pgPool?: Pool
+  currentDbUrl?: string
 }
 
 export function getPool(): Pool {
+  const dbUrl = getDatabaseUrl()
   if (
     !globalForDb.pgPool ||
+    globalForDb.currentDbUrl !== dbUrl ||
     (globalForDb.pgPool as unknown as { ending: boolean; ended: boolean }).ending ||
     (globalForDb.pgPool as unknown as { ending: boolean; ended: boolean }).ended
   ) {
+    if (globalForDb.pgPool) {
+      try {
+        globalForDb.pgPool.end()
+      } catch {
+        // Ignore end error
+      }
+    }
+    globalForDb.currentDbUrl = dbUrl
     globalForDb.pgPool = new Pool({
-      connectionString: DATABASE_URL,
+      connectionString: dbUrl,
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
@@ -61,12 +75,14 @@ if (typeof process !== 'undefined') {
   process.once('SIGTERM', handleExit)
 }
 
+export type DbRow = Record<string, any>
+
 /**
  * Execute a query against the PostgreSQL pool.
  */
-export async function query<T extends QueryResultRow = any>(
+export async function query<T extends QueryResultRow = DbRow>(
   text: string,
-  params?: any[]
+  params?: unknown[]
 ): Promise<QueryResult<T>> {
   return pool.query<T>(text, params)
 }
@@ -119,7 +135,7 @@ export async function withTransaction<T>(
  */
 export async function initDb() {
   return {
-    query: async (text: string, params?: any[]) => {
+    query: async (text: string, params?: unknown[]) => {
       const res = await pool.query(text, params)
       return res.rows
     },
