@@ -1,28 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
-import { initDb, closeDb, type SqlDatabase } from '@/lib/db'
-import { requireAuth } from '@/lib/api-auth'
+import { initDb } from '@/lib/db'
+import { requireAuth, saveAndClose } from '@/lib/api-auth'
 
-function saveAndClose(db: SqlDatabase) {
-  try {
-    const data = db.export()
-    const fs = require('fs')
-    const path = require('path')
-    const dbDir = path.dirname(
-      process.env.DATABASE_URL
-        ? process.env.DATABASE_URL.replace(/^sqlite:/, '')
-        : path.join(process.cwd(), '.data', 'goa-creator.db')
-    )
-    if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true })
-    fs.writeFileSync(
-      process.env.DATABASE_URL
-        ? process.env.DATABASE_URL.replace(/^sqlite:/, '')
-        : path.join(process.cwd(), '.data', 'goa-creator.db'),
-      Buffer.from(data)
-    )
-  } catch {}
-  closeDb()
-}
 
 export async function GET() {
   const auth = await requireAuth()
@@ -34,7 +14,7 @@ export async function GET() {
       .query(
         'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50'
       )
-      .all(auth.user.user_id) as any[]
+      .all(auth.user.user_id) as unknown as Record<string, unknown>[]
     saveAndClose(db)
     return NextResponse.json({ success: true, data: rows })
   } catch {

@@ -1,19 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import {
     Camera,
     Play,
     ShieldCheck,
     RefreshCw,
-    Trash2,
     Link as LinkIcon,
     Download,
-    ExternalLink,
-    Phone,
-    Mail,
 } from 'lucide-react'
+import { SocialAccountRow, SocialMetricRow } from '@/lib/db'
 
 const platforms = [
     { id: 'instagram', name: 'Instagram', icon: Camera, color: 'text-primary' },
@@ -21,14 +17,9 @@ const platforms = [
 ]
 
 export default function CreatorSocialPage() {
-    const [accounts, setAccounts] = useState<any[]>([])
-    const [metrics, setMetrics] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
+    const [accounts, setAccounts] = useState<SocialAccountRow[]>([])
+    const [metrics, setMetrics] = useState<SocialMetricRow[]>([])
     const [connecting, setConnecting] = useState<string | null>(null)
-
-    useEffect(() => {
-        loadData()
-    }, [])
 
     const loadData = async () => {
         try {
@@ -46,10 +37,13 @@ export default function CreatorSocialPage() {
             }
         } catch (err) {
             console.error('Social load error:', err)
-        } finally {
-            setLoading(false)
         }
     }
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        loadData()
+    }, [])
 
     const handleConnect = (platformId: string) => {
         setConnecting(platformId)
@@ -83,7 +77,8 @@ export default function CreatorSocialPage() {
     }
 
     const getLatestMetric = (accountId: string) => {
-        return metrics.find((m: any) => m.account_id === accountId)?.metrics || null
+        const m = (metrics as unknown as { account_id: string; metrics: { followers: number; engagement_rate: number; avg_likes: number; source: string; verified: number } | null }[]).find((metric) => metric.account_id === accountId)
+        return m?.metrics || null
     }
 
     return (
@@ -147,7 +142,7 @@ export default function CreatorSocialPage() {
                                     <span className="text-xs text-muted-foreground">Connecting...</span>
                                 ) : (
                                     <button
-                                        onClick={() => handleDisconnect(connected.account_id)}
+                                        onClick={() => handleDisconnect(connected!.account_id)}
                                         className="text-xs font-bold text-destructive hover:text-destructive/90"
                                     >
                                         Disconnect

@@ -72,20 +72,13 @@ export default function CreatorProfilePage() {
     const [selectedNiches, setSelectedNiches] = useState(
         new Set(niches.filter((n) => n.selected).map((n) => n.id)),
     )
-    const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
-    const [profileData, setProfileData] = useState<any>(null)
-
-    useEffect(() => {
-        fetchProfile()
-    }, [])
 
     const fetchProfile = async () => {
         try {
             const res = await fetch('/api/profile', { credentials: 'include' })
             if (res.ok) {
                 const data = await res.json()
-                setProfileData(data.data || null)
                 const profile = data.data?.profile
                 if (profile) {
                     setBarter(profile.accepts_barter === 1)
@@ -95,10 +88,13 @@ export default function CreatorProfilePage() {
             }
         } catch (err) {
             console.error('Profile fetch error:', err)
-        } finally {
-            setLoading(false)
         }
     }
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchProfile()
+    }, [])
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -122,7 +118,7 @@ export default function CreatorProfilePage() {
             } else {
                 alert('Failed to save profile.')
             }
-        } catch (err) {
+        } catch {
             alert('Error saving profile.')
         } finally {
             setSaving(false)

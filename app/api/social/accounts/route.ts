@@ -1,8 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
-import { initDb, closeDb, type SqlDatabase } from '@/lib/db'
-import { requireAuth } from '@/lib/api-auth'
-import { saveAndClose } from '@/lib/api-auth'
+import { initDb } from '@/lib/db'
+import { requireAuth, saveAndClose } from '@/lib/api-auth'
 import crypto from 'crypto'
 
 export async function GET() {

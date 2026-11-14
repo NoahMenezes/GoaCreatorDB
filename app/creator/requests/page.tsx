@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ShieldCheck, Plus, MapPin, ChevronRight } from 'lucide-react'
+import { Plus, MapPin } from 'lucide-react'
+import { CollaborationRequestRow } from '@/lib/db'
 
 const statusLabels: Record<string, string> = {
     pending: 'Pending Creator Response',
@@ -13,29 +14,44 @@ const statusLabels: Record<string, string> = {
 }
 
 export default function CreatorRequestsPage() {
-    const [requests, setRequests] = useState<any[]>([])
+    const [requests, setRequests] = useState<CollaborationRequestRow[]>([])
     const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'declined' | 'expired'>('all')
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        loadRequests()
-    }, [filter])
-
-    const loadRequests = async () => {
+    const loadRequests = useCallback(async () => {
         try {
             const res = await fetch(`/api/requests?status=${filter === 'all' ? '' : filter}`, {
                 credentials: 'include',
             })
             if (res.ok) {
                 const data = await res.json()
-                setRequests(data.data || [])
+                setRequests((data.data || []) as unknown as CollaborationRequestRow[])
             }
         } catch (err) {
             console.error('Requests load error:', err)
         } finally {
             setLoading(false)
         }
-    }
+    }, [filter])
+
+    useEffect(() => {
+        const fetchRequests = async () => {
+            try {
+                const res = await fetch(`/api/requests?status=${filter === 'all' ? '' : filter}`, {
+                    credentials: 'include',
+                })
+                if (res.ok) {
+                    const data = await res.json()
+                    setRequests((data.data || []) as unknown as CollaborationRequestRow[])
+                }
+            } catch (err) {
+                console.error('Requests load error:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchRequests()
+    }, [filter])
 
     const handleAction = async (requestId: string, action: 'accept' | 'decline') => {
         if (!confirm(`Are you sure you want to ${action} this request?`)) return
@@ -59,7 +75,7 @@ export default function CreatorRequestsPage() {
         { id: 'pending', label: `Pending (${requests.filter(r => r.status === 'pending').length})` },
         { id: 'accepted', label: `Accepted (${requests.filter(r => r.status === 'accepted').length})` },
         { id: 'declined', label: `Declined (${requests.filter(r => r.status === 'declined').length})` },
-    ]
+    ] as const
 
     const filtered = filter === 'all' ? requests : requests.filter(r => r.status === filter)
 
@@ -88,7 +104,7 @@ export default function CreatorRequestsPage() {
                     <button
                         key={tab.id}
                         type="button"
-                        onClick={() => setFilter(tab.id as any)}
+                        onClick={() => setFilter(tab.id)}
                         className={`px-4 py-2 text-xs font-bold transition-colors cursor-pointer rounded-sm border ${
                             filter === tab.id
                                 ? 'bg-primary text-primary-foreground border-primary'
@@ -110,7 +126,9 @@ export default function CreatorRequestsPage() {
                         <p className="text-sm text-muted-foreground">No requests found.</p>
                     </div>
                 ) : (
-                    filtered.map((req) => (
+                    filtered.map((req) => {
+        const r = req as unknown as { business_email: string; request_id: string; title: string; compensation_type: string; compensation_amount: number; status: string; deadline: string | null; collaboration_type: string }
+        return (
                         <div
                             key={req.request_id}
                             className="border border-border bg-card p-5 rounded-sm shadow-sm space-y-4 hover:border-primary/50 transition-colors"
@@ -121,7 +139,7 @@ export default function CreatorRequestsPage() {
                                         <Image
                                             unoptimized
                                             src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=200&auto=format&fit=crop"
-                                            alt={req.business_email || 'Business'}
+                                            alt={r.business_email || 'Business'}
                                             width={80}
                                             height={80}
                                             className="size-full object-cover"
@@ -130,7 +148,7 @@ export default function CreatorRequestsPage() {
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <h3 className="text-sm font-bold text-foreground">
-                                                {req.business_email?.split('@')[0] || 'Business'}
+                                                {r.business_email?.split('@')[0] || 'Business'}
                                             </h3>
                                             <span className="text-[10px] text-muted-foreground font-mono">
                                                 {req.request_id}
@@ -210,8 +228,8 @@ export default function CreatorRequestsPage() {
                                 </Link>
                             </div>
                         </div>
-                    ))
-                )}
+)}
+                ))}
             </div>
         </main>
     )

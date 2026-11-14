@@ -1,29 +1,9 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
-import { initDb, closeDb, type SqlDatabase } from '@/lib/db'
-import { requireAuth } from '@/lib/api-auth'
+import { initDb } from '@/lib/db'
+import { requireAuth, saveAndClose } from '@/lib/api-auth'
 import crypto from 'crypto'
 
-function saveAndClose(db: SqlDatabase) {
-  try {
-    const data = db.export()
-    const fs = require('fs')
-    const path = require('path')
-    const dbDir = path.dirname(
-      process.env.DATABASE_URL
-        ? process.env.DATABASE_URL.replace(/^sqlite:/, '')
-        : path.join(process.cwd(), '.data', 'goa-creator.db')
-    )
-    if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true })
-    fs.writeFileSync(
-      process.env.DATABASE_URL
-        ? process.env.DATABASE_URL.replace(/^sqlite:/, '')
-        : path.join(process.cwd(), '.data', 'goa-creator.db'),
-      Buffer.from(data)
-    )
-  } catch {}
-  closeDb()
-}
 
 export async function GET(request: Request) {
   const auth = await requireAuth()
@@ -43,7 +23,7 @@ export async function GET(request: Request) {
       JOIN users u2 ON c.business_id = u2.user_id
       WHERE r.reviewer_id = ?
     `
-    const params: any[] = [auth.user.user_id]
+    const params: unknown[] = [auth.user.user_id]
 
     if (filter === 'with-reviews') {
       query += ' AND r.comment IS NOT NULL AND r.comment != ""'
@@ -56,7 +36,7 @@ export async function GET(request: Request) {
 
     query += ' ORDER BY r.created_at DESC'
 
-    const rows = db.query(query).all(params) as any[]
+    const rows = db.query(query).all(params) as unknown as Record<string, unknown>[]
     saveAndClose(db)
     return NextResponse.json({ success: true, data: rows })
   } catch {
@@ -89,7 +69,7 @@ export async function POST(request: Request) {
       .query(
         'SELECT * FROM collaborations WHERE collaboration_id = ? AND creator_id = ? AND status = ?'
       )
-      .get(collaboration_id, auth.user.user_id, 'completed') as any | null
+      .get(collaboration_id, auth.user.user_id, 'completed') as unknown as { [key: string]: unknown } | null
 
     if (!collab) {
       saveAndClose(db)

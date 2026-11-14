@@ -1,28 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
-import { initDb, closeDb, type SqlDatabase } from '@/lib/db'
-import { requireAuth } from '@/lib/api-auth'
+import { initDb } from '@/lib/db'
+import { requireAuth, saveAndClose } from '@/lib/api-auth'
 
-function saveAndClose(db: SqlDatabase) {
-  try {
-    const data = db.export()
-    const fs = require('fs')
-    const path = require('path')
-    const dbDir = path.dirname(
-      process.env.DATABASE_URL
-        ? process.env.DATABASE_URL.replace(/^sqlite:/, '')
-        : path.join(process.cwd(), '.data', 'goa-creator.db')
-    )
-    if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true })
-    fs.writeFileSync(
-      process.env.DATABASE_URL
-        ? process.env.DATABASE_URL.replace(/^sqlite:/, '')
-        : path.join(process.cwd(), '.data', 'goa-creator.db'),
-      Buffer.from(data)
-    )
-  } catch {}
-  closeDb()
-}
 
 export async function GET(request: Request) {
   const auth = await requireAuth()
@@ -49,7 +29,7 @@ export async function GET(request: Request) {
          JOIN users u2 ON c.business_id = u2.user_id
          WHERE c.collaboration_id = ? AND c.creator_id = ?`
       )
-      .get(collaborationId, auth.user.user_id) as any | null
+      .get(collaborationId, auth.user.user_id) as unknown as { [key: string]: unknown } | null
 
     if (!collab) {
       saveAndClose(db)
@@ -62,12 +42,12 @@ export async function GET(request: Request) {
     // Get associated payment
     const payment = db
       .query('SELECT * FROM payments WHERE collaboration_id = ?')
-      .get(collaborationId) as any | null
+      .get(collaborationId) as unknown as { [key: string]: unknown } | null
 
     // Get reviews
     const reviews = db
       .query('SELECT * FROM reviews WHERE collaboration_id = ?')
-      .all(collaborationId) as any[]
+      .all(collaborationId) as unknown as Record<string, unknown>[]
 
     saveAndClose(db)
     return NextResponse.json({

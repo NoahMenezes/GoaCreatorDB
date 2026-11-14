@@ -1,28 +1,9 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
-import { initDb, closeDb, type SqlDatabase } from '@/lib/db'
+import { initDb } from '@/lib/db'
+import { saveAndClose } from '@/lib/api-auth'
 import crypto from 'crypto'
 
-function saveAndClose(db: SqlDatabase) {
-  try {
-    const data = db.export()
-    const fs = require('fs')
-    const path = require('path')
-    const dbDir = path.dirname(
-      process.env.DATABASE_URL
-        ? process.env.DATABASE_URL.replace(/^sqlite:/, '')
-        : path.join(process.cwd(), '.data', 'goa-creator.db')
-    )
-    if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true })
-    fs.writeFileSync(
-      process.env.DATABASE_URL
-        ? process.env.DATABASE_URL.replace(/^sqlite:/, '')
-        : path.join(process.cwd(), '.data', 'goa-creator.db'),
-      Buffer.from(data)
-    )
-  } catch {}
-  closeDb()
-}
 
 export async function POST(request: Request) {
   const body = await request.json()
@@ -39,7 +20,7 @@ export async function POST(request: Request) {
   try {
     const user = db
       .query('SELECT * FROM users WHERE email = ?')
-      .get(email.trim().toLowerCase()) as any | null
+      .get(email.trim().toLowerCase()) as unknown as { [key: string]: unknown } | null
 
     // Always return success to prevent email enumeration
     if (!user) {

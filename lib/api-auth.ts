@@ -1,7 +1,7 @@
 import { getSessionUser } from '@/lib/auth'
 import { saveAndClose } from '@/lib/api-helpers'
 
-export async function requireAuth(): Promise<{ user: any; role: string } | Response> {
+export async function requireAuth(): Promise<{ user: Record<string, unknown>; role: string } | Response> {
   const session = await getSessionUser()
   if (!session) {
     return new Response(

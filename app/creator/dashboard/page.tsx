@@ -10,13 +10,10 @@ import {
     ShieldCheck,
     Star,
     TrendingUp,
-    Users,
-    Rocket,
     ChevronRight,
-    ExternalLink,
-    Send,
     Bell,
 } from 'lucide-react'
+import { CollaborationRequestRow, CreatorRow, UserRow } from '@/lib/db'
 
 const statCards = [
     {
@@ -54,16 +51,14 @@ const statCards = [
 ]
 
 export default function CreatorDashboardPage() {
-    const [stats, setStats] = useState<Record<string, any>>({})
-    const [requests, setRequests] = useState<any[]>([])
-    const [user, setUser] = useState<any>(null)
-    const [profile, setProfile] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
+    const [stats, setStats] = useState<Record<string, unknown>>({})
+    const [requests, setRequests] = useState<CollaborationRequestRow[]>([])
+    const [user, setUser] = useState<UserRow | null>(null)
+    const [profile, setProfile] = useState<CreatorRow | null>(null)
     const [availability, setAvailability] = useState(false)
     const [profileCompleteness, setProfileCompleteness] = useState(0)
 
     useEffect(() => {
-        let cancelled = false
         const fetchData = async () => {
             try {
                 const [statsRes, requestsRes, profileRes] = await Promise.all([
@@ -78,22 +73,19 @@ export default function CreatorDashboardPage() {
                 }
                 if (requestsRes.ok) {
                     const reqData = await requestsRes.json()
-                    setRequests(reqData.data || [])
+                    setRequests((reqData.data || []) as unknown as CollaborationRequestRow[])
                 }
                 if (profileRes.ok) {
                     const profileData = await profileRes.json()
-                    setUser(profileData.data?.user || null)
-                    setProfile(profileData.data?.profile || null)
+                    setUser((profileData.data?.user || null) as unknown as UserRow | null)
+                    setProfile((profileData.data?.profile || null) as unknown as CreatorRow | null)
                     setProfileCompleteness(profileData.data?.completeness || 0)
                 }
             } catch (err) {
                 console.error('Dashboard load error:', err)
-            } finally {
-                if (!cancelled) setLoading(false)
             }
         }
         fetchData()
-        return () => { cancelled = true }
     }, [])
 
     return (
@@ -104,7 +96,7 @@ export default function CreatorDashboardPage() {
                     <div className="flex items-center gap-2">
                         <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wider">
                             <MapPin className="size-3" />
-                            {profile?.location ? (
+                            {profile?.location_id ? (
                                 <span>{String(profile.location_id || '')}</span>
                             ) : (
                                 <span>Assagao, Goa</span>
@@ -118,7 +110,7 @@ export default function CreatorDashboardPage() {
                         Welcome back, {user?.email?.split('@')[0] || 'Creator'}
                     </h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        You have {stats.new_requests || 0} incoming partnership request{stats.new_requests !== 1 ? 's' : ''} from businesses awaiting response.
+                        You have {(stats as { new_requests: number }).new_requests || 0} incoming partnership request{(stats as { new_requests: number }).new_requests !== 1 ? 's' : ''} from businesses awaiting response.
                     </p>
                 </div>
 
@@ -186,11 +178,17 @@ export default function CreatorDashboardPage() {
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {statCards.map((card) => {
                     const Icon = card.icon
-                    let value = '--'
-                    if (card.title === 'New Requests') value = stats.new_requests || 0
-                    if (card.title === 'Accepted Collabs') value = stats.accepted_collaborations || 0
-                    if (card.title === 'Completed Campaigns') value = stats.completed_campaigns || 0
-                    if (card.title === 'Average Rating') value = stats.average_rating || 0
+                    const s = stats as {
+                    new_requests: number
+                    accepted_collaborations: number
+                    completed_campaigns: number
+                    average_rating: number
+                }
+                    let value: string | number = '--'
+                    if (card.title === 'New Requests') value = s.new_requests || 0
+                    if (card.title === 'Accepted Collabs') value = s.accepted_collaborations || 0
+                    if (card.title === 'Completed Campaigns') value = s.completed_campaigns || 0
+                    if (card.title === 'Average Rating') value = s.average_rating || 0
 
                     return (
                         <div
@@ -246,7 +244,9 @@ export default function CreatorDashboardPage() {
                                 <p className="text-sm text-muted-foreground">No pending requests at the moment.</p>
                             </div>
                         ) : (
-                            requests.slice(0, 3).map((req) => (
+                            requests.slice(0, 3).map((req) => {
+        const r = req as unknown as { business_email: string; title: string; compensation_type: string; compensation_amount: number; status: string; deadline: string | null }
+        return (
                                 <div
                                     key={req.request_id}
                                     className="border border-border bg-card p-5 rounded-sm shadow-sm"
@@ -256,7 +256,7 @@ export default function CreatorDashboardPage() {
                                             <div className="size-12 overflow-hidden border border-border shrink-0 relative rounded-md">
                                                 <Image
                                                     src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=200&auto=format&fit=crop"
-                                                    alt={req.business_email || 'Business'}
+                                                    alt={r.business_email || 'Business'}
                                                     width={56}
                                                     height={56}
                                                     className="size-full object-cover"
@@ -265,11 +265,11 @@ export default function CreatorDashboardPage() {
                                             <div className="space-y-0.5">
                                                 <div className="flex items-center gap-1">
                                                     <h3 className="text-sm font-bold text-foreground truncate">
-                                                        {req.business_email?.split('@')[0] || 'Business'}
+                                                        {r.business_email?.split('@')[0] || 'Business'}
                                                     </h3>
                                                 </div>
                                                 <p className="text-[10px] text-muted-foreground">
-                                                    {req.title}
+{r.title}
                                                 </p>
                                                 <div className="flex items-center gap-2 mt-1.5">
                                                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-bold ${req.compensation_type === 'paid' ? 'bg-primary/10 border-primary/20 text-primary' : 'border-border text-muted-foreground bg-background'}`}>
@@ -312,9 +312,10 @@ export default function CreatorDashboardPage() {
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))
-                        )}
+</div>
+                                )
+                            }
+                        ))}
                     </div>
                 </div>
 

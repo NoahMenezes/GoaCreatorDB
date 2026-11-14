@@ -12,43 +12,38 @@ import {
     Store,
     TrendingUp,
     Users,
-    Loader2,
 } from 'lucide-react'
 
 export default function BusinessDashboardPage() {
-    const [stats, setStats] = useState<Record<string, any>>({})
-    const [requests, setRequests] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
+    const [stats, setStats] = useState<Record<string, unknown>>({})
+    const [requests, setRequests] = useState<Record<string, unknown>[]>([])
     const [savedBookmarks, setSavedBookmarks] = useState<Record<string, boolean>>({})
-
-    useEffect(() => {
-        loadData()
-    }, [])
-
-    const loadData = async () => {
-        try {
-            const [statsRes, reqRes] = await Promise.all([
-                fetch('/api/dashboard/stats', { credentials: 'include' }),
-                fetch('/api/requests?status=all', { credentials: 'include' }),
-            ])
-            if (statsRes.ok) {
-                const data = await statsRes.json()
-                setStats(data.data || {})
-            }
-            if (reqRes.ok) {
-                const data = await reqRes.json()
-                setRequests(data.data || [])
-            }
-        } catch (err) {
-            console.error('Dashboard load error:', err)
-        } finally {
-            setLoading(false)
-        }
-    }
 
     const toggleBookmark = (name: string) => {
         setSavedBookmarks((prev) => ({ ...prev, [name]: !prev[name] }))
     }
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const [statsRes, reqRes] = await Promise.all([
+                    fetch('/api/dashboard/stats', { credentials: 'include' }),
+                    fetch('/api/requests?status=all', { credentials: 'include' }),
+                ])
+                if (statsRes.ok) {
+                    const data = await statsRes.json()
+                    setStats(data.data || {})
+                }
+                if (reqRes.ok) {
+                    const data = await reqRes.json()
+                    setRequests(data.data || [])
+                }
+            } catch (err) {
+                console.error('Dashboard load error:', err)
+            }
+        }
+        loadData()
+    }, [])
 
     const statCards = [
         {
@@ -77,14 +72,24 @@ export default function BusinessDashboardPage() {
         },
     ]
 
-    const collabRows = requests.map((req) => ({
-        name: req.business_email?.split('@')[0] || 'Business',
-        handle: `@${req.business_email?.split('@')[0] || 'biz'}`,
-        desc: req.objective,
-        type: `${req.compensation_type.charAt(0).toUpperCase() + req.compensation_type.slice(1)} · ₹${req.compensation_amount}`,
-        status: req.status.toUpperCase(),
-        date: req.deadline ? `Deadline: ${req.deadline}` : 'No deadline',
-    }))
+    const collabRows: { name: string; handle: string; desc: string; type: string; status: string; date: string }[] = requests.map((req) => {
+        const r = req as {
+            business_email: string
+            objective: string
+            compensation_type: string
+            compensation_amount: number
+            status: string
+            deadline: string | null
+        }
+        return {
+            name: r.business_email.split('@')[0] || 'Business',
+            handle: `@${r.business_email.split('@')[0] || 'biz'}`,
+            desc: r.objective,
+            type: `${r.compensation_type.charAt(0).toUpperCase() + r.compensation_type.slice(1)} · ₹${r.compensation_amount}`,
+            status: r.status.toUpperCase(),
+            date: r.deadline ? `Deadline: ${r.deadline}` : 'No deadline',
+        }
+    })
 
     const recommendations = [
         {

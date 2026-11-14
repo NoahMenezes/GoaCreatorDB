@@ -1,29 +1,9 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
-import { initDb, closeDb, type SqlDatabase } from '@/lib/db'
+import { initDb } from '@/lib/db'
+import { saveAndClose } from '@/lib/api-auth'
 import { hashPassword } from '@/lib/auth'
-import crypto from 'crypto'
 
-function saveAndClose(db: SqlDatabase) {
-  try {
-    const data = db.export()
-    const fs = require('fs')
-    const path = require('path')
-    const dbDir = path.dirname(
-      process.env.DATABASE_URL
-        ? process.env.DATABASE_URL.replace(/^sqlite:/, '')
-        : path.join(process.cwd(), '.data', 'goa-creator.db')
-    )
-    if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true })
-    fs.writeFileSync(
-      process.env.DATABASE_URL
-        ? process.env.DATABASE_URL.replace(/^sqlite:/, '')
-        : path.join(process.cwd(), '.data', 'goa-creator.db'),
-      Buffer.from(data)
-    )
-  } catch {}
-  closeDb()
-}
 
 export async function POST(request: Request) {
   const body = await request.json()
@@ -49,7 +29,7 @@ export async function POST(request: Request) {
       .query(
         'SELECT * FROM sessions WHERE token = ? AND expires_at > ?'
       )
-      .get(`reset-${token}`, new Date().toISOString()) as any | null
+      .get(`reset-${token}`, new Date().toISOString()) as unknown as { [key: string]: unknown } | null
 
     if (!session) {
       saveAndClose(db)

@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
-import { initDb, closeDb, type SqlDatabase } from '@/lib/db'
+import { initDb } from '@/lib/db'
 import { requireAuth, saveAndClose } from '@/lib/api-auth'
 
 export async function GET() {
