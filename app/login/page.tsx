@@ -29,6 +29,7 @@ function LoginContent() {
     const registeredRole = searchParams.get('registered')
     const registeredEmail = searchParams.get('email')
     const registeredName = searchParams.get('name')
+    const resetSuccess = searchParams.get('reset') === 'success'
 
     const [activeTab, setActiveTab] = useState<'business' | 'creator'>(
         registeredRole === 'business' ? 'business' : 'business'
@@ -40,7 +41,9 @@ function LoginContent() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [successBanner, setSuccessBanner] = useState<string | null>(
-        registeredEmail
+        resetSuccess
+            ? 'Password has been reset successfully! Please sign in with your new password.'
+            : registeredEmail
             ? `Profile created for ${registeredName || 'your establishment'}! Please sign in with your credentials to enter GoaConnect.`
             : null
     )
@@ -271,11 +274,7 @@ function LoginContent() {
                                     </label>
 
                                     <Link
-                                        href="#"
-                                        onClick={(e) => {
-                                            e.preventDefault()
-                                            alert('For DBMS college project demo, you can use the quick demo accounts below.')
-                                        }}
+                                        href="/forgot-password"
                                         className="font-medium text-primary hover:underline"
                                     >
                                         Forgot password?
