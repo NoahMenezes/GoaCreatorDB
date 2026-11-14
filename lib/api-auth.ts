@@ -50,4 +50,16 @@ export async function requireAuth(reqOrToken?: Request | string): Promise<AuthCo
   }
 }
 
+export async function requireAdmin(reqOrToken?: Request | string): Promise<AuthContext | Response> {
+  const auth = await requireAuth(reqOrToken)
+  if (auth instanceof Response) return auth
+  if (auth.role !== 'admin') {
+    return new Response(
+      JSON.stringify({ success: false, error: 'Forbidden: Admin access required' }),
+      { status: 403, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+  return auth
+}
+
 export { saveAndClose }
