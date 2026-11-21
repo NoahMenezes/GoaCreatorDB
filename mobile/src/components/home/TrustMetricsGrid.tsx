@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
 
 interface TrustMetricsGridProps {
-  metrics: Array<{ value: string; title: string; subtitle: string }>;
+  metrics: { value: string; title: string; subtitle: string }[];
 }
 
 export function TrustMetricsGrid({ metrics }: TrustMetricsGridProps) {

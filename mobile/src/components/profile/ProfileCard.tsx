@@ -10,7 +10,7 @@ export interface ProfileDetails {
   location: string;
   bio: string;
   tier: string;
-  stats: Array<{ label: string; value: string }>;
+  stats: { label: string; value: string }[];
 }
 
 interface ProfileCardProps {

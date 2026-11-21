@@ -1,6 +1,9 @@
 import { Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
-import { Creator, MOCK_CREATORS, TRUST_METRICS } from '@/constants/mock-data';
+import { MOCK_CREATORS, TRUST_METRICS } from '@/constants/mock-data';
+import { saveToken, getToken, removeToken } from './storage';
+import { formatFollowers, mapBackendCreator } from './mappers';
+
+export { saveToken, getToken, removeToken, formatFollowers, mapBackendCreator };
 
 function getBaseUrl() {
   if (process.env.EXPO_PUBLIC_API_URL) {
@@ -19,72 +22,6 @@ function getBaseUrl() {
 }
 
 export const API_BASE_URL = getBaseUrl();
-
-// Safe storage for session token
-export async function saveToken(token: string) {
-  try {
-    if (Platform.OS === 'web') {
-      if (typeof window !== 'undefined') localStorage.setItem('goa_session_token', token);
-    } else {
-      await SecureStore.setItemAsync('goa_session_token', token);
-    }
-  } catch {}
-}
-
-export async function getToken(): Promise<string | null> {
-  try {
-    if (Platform.OS === 'web') {
-      if (typeof window !== 'undefined') return localStorage.getItem('goa_session_token');
-    } else {
-      return await SecureStore.getItemAsync('goa_session_token');
-    }
-  } catch {}
-  return null;
-}
-
-export async function removeToken() {
-  try {
-    if (Platform.OS === 'web') {
-      if (typeof window !== 'undefined') localStorage.removeItem('goa_session_token');
-    } else {
-      await SecureStore.deleteItemAsync('goa_session_token');
-    }
-  } catch {}
-}
-
-// Helper to format follower counts into e.g. 120K
-function formatFollowers(num: number): string {
-  if (!num) return '0';
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-  if (num >= 1000) return Math.round(num / 1000) + 'K';
-  return String(num);
-}
-
-// Convert a backend creator card row to our mobile Creator model
-export function mapBackendCreator(row: any): Creator {
-  const creatorId = String(row.creator_id || row.id || Math.random());
-  const fallback = MOCK_CREATORS[Math.abs(Number(row.creator_id || 1)) % MOCK_CREATORS.length];
-
-  return {
-    id: creatorId,
-    name: row.full_name || row.displayName || row.name || 'Goan Creator',
-    handle: row.handle ? (row.handle.startsWith('@') ? row.handle : `@${row.handle}`) : fallback.handle,
-    avatar: row.avatar_url || row.avatar || fallback.avatar,
-    cover: row.cover_image_url || row.coverImage || fallback.cover,
-    tag: row.primary_category || (Array.isArray(row.categories) ? row.categories[0] : null) || fallback.tag,
-    location: row.area_name || row.location || 'Goa',
-    district: row.district === 'South Goa' ? 'South Goa' : 'North Goa',
-    followers: row.total_followers ? formatFollowers(Number(row.total_followers)) : fallback.followers,
-    engagement: row.avg_engagement_rate ? `${Number(row.avg_engagement_rate).toFixed(1)}%` : fallback.engagement,
-    rate: row.min_paid_rate ? `Min ₹${Number(row.min_paid_rate).toLocaleString('en-IN')}` : fallback.rate,
-    collabType: row.accepts_barter ? 'BARTER FRIENDLY' : 'PAID ONLY',
-    verified: Boolean(row.is_verified),
-    reviewsCount: Number(row.review_count || row.reviewsCount || fallback.reviewsCount),
-    rating: Number(row.avg_rating || fallback.rating),
-    bio: row.bio || fallback.bio,
-    specialties: Array.isArray(row.categories) && row.categories.length > 0 ? row.categories : fallback.specialties,
-  };
-}
 
 export const api = {
   // Authentication: Login

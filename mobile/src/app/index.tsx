@@ -38,7 +38,7 @@ export default function HomeScreen() {
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
   const [bookingModalVisible, setBookingModalVisible] = useState(false);
   const [authModalVisible, setAuthModalVisible] = useState(false);
-  const [welcomeVisible, setWelcomeVisible] = useState(true);
+  const [welcomeVisible, setWelcomeVisible] = useState(false);
   const [revealVisible, setRevealVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [metrics, setMetrics] = useState(TRUST_METRICS);
