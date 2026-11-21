@@ -42,6 +42,7 @@ export async function POST(request: Request) {
         success: true,
         user,
         profile,
+        token,
         message: 'Registration successful!',
       },
       { status: 201 }

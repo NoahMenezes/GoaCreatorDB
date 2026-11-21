@@ -25,6 +25,7 @@ export async function POST(request: Request) {
       success: true,
       user,
       profile,
+      token,
       message: 'Signed in successfully!',
     })
 

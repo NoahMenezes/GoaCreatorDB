@@ -17,6 +17,7 @@ const eslintConfig = defineConfig([
     // Ambient type declarations (any types are expected)
     "types/**",
     "e2e/**",
+    "mobile/**",
   ]),
   {
     rules: {
