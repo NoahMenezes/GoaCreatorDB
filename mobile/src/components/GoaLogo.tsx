@@ -30,8 +30,8 @@ export function GoaLogo({ size = 'default' }: { size?: 'small' | 'default' | 'la
         <Text style={[styles.goaText, { fontSize: iconSizes.text, color: theme.text }]}>
           Goa
         </Text>
-        <Text style={[styles.connectText, { fontSize: iconSizes.sub, color: theme.secondary }]}>
-          Connect
+        <Text style={[styles.connectText, { fontSize: iconSizes.sub, color: theme.primary }]}>
+          CreatorDB
         </Text>
       </View>
     </View>
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   iconBox: {
-    borderRadius: 8,
+    borderRadius: 0,
     borderWidth: 1.5,
     justifyContent: 'center',
     alignItems: 'center',

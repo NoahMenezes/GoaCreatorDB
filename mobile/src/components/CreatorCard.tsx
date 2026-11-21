@@ -36,9 +36,9 @@ export function CreatorCard({ creator, onBookPress, onCardPress }: CreatorCardPr
         <Image source={{ uri: creator.cover }} style={styles.coverImage} resizeMode="cover" />
         <View style={styles.coverOverlay} />
 
-        {/* Niche & District pills */}
+        {/* Niche & Bookmark */}
         <View style={styles.topBadgesRow}>
-          <View style={[styles.pillBadge, { backgroundColor: 'rgba(0,0,0,0.65)' }]}>
+          <View style={[styles.pillBadge, { backgroundColor: 'rgba(8,9,13,0.85)', borderColor: theme.border }]}>
             <Text style={styles.pillText}>{creator.tag}</Text>
           </View>
 
@@ -47,12 +47,12 @@ export function CreatorCard({ creator, onBookPress, onCardPress }: CreatorCardPr
             onPress={() => setBookmarked(!bookmarked)}
             style={[
               styles.bookmarkBtn,
-              { backgroundColor: bookmarked ? theme.primary : 'rgba(0,0,0,0.6)' },
+              { backgroundColor: bookmarked ? theme.primary : 'rgba(8,9,13,0.85)', borderColor: theme.border },
             ]}>
             <Feather
               name="bookmark"
-              size={14}
-              color={bookmarked ? '#FFFFFF' : '#FFFFFF'}
+              size={13}
+              color={bookmarked ? '#FFFFFF' : '#9497A8'}
             />
           </TouchableOpacity>
         </View>
@@ -67,6 +67,10 @@ export function CreatorCard({ creator, onBookPress, onCardPress }: CreatorCardPr
                   creator.collabType === 'BARTER FRIENDLY'
                     ? theme.badgeBarterBg
                     : theme.badgePaidBg,
+                borderColor:
+                  creator.collabType === 'BARTER FRIENDLY'
+                    ? theme.badgeBarter
+                    : theme.badgePaid,
               },
             ]}>
             <Text
@@ -92,7 +96,7 @@ export function CreatorCard({ creator, onBookPress, onCardPress }: CreatorCardPr
             <Image source={{ uri: creator.avatar }} style={styles.avatar} />
             {creator.verified && (
               <View style={[styles.verifiedBadge, { backgroundColor: theme.primary }]}>
-                <Feather name="check" size={10} color="#FFFFFF" />
+                <Feather name="check" size={9} color="#FFFFFF" />
               </View>
             )}
           </View>
@@ -103,13 +107,13 @@ export function CreatorCard({ creator, onBookPress, onCardPress }: CreatorCardPr
                 {creator.name}
               </Text>
             </View>
-            <Text style={[styles.handleText, { color: theme.secondary }]}>
+            <Text style={[styles.handleText, { color: theme.textSecondary }]}>
               {creator.handle}
             </Text>
           </View>
 
-          <View style={styles.locationPill}>
-            <Feather name="map-pin" size={11} color={theme.textSecondary} />
+          <View style={[styles.locationPill, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Feather name="map-pin" size={10} color={theme.textSecondary} />
             <Text style={[styles.locationText, { color: theme.textSecondary }]}>
               {creator.location}
             </Text>
@@ -134,13 +138,13 @@ export function CreatorCard({ creator, onBookPress, onCardPress }: CreatorCardPr
           </View>
         </View>
 
-        {/* Action Button: Book Collab */}
+        {/* Action Button: Book Collab (Vibrant red with sharp 8px corners) */}
         <TouchableOpacity
-          activeOpacity={0.85}
+          activeOpacity={0.88}
           onPress={() => onBookPress(creator)}
           style={[styles.bookButton, { backgroundColor: theme.primary }]}>
-          <Feather name="send" size={14} color="#FFFFFF" style={{ marginRight: 6 }} />
-          <Text style={styles.bookButtonText}>Send Collab Request</Text>
+          <Feather name="send" size={13} color="#FFFFFF" style={{ marginRight: 6 }} />
+          <Text style={styles.bookButtonText}>Send Collab Proposal</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -149,21 +153,16 @@ export function CreatorCard({ creator, onBookPress, onCardPress }: CreatorCardPr
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 12,
+    borderRadius: 0,
     borderWidth: 1,
     overflow: 'hidden',
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
   },
   coverContainer: {
-    height: 140,
+    height: 145,
     width: '100%',
     position: 'relative',
-    backgroundColor: '#333',
+    backgroundColor: '#121319',
   },
   coverImage: {
     width: '100%',
@@ -175,7 +174,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: 'rgba(8,9,13,0.3)',
   },
   topBadgesRow: {
     position: 'absolute',
@@ -189,7 +188,8 @@ const styles = StyleSheet.create({
   pillBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 0,
+    borderWidth: 1,
   },
   pillText: {
     color: '#FFFFFF',
@@ -200,7 +200,8 @@ const styles = StyleSheet.create({
   bookmarkBtn: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: 0,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -212,7 +213,8 @@ const styles = StyleSheet.create({
   collabBadge: {
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 4,
+    borderRadius: 0,
+    borderWidth: 1,
   },
   collabBadgeText: {
     fontSize: 9,
@@ -232,21 +234,21 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
+    width: 42,
+    height: 42,
+    borderRadius: 0,
+    borderWidth: 1.5,
+    borderColor: '#232532',
   },
   verifiedBadge: {
     position: 'absolute',
     bottom: -1,
     right: -1,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 15,
+    height: 15,
+    borderRadius: 0,
     borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+    borderColor: '#121319',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -263,13 +265,16 @@ const styles = StyleSheet.create({
   },
   handleText: {
     fontSize: 12,
-    fontWeight: '600',
     marginTop: 1,
   },
   locationPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 0,
+    borderWidth: 1,
   },
   locationText: {
     fontSize: 11,
@@ -280,7 +285,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 0,
     borderWidth: 1,
     marginBottom: 12,
   },
@@ -298,14 +303,14 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    height: 20,
+    height: 18,
   },
   bookButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 0,
   },
   bookButtonText: {
     color: '#FFFFFF',

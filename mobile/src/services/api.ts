@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 import { Creator, MOCK_CREATORS, TRUST_METRICS } from '@/constants/mock-data';
 
 function getBaseUrl() {
@@ -18,6 +19,38 @@ function getBaseUrl() {
 }
 
 export const API_BASE_URL = getBaseUrl();
+
+// Safe storage for session token
+export async function saveToken(token: string) {
+  try {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined') localStorage.setItem('goa_session_token', token);
+    } else {
+      await SecureStore.setItemAsync('goa_session_token', token);
+    }
+  } catch {}
+}
+
+export async function getToken(): Promise<string | null> {
+  try {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined') return localStorage.getItem('goa_session_token');
+    } else {
+      return await SecureStore.getItemAsync('goa_session_token');
+    }
+  } catch {}
+  return null;
+}
+
+export async function removeToken() {
+  try {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined') localStorage.removeItem('goa_session_token');
+    } else {
+      await SecureStore.deleteItemAsync('goa_session_token');
+    }
+  } catch {}
+}
 
 // Helper to format follower counts into e.g. 120K
 function formatFollowers(num: number): string {
@@ -54,6 +87,102 @@ export function mapBackendCreator(row: any): Creator {
 }
 
 export const api = {
+  // Authentication: Login
+  async login(email: string, pass: string) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password: pass }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.token) {
+          await saveToken(data.token);
+        }
+        return { success: true, user: data.user, profile: data.profile };
+      }
+      return { success: false, error: data.error || 'Invalid credentials' };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Network error connecting to GoaConnect backend' };
+    }
+  },
+
+  // Authentication: Register
+  async register(payload: {
+    email: string;
+    password: string;
+    role: 'business' | 'creator';
+    fullName?: string;
+    locationId?: number;
+    businessName?: string;
+    industry?: string;
+  }) {
+    try {
+      const body: any = {
+        email: payload.email.trim(),
+        password: payload.password,
+        role: payload.role,
+        location_id: payload.locationId || 1,
+      };
+
+      if (payload.role === 'business') {
+        body.businessData = {
+          business_name: payload.businessName || payload.fullName || 'Goan Hospitality Venue',
+          industry: payload.industry || 'Food & Beach Dining',
+        };
+      } else {
+        body.creatorData = {
+          full_name: payload.fullName || 'Goa Creator',
+          bio: 'Verified Goan storyteller and content creator',
+          accepts_barter: true,
+          min_paid_rate: 6500,
+        };
+      }
+
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.token) {
+          await saveToken(data.token);
+        }
+        return { success: true, user: data.user, profile: data.profile };
+      }
+      return { success: false, error: data.error || 'Registration failed' };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Network error during registration' };
+    }
+  },
+
+  // Authentication: Current User
+  async getMe() {
+    try {
+      const token = await getToken();
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const res = await fetch(`${API_BASE_URL}/api/auth/me`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        return data;
+      }
+    } catch {}
+    return { authenticated: false, user: null, profile: null };
+  },
+
+  // Authentication: Logout
+  async logout() {
+    try {
+      await fetch(`${API_BASE_URL}/api/auth/logout`, { method: 'POST' });
+    } catch {}
+    await removeToken();
+  },
+
   // Fetch live public platform KPIs
   async getPublicStats() {
     try {
@@ -150,9 +279,11 @@ export const api = {
   // Fetch collaborations
   async getCollaborations() {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/collaborations`, {
-        headers: { Accept: 'application/json' },
-      });
+      const token = await getToken();
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${API_BASE_URL}/api/collaborations`, { headers });
       if (res.ok) {
         const json = await res.json();
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
@@ -189,17 +320,20 @@ export const api = {
     deadline?: string;
   }) {
     try {
-      // Future date for deadline
+      const token = await getToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 14);
       const deadlineStr = futureDate.toISOString().split('T')[0];
 
       const res = await fetch(`${API_BASE_URL}/api/requests`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           creator_id: Number(payload.creatorId) || 1,
           collab_type: payload.collabType,
@@ -216,7 +350,7 @@ export const api = {
         return { success: true, data: json };
       }
     } catch {
-      // Offline fallback simulation
+      // Offline simulation
     }
     return { success: true, simulated: true };
   },

@@ -1,89 +1,109 @@
 export const Colors = {
-  light: {
-    primary: '#0C4E40',
-    primaryHover: '#093D32',
-    primaryLight: '#E6F4F0',
-    primaryBorder: '#B2DFD4',
-    secondary: '#167D65',
-    accent: '#B9E4D2',
-    gold: '#B98A2C',
-    goldLight: '#FEF9EE',
-    goldBorder: '#F6E5B8',
-
-    background: '#FFFFFF',
-    card: '#FFFFFF',
-    surface: '#F8F9FA',
-    border: '#E5E7EB',
-    borderSubtle: '#F0F0F0',
-
-    text: '#141414',
-    textSecondary: '#6B7280',
-    textMuted: '#9CA3AF',
-    textInverse: '#FFFFFF',
-
-    tagFood: '#DC2626',
-    tagFoodBg: '#FEF2F2',
-    tagStay: '#2563EB',
-    tagStayBg: '#EFF6FF',
-    tagNight: '#7C3AED',
-    tagNightBg: '#F5F3FF',
-    tagTravel: '#059669',
-    tagTravelBg: '#ECFDF5',
-
-    badgeBarter: '#0C4E40',
-    badgeBarterBg: '#E8F5F1',
-    badgePaid: '#D97706',
-    badgePaidBg: '#FEF3C7',
-
-    tabBarBackground: '#FFFFFF',
-    tabBarBorder: '#E5E7EB',
-    tabBarActive: '#0C4E40',
-    tabBarInactive: '#9CA3AF',
-  },
   dark: {
-    primary: '#167D65',
-    primaryHover: '#1B9E7F',
-    primaryLight: '#123930',
-    primaryBorder: '#1F5245',
-    secondary: '#2C5F53',
-    accent: '#B9E4D2',
-    gold: '#C9A227',
-    goldLight: '#2C2512',
-    goldBorder: '#4E421F',
+    // GoaCreatorDB Visual Identity: Charcoal, Obsidian, and Crimson Red
+    primary: '#EF1717',
+    primaryHover: '#D61212',
+    deepRed: '#B90F19',
+    primaryLight: 'rgba(239, 23, 23, 0.12)',
+    primaryBorder: 'rgba(239, 23, 23, 0.35)',
 
-    background: '#0A0A0A',
-    card: '#141414',
-    surface: '#1A1A1A',
-    border: '#272727',
-    borderSubtle: '#1F1F1F',
+    // Secondary & Highlights
+    secondary: '#111214',
+    accent: '#EF1717',
+    gold: '#F59E0B',
+    goldLight: 'rgba(245, 158, 11, 0.12)',
+    goldBorder: 'rgba(245, 158, 11, 0.28)',
 
-    text: '#F5F5F4',
+    // Premium Charcoal & Black Surfaces (edge-to-edge full-screen)
+    background: '#090909',
+    card: '#111214',
+    surface: '#17191C',
+    border: '#22252A',
+    borderSubtle: '#191A20',
+
+    // High Contrast Typography
+    text: '#F5F5F5',
     textSecondary: '#A1A1AA',
-    textMuted: '#71717A',
-    textInverse: '#141414',
+    textMuted: '#686B78',
+    textInverse: '#090909',
 
-    tagFood: '#F87171',
-    tagFoodBg: '#3E1919',
-    tagStay: '#60A5FA',
-    tagStayBg: '#192C4E',
-    tagNight: '#A78BFA',
-    tagNightBg: '#2D1B4E',
-    tagTravel: '#34D399',
-    tagTravelBg: '#143B2A',
+    tagFood: '#EF1717',
+    tagFoodBg: 'rgba(239, 23, 23, 0.14)',
+    tagStay: '#3B82F6',
+    tagStayBg: 'rgba(59, 130, 246, 0.14)',
+    tagNight: '#A855F7',
+    tagNightBg: 'rgba(168, 85, 247, 0.14)',
+    tagTravel: '#10B981',
+    tagTravelBg: 'rgba(16, 185, 129, 0.14)',
 
-    badgeBarter: '#34D399',
-    badgeBarterBg: '#143B2A',
-    badgePaid: '#FBBF24',
-    badgePaidBg: '#3B2E14',
+    badgeBarter: '#EF1717',
+    badgeBarterBg: 'rgba(239, 23, 23, 0.12)',
+    badgePaid: '#F59E0B',
+    badgePaidBg: 'rgba(245, 158, 11, 0.12)',
 
-    tabBarBackground: '#121212',
-    tabBarBorder: '#272727',
-    tabBarActive: '#34D399',
-    tabBarInactive: '#71717A',
+    tabBarBackground: '#090909',
+    tabBarBorder: '#1A1B20',
+    tabBarActive: '#EF1717',
+    tabBarInactive: '#717482',
+  },
+  light: {
+    primary: '#EF1717',
+    primaryHover: '#D61212',
+    deepRed: '#B90F19',
+    primaryLight: 'rgba(239, 23, 23, 0.12)',
+    primaryBorder: 'rgba(239, 23, 23, 0.35)',
+
+    secondary: '#111214',
+    accent: '#EF1717',
+    gold: '#F59E0B',
+    goldLight: 'rgba(245, 158, 11, 0.12)',
+    goldBorder: 'rgba(245, 158, 11, 0.28)',
+
+    // Pure Dark-First architecture across both themes
+    background: '#090909',
+    card: '#111214',
+    surface: '#17191C',
+    border: '#22252A',
+    borderSubtle: '#191A20',
+
+    text: '#F5F5F5',
+    textSecondary: '#A1A1AA',
+    textMuted: '#686B78',
+    textInverse: '#090909',
+
+    tagFood: '#EF1717',
+    tagFoodBg: 'rgba(239, 23, 23, 0.14)',
+    tagStay: '#3B82F6',
+    tagStayBg: 'rgba(59, 130, 246, 0.14)',
+    tagNight: '#A855F7',
+    tagNightBg: 'rgba(168, 85, 247, 0.14)',
+    tagTravel: '#10B981',
+    tagTravelBg: 'rgba(16, 185, 129, 0.14)',
+
+    badgeBarter: '#EF1717',
+    badgeBarterBg: 'rgba(239, 23, 23, 0.12)',
+    badgePaid: '#F59E0B',
+    badgePaidBg: 'rgba(245, 158, 11, 0.12)',
+
+    tabBarBackground: '#090909',
+    tabBarBorder: '#1A1B20',
+    tabBarActive: '#EF1717',
+    tabBarInactive: '#717482',
   },
 } as const;
 
-export type ThemeColors = typeof Colors.light;
+export type ThemeColors = typeof Colors.dark;
+
+// Precision sharp corners (ZERO rounded borders everywhere)
+export const Radius = {
+  none: 0,
+  xs: 0,
+  sm: 0,
+  md: 0,
+  lg: 0,
+  xl: 0,
+  full: 0,
+} as const;
 
 export const Spacing = {
   half: 2,
@@ -116,12 +136,12 @@ export const Typography = {
   hero: {
     fontSize: 28,
     fontWeight: '800' as const,
-    letterSpacing: -0.5,
+    letterSpacing: -0.6,
   },
   h1: {
     fontSize: 22,
     fontWeight: '700' as const,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   h2: {
     fontSize: 18,
@@ -153,7 +173,7 @@ export const Typography = {
   caption: {
     fontSize: 10,
     fontWeight: '700' as const,
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
   },
 };

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Header } from '@/components/Header';
+import { CyberGlowBackground } from '@/components/CyberGlowBackground';
 import { MOCK_COLLABS } from '@/constants/mock-data';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/services/api';
@@ -39,11 +40,11 @@ export default function CollabsScreen() {
       case 'In Progress':
         return { bg: theme.primaryLight, text: theme.primary, border: theme.primaryBorder };
       case 'Accepted':
-        return { bg: '#ECFDF5', text: '#059669', border: '#A7F3D0' };
+        return { bg: 'rgba(16,185,129,0.15)', text: '#10B981', border: 'rgba(16,185,129,0.3)' };
       case 'Pending':
         return { bg: theme.goldLight, text: theme.gold, border: theme.goldBorder };
       case 'Completed':
-        return { bg: '#F3F4F6', text: '#4B5563', border: '#E5E7EB' };
+        return { bg: 'rgba(255,255,255,0.08)', text: '#9497A8', border: theme.border };
       default:
         return { bg: theme.surface, text: theme.text, border: theme.border };
     }
@@ -51,10 +52,11 @@ export default function CollabsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <CyberGlowBackground glowIntensity="subtle" />
       <Header />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Title & Stats */}
+        {/* Title */}
         <View style={styles.headerBox}>
           <Text style={[styles.title, { color: theme.text }]}>Collaboration Pipeline</Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
@@ -62,14 +64,14 @@ export default function CollabsScreen() {
           </Text>
         </View>
 
-        {/* Filter Tabs */}
+        {/* Filter Bar with sharp 8px corners */}
         <View style={[styles.filterBar, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           {(
             [
               { id: 'all', label: 'All' },
-              { id: 'active', label: 'Active (2)' },
-              { id: 'pending', label: 'Pending (1)' },
-              { id: 'completed', label: 'Done (1)' },
+              { id: 'active', label: 'Active' },
+              { id: 'pending', label: 'Pending' },
+              { id: 'completed', label: 'Done' },
             ] as const
           ).map((t) => {
             const active = filter === t.id;
@@ -113,7 +115,7 @@ export default function CollabsScreen() {
                   <Image source={{ uri: collab.creatorAvatar }} style={styles.avatar} />
                   <View style={styles.creatorInfo}>
                     <Text style={[styles.creatorName, { color: theme.text }]}>{collab.creatorName}</Text>
-                    <Text style={[styles.businessText, { color: theme.secondary }]}>
+                    <Text style={[styles.businessText, { color: theme.primary }]}>
                       {collab.businessName}
                     </Text>
                   </View>
@@ -137,13 +139,13 @@ export default function CollabsScreen() {
                     {collab.campaignTitle}
                   </Text>
                   <View style={styles.detailRow}>
-                    <Feather name="layers" size={13} color={theme.textSecondary} />
+                    <Feather name="layers" size={12} color={theme.textSecondary} />
                     <Text style={[styles.detailText, { color: theme.textSecondary }]}>
                       {collab.deliverables}
                     </Text>
                   </View>
                   <View style={styles.detailRow}>
-                    <Feather name="calendar" size={13} color={theme.textSecondary} />
+                    <Feather name="calendar" size={12} color={theme.textSecondary} />
                     <Text style={[styles.detailText, { color: theme.textSecondary }]}>
                       {collab.dates}
                     </Text>
@@ -164,12 +166,12 @@ export default function CollabsScreen() {
                       activeOpacity={0.8}
                       onPress={() => Alert.alert('Chat', `Open messaging with ${collab.creatorName}`)}
                       style={[styles.smallBtn, { borderColor: theme.border, backgroundColor: theme.surface }]}>
-                      <Feather name="message-square" size={13} color={theme.text} />
+                      <Feather name="message-square" size={12} color={theme.text} />
                       <Text style={[styles.smallBtnText, { color: theme.text }]}>Chat</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      activeOpacity={0.85}
+                      activeOpacity={0.88}
                       onPress={() =>
                         Alert.alert('Deliverables', `Viewing deliverable files for ${collab.campaignTitle}`)
                       }
@@ -192,7 +194,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 36,
+    paddingBottom: 40,
   },
   headerBox: {
     paddingHorizontal: 16,
@@ -202,7 +204,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '800',
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
     marginBottom: 4,
   },
   subtitle: {
@@ -213,7 +215,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 16,
     padding: 3,
-    borderRadius: 8,
+    borderRadius: 0,
     borderWidth: 1,
     marginBottom: 16,
   },
@@ -221,7 +223,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 7,
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 0,
   },
   filterTabText: {
     fontSize: 11,
@@ -232,7 +234,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   card: {
-    borderRadius: 12,
+    borderRadius: 0,
     borderWidth: 1,
     padding: 14,
   },
@@ -244,7 +246,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 0,
     marginRight: 10,
   },
   creatorInfo: {
@@ -261,13 +263,13 @@ const styles = StyleSheet.create({
   },
   statusBadge: {
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingVertical: 3,
+    borderRadius: 0,
     borderWidth: 1,
   },
   statusText: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   bodyBox: {
     gap: 4,
@@ -295,12 +297,12 @@ const styles = StyleSheet.create({
   },
   compLabel: {
     fontSize: 9,
-    fontWeight: '700',
+    fontWeight: '800',
     textTransform: 'uppercase',
   },
   compValue: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '800',
   },
   actionBtns: {
     flexDirection: 'row',
@@ -311,7 +313,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 0,
     borderWidth: 1,
     gap: 4,
   },
@@ -322,7 +324,7 @@ const styles = StyleSheet.create({
   smallBtnPrimary: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -332,4 +334,3 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
-

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Header } from '@/components/Header';
+import { CyberGlowBackground } from '@/components/CyberGlowBackground';
 import { PRICING_PLANS } from '@/constants/mock-data';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -17,7 +18,7 @@ export default function PricingScreen() {
 
   const handleSelectPlan = (planName: string) => {
     Alert.alert(
-      'Membership Plan Selected',
+      'Membership Tier',
       `You selected the ${planName} membership. Secure checkout and invoice generation will open next.`,
       [{ text: 'Continue' }, { text: 'Cancel', style: 'cancel' }]
     );
@@ -25,18 +26,16 @@ export default function PricingScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <CyberGlowBackground glowIntensity="subtle" />
       <Header />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.headerBox}>
-          <View style={styles.tagRow}>
-            <View style={[styles.greenDot, { backgroundColor: theme.primary }]} />
-            <Text style={[styles.tagText, { color: theme.primary }]}>MEMBERSHIP &amp; ACCESS</Text>
-          </View>
+          <Text style={[styles.tracker, { color: theme.primary }]}>MEMBERSHIP &amp; ACCESS</Text>
           <Text style={[styles.title, { color: theme.text }]}>Transparent Plans</Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-            Transparent, zero-hidden-fee memberships for Goan creators, villas, and hospitality brands.
+            Designed for emerging Goan creators, active influencers, and partner hotels.
           </Text>
         </View>
 
@@ -75,7 +74,7 @@ export default function PricingScreen() {
                   {plan.features.map((feature, fIdx) => (
                     <View key={fIdx} style={styles.featureItem}>
                       <View style={[styles.checkCircle, { backgroundColor: theme.primaryLight }]}>
-                        <Feather name="check" size={12} color={theme.primary} />
+                        <Feather name="check" size={11} color={theme.primary} />
                       </View>
                       <Text style={[styles.featureText, { color: theme.text }]}>{feature}</Text>
                     </View>
@@ -84,7 +83,7 @@ export default function PricingScreen() {
 
                 {/* CTA Button */}
                 <TouchableOpacity
-                  activeOpacity={0.85}
+                  activeOpacity={0.88}
                   onPress={() => handleSelectPlan(plan.name)}
                   style={[
                     styles.ctaButton,
@@ -106,15 +105,6 @@ export default function PricingScreen() {
             );
           })}
         </View>
-
-        {/* FAQ note */}
-        <View style={[styles.faqCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          <Feather name="help-circle" size={18} color={theme.primary} style={{ marginBottom: 6 }} />
-          <Text style={[styles.faqTitle, { color: theme.text }]}>Need custom agency terms?</Text>
-          <Text style={[styles.faqText, { color: theme.textSecondary }]}>
-            Hotels with 10+ villas or multi-city influencer rosters can contact our Goa team for dedicated billing and onboarding.
-          </Text>
-        </View>
       </ScrollView>
     </View>
   );
@@ -132,26 +122,16 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 8,
   },
-  tagRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    marginBottom: 4,
-  },
-  greenDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  tagText: {
+  tracker: {
     fontSize: 10,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
+    marginBottom: 4,
   },
   title: {
     fontSize: 22,
     fontWeight: '800',
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
     marginBottom: 4,
   },
   subtitle: {
@@ -164,26 +144,21 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   planCard: {
-    borderRadius: 14,
-    padding: 18,
+    borderRadius: 0,
+    padding: 16,
     position: 'relative',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
   },
   popularBadge: {
     position: 'absolute',
     top: 14,
     right: 14,
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
     paddingVertical: 3,
-    borderRadius: 4,
+    borderRadius: 0,
   },
   popularBadgeText: {
     color: '#FFFFFF',
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: '800',
     letterSpacing: 0.5,
   },
@@ -222,9 +197,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   checkCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 18,
+    height: 18,
+    borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -234,7 +209,7 @@ const styles = StyleSheet.create({
   },
   ctaButton: {
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -242,21 +217,4 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
-  faqCard: {
-    marginHorizontal: 16,
-    marginTop: 20,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  faqTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  faqText: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
 });
-

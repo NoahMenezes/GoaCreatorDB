@@ -20,6 +20,25 @@ export interface Creator {
 
 export const MOCK_CREATORS: Creator[] = [
   {
+    id: 'c0',
+    name: 'Jack John',
+    handle: '@Jihyo_James',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop',
+    cover: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1000&auto=format&fit=crop',
+    tag: 'Fashion & Stays',
+    location: 'Vagator',
+    district: 'North Goa',
+    followers: '240K',
+    engagement: '8.4%',
+    rate: 'Min ₹12,000',
+    collabType: 'BARTER FRIENDLY',
+    verified: true,
+    reviewsCount: 52,
+    rating: 4.95,
+    bio: 'High-aesthetic visual creator crafting lookbooks and cinematic reels for boutique Goan villas, luxury stays, and editorial drops.',
+    specialties: ['Editorial Lookbooks', 'Cinematic Reels', 'Luxury Villa Tours', 'Drop Highlights'],
+  },
+  {
     id: 'c1',
     name: 'Sneha Ferns',
     handle: '@sneha_demo',
